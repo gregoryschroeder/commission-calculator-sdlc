@@ -1,0 +1,155 @@
+# Research: Quarterly Sales Commission Calculator
+
+Every decision records how it was established (Principle IV): **spiked** (built and run in a
+throwaway project outside this repository), **measured**, **vendor-doc/registry** (with the date
+consulted), **assumed** (flagged), or **copied** (with its source). All checks were made on
+2026-09-21 on macOS arm64 with .NET SDK 10.0.400. No assumed or copied claim is load-bearing for
+correctness.
+
+## R1. Runtime and SDK
+
+- **Decision**: .NET 10 (`net10.0`), SDK pinned in `global.json` to 10.0.400 with
+  `rollForward: latestFeature`.
+- **Established**: vendor metadata — Microsoft `releases-index.json`, 2026-09-21: 10.0 is `active`
+  LTS (latest 10.0.12 / SDK 10.0.401); 11.0 is `11.0.0-rc.1`. Measured: `dotnet --version` =
+  10.0.400. (Constitution C1.)
+- **Alternatives**: .NET 11 RC — not stable, excluded by the brief.
+
+## R2. Web UI technology
+
+- **Decision**: ASP.NET Core Razor Pages, server-rendered, no client-side script. The scenario
+  picker is an HTML `<form method="get">` with a labelled `<select>` and a submit button.
+- **Rationale**: the UI only displays engine output; a GET form works with keyboard and screen
+  reader out of the box, needs no JavaScript and makes every scenario a linkable URL.
+- **Established**: spiked — `dotnet new webapp` on SDK 10.0.400 builds and serves `/`; the
+  template's static assets are local under `wwwroot/lib` (no CDN). The `lang` attribute on the
+  rendered `<html>` was read by a test (AngleSharp) through `WebApplicationFactory`.
+- **Alternatives**: Blazor Server (needs a live SignalR circuit and JavaScript for a static
+  read-only view — no benefit); minimal API + static HTML (would need client script to render).
+
+## R3. Test framework and runner
+
+- **Decision**: xUnit v3 `xunit.v3` 4.0.1 on **Microsoft.Testing.Platform (MTP)**, opted in via
+  `global.json` `"test": { "runner": "Microsoft.Testing.Platform" }`. No `Microsoft.NET.Test.Sdk`,
+  no `xunit.runner.visualstudio`.
+- **Established**: registry — NuGet, 2026-09-21: `xunit.v3` 4.0.1 published 2026-09-12. Spiked:
+  with the VSTest packages, `dotnet test` on SDK 10.0.400 **fails** with "Testing with VSTest target
+  is no longer supported by Microsoft.Testing.Platform on .NET 10 SDK and later"; with the
+  `global.json` opt-in the same project runs.
+- **Correction recorded**: the first spike used `coverlet.collector` and the VSTest packages from
+  memory of the usual template; that combination does not run. Kept visible because the difference
+  in method is the lesson (Principle IV).
+
+## R4. BDD tool for Gherkin integration tests
+
+- **Decision**: Reqnroll 3.3.4 with `Reqnroll.xUnit.v3` 3.3.4.
+- **Maintenance check** (required by Principle II before adoption): registry and source host,
+  2026-09-21 — NuGet: `Reqnroll`/`Reqnroll.xUnit.v3` 3.3.4 published 2026-03-23; GitHub
+  `reqnroll/Reqnroll`: not archived, last push 2026-08-26, most recent commit 2026-08-26 ("added
+  .NET 10 and TUnit" to the bug template), releases v3.3.2 (2026-01-14), v3.3.3 (2026-01-27),
+  v3.3.4 (2026-03-23). Judged currently maintained. SpecFlow, the former .NET default, is not
+  considered: Reqnroll is its maintained successor.
+- **Compatibility**: `Reqnroll.xUnit.v3` 3.3.4 declares a dependency on
+  `xunit.v3.extensibility.core` ≥ 2.0.0, while current xUnit v3 is 4.0.1 — compatibility was
+  therefore **spiked**, not assumed: a feature file with a `@FR-006` tag and a step binding ran
+  and passed under xunit.v3 4.0.1 + MTP on SDK 10.0.400.
+- **Revisit when**: a Reqnroll release declares support for a newer xUnit major, or xUnit v3's
+  next major breaks the spiked combination (the CI build would fail loudly).
+
+## R5. No silent skips
+
+- **Decision**: every CI test run passes `--fail-skips on`.
+- **Established**: spiked. Without it, a test marked `Skip` produced "Test run summary: Passed!"
+  (total 3, succeeded 2, skipped 1) — a false green. With `--fail-skips on`, the same run reported
+  "Failed!" (failed 1) and exit code 2. The option is documented by the xUnit v3 runner's own
+  `--help` ("treat skipped tests as failures").
+- **Positive control**: that skipped probe *is* the control — the gate was seen to fail on a skip
+  before being relied on.
+
+## R6. Coverage
+
+- **Decision**: `Microsoft.Testing.Extensions.CodeCoverage` 18.11.2, run with
+  `--coverage --coverage-output-format cobertura`; CI reads the cobertura line rate for the engine
+  assembly, writes it to the job summary, and fails below 80% (Principle II floor).
+- **Established**: registry 2026-09-21 (published 2026-09-11); spiked — produced a
+  `*.cobertura.xml` under MTP. `coverlet.collector` is VSTest-only (see R3).
+
+## R7. Test results and traceability input
+
+- **Decision**: `Microsoft.Testing.Extensions.TrxReport` (`--report-trx`). Unit tests carry
+  `[Trait("Requirement", "FR-0xx")]`; Gherkin scenarios carry `@FR-0xx` / `@SC-00x` tags.
+- **Established**: spiked — in the TRX, a Reqnroll tag appears as
+  `<TestCategoryItem TestCategory="FR-006" />` and an xUnit trait value appears in the test's
+  properties; both were found by searching the TRX for the IDs.
+
+## R8. Traceability generator
+
+- **Decision**: a .NET 10 file-based program, `tools/Traceability.cs`, run with
+  `dotnet run tools/Traceability.cs -- <trx files>`. It reads FR/SC IDs from `spec.md`, test → ID
+  from TRX files, and implementing member → ID from `[Implements("FR-0xx")]` attributes in the
+  engine assembly (reflection), and writes `specs/001-commission-calculator/traceability.md`
+  including a gaps section. CI runs it and uploads the result.
+- **Established**: spiked — `dotnet run hello.cs` ran a single-file program on SDK 10.0.400.
+
+## R9. Integration test host for the UI
+
+- **Decision**: `Microsoft.AspNetCore.Mvc.Testing` 10.0.12 (`WebApplicationFactory<Program>`) and
+  AngleSharp 1.8.2 to parse and assert rendered HTML (FR citations, table headers, labels).
+- **Established**: registry 2026-09-21; spiked — a test fetched `/` and asserted `lang="en"`.
+
+## R10. Exact money arithmetic
+
+- **Decision**: all money is `decimal`; rounding is
+  `Math.Round(x, 2, MidpointRounding.AwayFromZero)` (FR-018); whole-cent validation is
+  `decimal.Round(x, 2) == x`; percentages are `decimal`.
+- **Established**: spiked — `Math.Round(0.505m, 2, AwayFromZero)` = 0.51 and of −0.505m = −0.51;
+  `JsonSerializer.Deserialize<decimal>("10.005")` = 10.005 exactly (scale 3), so a sub-cent input
+  is detectable after deserialization (FR-004).
+
+## R11. Dates
+
+- **Decision**: `DateOnly`; inclusive day counts as `end.DayNumber − start.DayNumber + 1`.
+- **Established**: spiked — 2026-05-16..2026-06-30 = 46 (spec US3 AS3).
+
+## R12. How the brief's "`dotnet run`" is met
+
+- **Finding**: spiked — with a solution file at the repository root, `dotnet run` there fails:
+  "Couldn't find a project to run … or pass the path to the project using --project."
+- **Decision**: the web project is the only runnable project; run it with
+  `dotnet run --project src/CommissionCalculator.Web` from the root, or plain `dotnet run` from
+  `src/CommissionCalculator.Web`. Both are documented in the README and exercised by CI (a smoke
+  step starts the app and requests `/`). Putting the web `.csproj` at the root was rejected: its
+  default file globs would compile the engine, tests and tools into the web assembly.
+- **Needs maintainer approval**: this is the interpretation of constraint C2 (see plan).
+
+## R13. Seed data format
+
+- **Decision**: one JSON file per seeded scenario under `src/CommissionCalculator.Web/Scenarios/`,
+  copied to the output directory and read at startup (the brief allows "a local file"). The files
+  are the seeded scenarios; each seeded rep corresponds to an acceptance example in `spec.md`, so
+  SC-001's expected values are the spec's.
+- **Established**: R10 spike (exact decimal parsing); `System.Text.Json` is part of the shared
+  framework (no package).
+
+## R14. CI
+
+- **Decision**: GitHub Actions on `ubuntu-latest`, `actions/checkout@v7`,
+  `actions/setup-dotnet@v6` (reads `global.json`), `actions/upload-artifact@v7`.
+- **Established**: source host, 2026-09-21 — latest releases: checkout v7.0.1 (2026-07-20),
+  setup-dotnet v6.0.0 (2026-07-16, documents installing the `global.json` SDK when no version is
+  given), upload-artifact v7.0.1 (2026-04-10). **Assumed until the first CI run**: that the
+  runner resolves SDK 10.0.4xx via setup-dotnet (constitution C7 records the same assumption).
+- **Not in CI**: the kit's `install.sh --check` — the library is private and the public
+  repository's CI cannot fetch it. Run locally after any SpecKit upgrade (docs/PROVISIONING.md).
+
+## R15. Per-test isolation
+
+- **Decision**: the engine is pure (no I/O, no clock, no statics with state); seed files are
+  read-only. CI additionally runs each Gherkin scenario and each web test individually
+  (`--filter-method` per fully qualified `className.name` read from the suite run's TRX), so a test
+  depending on another would fail there.
+- **Established**: spiked — `--filter-method` selected tests under MTP; `--list-tests` lists
+  Reqnroll scenarios by display name ("rounding") rather than method name, which is why the loop
+  takes names from the TRX `<TestMethod className=… name=…>` (e.g. `Bdd.Features.AddFeature` /
+  `Rounding`) instead. **Assumed**: the per-test loop adds under two minutes to CI — to be
+  measured on the first run.
