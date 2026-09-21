@@ -4,7 +4,7 @@
 
 **Created**: 2026-09-21
 
-**Status**: Draft
+**Status**: Clarified; approved by the maintainer 2026-09-21 (Appendix A added at plan decision 1A)
 
 **Input**: User description, verbatim (the project brief, everything above its PROCESS section):
 
@@ -397,14 +397,15 @@ the net result.
   roster: rejected (FR-004). Booking-
   quarter data supplied for clawbacks may name reps not on the roster (with their start dates);
   they get no statement (FR-016).
-- A scenario quarter that is not exactly three whole calendar months starting on the first day of
-  a month: rejected (FR-014 counts draws per calendar month).
+- A scenario quarter that is not exactly three (requirement) whole calendar months starting on the
+  first day of a month: rejected (FR-014 counts draws per calendar month).
 - A refund dated before the deal's booking date: rejected.
 - A rep whose start date is after the quarter's last day: the scenario is rejected, naming the rep
   (FR-011).
 - A deal booked before the start date of a rep credited on it, whether or not the deal counts this
   quarter: the scenario is rejected, naming the deal and the rep (FR-011).
-- Amounts that do not divide to whole cents (e.g. 5% of $10.10 is $0.505): rounded per FR-018.
+- Amounts that do not divide to whole cents (e.g. 5% of $10.10 (requirement) is $0.505
+  (requirement)): rounded per FR-018 to $0.51 (US1 AS4).
 - A partial refund: clawed back per FR-017. A refund of zero or less, or refunds on one deal
   totalling more than the deal amount, are rejected.
 - A clawback larger than the commission earned in the quarter: earned commission goes negative
@@ -425,8 +426,8 @@ the net result.
 - **FR-004**: A scenario that violates a validation rule (FR-011, FR-013, Edge Cases) MUST be shown
   as rejected with the reasons, and MUST NOT show any payout. Every monetary input MUST be a whole
   number of cents; deal amounts, quotas and refunds MUST be greater than zero; an opening
-  recoverable balance MUST be zero or more; every split percentage MUST be greater than 0% and at
-  most 100%. A scenario MUST also be rejected, naming the rep, deal or quarter involved, when: a
+  recoverable balance MUST be zero or more; every split percentage MUST be greater than 0%
+  (requirement) and at most 100% (requirement). A scenario MUST also be rejected, naming the rep, deal or quarter involved, when: a
   rep appears more than once on one deal; a prorated quota rounds to $0.00; any deal in the
   scenario's own deal list (counted or not) is credited to a rep not on the roster; a deal
   refunded in the quarter was booked in an earlier quarter whose data is missing or incomplete
@@ -444,9 +445,10 @@ the net result.
   (requirement) of quota, 8% (requirement) from 100% to 150% (requirement), and 12%
   (requirement) above 150%, applied marginally: each slice of credited bookings earns its own
   band's rate, and each band with a non-zero slice is its own breakdown line.
-- **FR-007**: Band edges are at exactly 100% and 150% of quota: the 5% band covers credited
-  bookings up to and including 100% of quota, the 8% band the part above 100% up to and including
-  150%, and the 12% band the part above 150%. (Under marginal tiers the edge assignment cannot
+- **FR-007**: Band edges are at exactly 100% (requirement) and 150% (requirement) of quota: the 5%
+  band covers credited bookings up to and including 100% of quota, the 8% band the part above 100%
+  up to and including 150%, and the 12% band the part above 150% (rates and edges as tagged in
+  FR-006). (Under marginal tiers the edge assignment cannot
   change an amount; it fixes which line a slice appears on.)
 - **FR-008**: A deal MUST count toward the quarter in which its booking date falls (first and last
   day inclusive); its close date does not affect crediting and is shown for information only.
@@ -481,10 +483,10 @@ the net result.
 
 - **FR-014**: Each rep MUST receive a draw of $4,000.00 (requirement) for each calendar month of
   the quarter in which they are employed. In the month containing a mid-quarter start date the
-  draw is $4,000.00 × (days from the start date to that month's last day, both inclusive) ÷ (days
+  draw is $4,000.00 (requirement) × (days from the start date to that month's last day, both inclusive) ÷ (days
   in that month); months before the start month carry no draw. Each month's draw is its own
   breakdown line.
-- **FR-015**: Each rep has an opening recoverable balance (default $0.00) of draw not yet
+- **FR-015**: Each rep has an opening recoverable balance (default $0.00, requirement) of draw not yet
   recovered from earlier quarters. The recoverable total is that balance plus the draws paid this
   quarter. Earned commission is commission before refunds minus clawbacks, and may be negative.
   When earned commission is zero or more, the amount recovered is the lesser of earned commission
@@ -518,7 +520,7 @@ the net result.
 
 **Money**
 
-- **FR-018**: Every computed monetary amount — prorated quota, the 150% band edge,
+- **FR-018**: Every computed monetary amount — prorated quota, the 150% (requirement) band edge,
   prorated draw, each tier line, clawback, recovery — MUST be rounded to the cent when it is
   produced, half away from zero, and later steps MUST use the rounded value. Every total MUST
   equal the sum of the lines shown. Split shares are the exception and follow FR-012.

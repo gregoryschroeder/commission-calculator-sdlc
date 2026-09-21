@@ -82,14 +82,18 @@ correctness.
   `<TestCategoryItem TestCategory="FR-006" />` and an xUnit trait value appears in the test's
   properties; both were found by searching the TRX for the IDs.
 
-## R8. Traceability generator
+## R8. Traceability generator and CI helpers
 
-- **Decision**: a .NET 10 file-based program, `tools/Traceability.cs`, run with
-  `dotnet run tools/Traceability.cs -- <trx files>`. It reads FR/SC IDs from `spec.md`, test → ID
-  from TRX files, and implementing member → ID from `[Implements("FR-0xx")]` attributes in the
-  engine assembly (reflection), and writes `specs/001-commission-calculator/traceability.md`
-  including a gaps section. CI runs it and uploads the result.
-- **Established**: spiked — `dotnet run hello.cs` ran a single-file program on SDK 10.0.400.
+- **Decision**: a console project, `tools/CommissionCalculator.Tools`, with commands `trace`,
+  `coverage-gate` and `list-tests`, unit-tested by `tests/CommissionCalculator.Tools.Tests`. `trace`
+  reads FR/SC IDs from `spec.md`, test → ID from TRX files, and implementing member → ID from
+  `[Implements("FR-0xx")]` attributes (reflection over the built assemblies), and writes
+  `specs/001-commission-calculator/traceability.md` with gaps and a scope-only list (FR-019).
+- **Correction (2026-09-21, analyze pass 1)**: this first said a single-file program,
+  `tools/Traceability.cs`. A single-file program cannot be referenced by a test project, and the
+  generator and gates contain real branching logic that the test-first principle requires tests
+  for, so it became a project. The spike that `dotnet run file.cs` works on SDK 10.0.400 still
+  stands; it is no longer relied on.
 
 ## R9. Integration test host for the UI
 
@@ -126,8 +130,9 @@ correctness.
 
 - **Decision**: one JSON file per seeded scenario under `src/CommissionCalculator.Web/Scenarios/`,
   copied to the output directory and read at startup (the brief allows "a local file"). The files
-  are the seeded scenarios; each seeded rep corresponds to an acceptance example in `spec.md`, so
-  SC-001's expected values are the spec's.
+  are the seeded scenarios, and their full expected statements are spec.md Appendix A
+  (maintainer decision 1A), so SC-001's expected values are the spec's. (Earlier wording, before
+  Appendix A: "each seeded rep corresponds to an acceptance example".)
 - **Established**: R10 spike (exact decimal parsing); `System.Text.Json` is part of the shared
   framework (no package).
 
@@ -145,7 +150,7 @@ correctness.
 ## R15. Per-test isolation
 
 - **Decision**: the engine is pure (no I/O, no clock, no statics with state); seed files are
-  read-only. CI additionally runs each Gherkin scenario and each web test individually
+  read-only. CI additionally runs every test in every test project individually
   (`--filter-method` per fully qualified `className.name` read from the suite run's TRX), so a test
   depending on another would fail there.
 - **Established**: spiked — `--filter-method` selected tests under MTP; `--list-tests` lists
@@ -153,3 +158,12 @@ correctness.
   takes names from the TRX `<TestMethod className=… name=…>` (e.g. `Bdd.Features.AddFeature` /
   `Rounding`) instead. **Assumed**: the per-test loop adds under two minutes to CI — to be
   measured on the first run.
+
+## R16. Offline smoke run (SC-004)
+
+- **Decision**: a CI job runs the published web app in `mcr.microsoft.com/dotnet/aspnet:10.0.12`
+  with `docker run --network none` and requests a scenario page from inside the container, so the
+  "no network service at run time" claim is shown under the condition, not reasoned.
+- **Established**: registry — `mcr.microsoft.com/v2/dotnet/aspnet/tags/list`, 2026-09-21, lists
+  `10.0.12`, `10.0` and `10.0-noble`. **Assumed until the first run of that job**: Docker is
+  available on `ubuntu-latest` runners.

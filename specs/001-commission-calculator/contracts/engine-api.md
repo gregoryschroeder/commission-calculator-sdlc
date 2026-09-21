@@ -53,7 +53,7 @@ public enum LineSection { Quota, Credit, Excluded, Tier, Clawback, Draw, Recover
 public sealed record BreakdownLine(LineSection Section, string Description, decimal Amount,
     string RequirementId);
 
-// Marks the member that implements a requirement; read by tools/Traceability.cs.
+// Marks the member that implements a requirement; read by the tools project's `trace` command.
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true)]
 public sealed class ImplementsAttribute(string requirementId) : Attribute
 {
