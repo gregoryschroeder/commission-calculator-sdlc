@@ -547,8 +547,9 @@ the net result.
 
 ### Measurable Outcomes
 
-- **SC-001**: For 100% (requirement) of the seeded scenarios, every rep's final amount and every
-  breakdown line matches the expected value stated in this spec, to the cent.
+- **SC-001**: For 100% (requirement) of the seeded scenarios, every rep's statement matches
+  Appendix A line for line, to the cent, and the rejected scenario lists exactly the errors
+  Appendix A states.
 - **SC-002**: 100% (requirement) of breakdown lines cite the FR that produced them, and every cited
   FR exists in this spec.
 - **SC-003**: Each of the eight compensation rules in the brief (requirement: all eight) is
@@ -565,3 +566,794 @@ the net result.
 - A rep who starts on or before the quarter's first day has a full quarter.
 - Scenarios are read-only seeded data; editing or creating scenarios is out of scope.
 - Only the rules in the brief apply: no accelerators, caps, SPIFs, or rep terminations mid-quarter.
+
+## Appendix A: Seeded scenarios and expected statements
+
+The seeded scenarios the application ships with, and the full statement expected for every rep in
+each. **Every amount in this appendix is a requirement** (SC-001; Principle II): each line is
+tested to the cent. The amounts were computed from FR-005–FR-018 by a reference calculation
+written independently of the application, and cross-checked against every amount stated in the
+acceptance scenarios above (all match). Each scenario lists the acceptance examples it carries.
+Reps whose start date is before the quarter have a full quarter; the opening recoverable balance
+is $0.00 unless shown.
+
+### A.1 `tiers`: Tiered rates
+
+Quarter 2026-01-01 to 2026-03-31 (90 days). Carries US1 AS1–AS4.
+
+| Rep | Quota | Start date | Opening balance |
+|---|---|---|---|
+| Avery (`avery`) | $100,000.00 | 2025-06-01 | $0.00 |
+| Blake (`blake`) | $100,000.00 | 2025-06-01 | $0.00 |
+| Casey (`casey`) | $100,000.00 | 2025-06-01 | $0.00 |
+| Devon (`devon`) | $100,000.00 | 2025-06-01 | $0.00 |
+
+Deals:
+
+| Deal | Amount | Close date | Booking date | Credit | Refunds |
+|---|---|---|---|---|---|
+| T-1 | $80,000.00 | 2026-02-10 | 2026-02-12 | avery 100% | — |
+| T-2 | $100,000.00 | 2026-01-20 | 2026-01-22 | blake 100% | — |
+| T-3 | $60,000.00 | 2026-03-02 | 2026-03-04 | blake 100% | — |
+| T-4 | $150,000.00 | 2026-02-26 | 2026-03-02 | casey 100% | — |
+| T-5 | $10.10 | 2026-01-15 | 2026-01-16 | devon 100% | — |
+
+**Avery**
+
+| Item | Amount | Rule |
+|---|---|---|
+| Quarterly quota | $100,000.00 | FR-005 |
+| T-1 booked 2026-02-12 | $80,000.00 | FR-008 |
+| 5% of $80,000.00 | $4,000.00 | FR-006 |
+| Commission before refunds | $4,000.00 | FR-006 |
+| Earned commission | $4,000.00 | FR-015 |
+| Draw, January 2026 | $4,000.00 | FR-014 |
+| Draw, February 2026 | $4,000.00 | FR-014 |
+| Draw, March 2026 | $4,000.00 | FR-014 |
+| Opening recoverable balance | $0.00 | FR-015 |
+| Draw recovered | $4,000.00 | FR-015 |
+| Commission payable | $0.00 | FR-015 |
+| Closing recoverable balance | $8,000.00 | FR-015 |
+
+**Blake**
+
+| Item | Amount | Rule |
+|---|---|---|
+| Quarterly quota | $100,000.00 | FR-005 |
+| T-2 booked 2026-01-22 | $100,000.00 | FR-008 |
+| T-3 booked 2026-03-04 | $60,000.00 | FR-008 |
+| 5% of $100,000.00 | $5,000.00 | FR-006 |
+| 8% of $50,000.00 | $4,000.00 | FR-006 |
+| 12% of $10,000.00 | $1,200.00 | FR-006 |
+| Commission before refunds | $10,200.00 | FR-006 |
+| Earned commission | $10,200.00 | FR-015 |
+| Draw, January 2026 | $4,000.00 | FR-014 |
+| Draw, February 2026 | $4,000.00 | FR-014 |
+| Draw, March 2026 | $4,000.00 | FR-014 |
+| Opening recoverable balance | $0.00 | FR-015 |
+| Draw recovered | $10,200.00 | FR-015 |
+| Commission payable | $0.00 | FR-015 |
+| Closing recoverable balance | $1,800.00 | FR-015 |
+
+**Casey**
+
+| Item | Amount | Rule |
+|---|---|---|
+| Quarterly quota | $100,000.00 | FR-005 |
+| T-4 booked 2026-03-02 | $150,000.00 | FR-008 |
+| 5% of $100,000.00 | $5,000.00 | FR-006 |
+| 8% of $50,000.00 | $4,000.00 | FR-006 |
+| Commission before refunds | $9,000.00 | FR-006 |
+| Earned commission | $9,000.00 | FR-015 |
+| Draw, January 2026 | $4,000.00 | FR-014 |
+| Draw, February 2026 | $4,000.00 | FR-014 |
+| Draw, March 2026 | $4,000.00 | FR-014 |
+| Opening recoverable balance | $0.00 | FR-015 |
+| Draw recovered | $9,000.00 | FR-015 |
+| Commission payable | $0.00 | FR-015 |
+| Closing recoverable balance | $3,000.00 | FR-015 |
+
+**Devon**
+
+| Item | Amount | Rule |
+|---|---|---|
+| Quarterly quota | $100,000.00 | FR-005 |
+| T-5 booked 2026-01-16 | $10.10 | FR-008 |
+| 5% of $10.10 | $0.51 | FR-006 |
+| Commission before refunds | $0.51 | FR-006 |
+| Earned commission | $0.51 | FR-015 |
+| Draw, January 2026 | $4,000.00 | FR-014 |
+| Draw, February 2026 | $4,000.00 | FR-014 |
+| Draw, March 2026 | $4,000.00 | FR-014 |
+| Opening recoverable balance | $0.00 | FR-015 |
+| Draw recovered | $0.51 | FR-015 |
+| Commission payable | $0.00 | FR-015 |
+| Closing recoverable balance | $11,999.49 | FR-015 |
+
+### A.2 `booking-dates`: Close date vs booking date
+
+Quarter 2026-01-01 to 2026-03-31 (90 days). Carries US2 AS1–AS4.
+
+| Rep | Quota | Start date | Opening balance |
+|---|---|---|---|
+| Emery (`emery`) | $100,000.00 | 2025-01-01 | $0.00 |
+
+Deals:
+
+| Deal | Amount | Close date | Booking date | Credit | Refunds |
+|---|---|---|---|---|---|
+| B-1 | $20,000.00 | 2026-03-30 | 2026-04-02 | emery 100% | — |
+| B-2 | $10,000.00 | 2025-12-29 | 2026-01-05 | emery 100% | — |
+| B-3 | $30,000.00 | 2026-02-03 | 2026-02-04 | emery 100% | — |
+| B-4 | $15,000.00 | 2025-12-10 | 2025-12-15 | emery 100% | — |
+
+**Emery**
+
+| Item | Amount | Rule |
+|---|---|---|
+| Quarterly quota | $100,000.00 | FR-005 |
+| B-1 booked 2026-04-02: excluded, booked outside the quarter | $0.00 | FR-008 |
+| B-2 booked 2026-01-05 | $10,000.00 | FR-008 |
+| B-3 booked 2026-02-04 | $30,000.00 | FR-008 |
+| B-4 booked 2025-12-15: excluded, booked outside the quarter | $0.00 | FR-008 |
+| 5% of $40,000.00 | $2,000.00 | FR-006 |
+| Commission before refunds | $2,000.00 | FR-006 |
+| Earned commission | $2,000.00 | FR-015 |
+| Draw, January 2026 | $4,000.00 | FR-014 |
+| Draw, February 2026 | $4,000.00 | FR-014 |
+| Draw, March 2026 | $4,000.00 | FR-014 |
+| Opening recoverable balance | $0.00 | FR-015 |
+| Draw recovered | $2,000.00 | FR-015 |
+| Commission payable | $0.00 | FR-015 |
+| Closing recoverable balance | $10,000.00 | FR-015 |
+
+### A.3 `proration`: Mid-quarter starters
+
+Quarter 2026-01-01 to 2026-03-31 (90 days). Carries US3 AS1–AS2, US5 AS5–AS6.
+
+| Rep | Quota | Start date | Opening balance |
+|---|---|---|---|
+| Finley (`finley`) | $90,000.00 | 2026-02-15 | $0.00 |
+| Gray (`gray`) | $90,000.00 | 2026-01-20 | $0.00 |
+
+Deals:
+
+| Deal | Amount | Close date | Booking date | Credit | Refunds |
+|---|---|---|---|---|---|
+| P-1 | $50,000.00 | 2026-03-09 | 2026-03-10 | finley 100% | — |
+| P-2 | $30,000.00 | 2026-01-30 | 2026-02-02 | gray 100% | — |
+
+**Finley**
+
+| Item | Amount | Rule |
+|---|---|---|
+| Quarterly quota | $90,000.00 | FR-005 |
+| Prorated quota (45 of 90 days) | $45,000.00 | FR-010 |
+| P-1 booked 2026-03-10 | $50,000.00 | FR-008 |
+| 5% of $45,000.00 | $2,250.00 | FR-006 |
+| 8% of $5,000.00 | $400.00 | FR-006 |
+| Commission before refunds | $2,650.00 | FR-006 |
+| Earned commission | $2,650.00 | FR-015 |
+| Draw, January 2026 | $0.00 | FR-014 |
+| Draw, February 2026 | $2,000.00 | FR-014 |
+| Draw, March 2026 | $4,000.00 | FR-014 |
+| Opening recoverable balance | $0.00 | FR-015 |
+| Draw recovered | $2,650.00 | FR-015 |
+| Commission payable | $0.00 | FR-015 |
+| Closing recoverable balance | $3,350.00 | FR-015 |
+
+**Gray**
+
+| Item | Amount | Rule |
+|---|---|---|
+| Quarterly quota | $90,000.00 | FR-005 |
+| Prorated quota (71 of 90 days) | $71,000.00 | FR-010 |
+| P-2 booked 2026-02-02 | $30,000.00 | FR-008 |
+| 5% of $30,000.00 | $1,500.00 | FR-006 |
+| Commission before refunds | $1,500.00 | FR-006 |
+| Earned commission | $1,500.00 | FR-015 |
+| Draw, January 2026 | $1,548.39 | FR-014 |
+| Draw, February 2026 | $4,000.00 | FR-014 |
+| Draw, March 2026 | $4,000.00 | FR-014 |
+| Opening recoverable balance | $0.00 | FR-015 |
+| Draw recovered | $1,500.00 | FR-015 |
+| Commission payable | $0.00 | FR-015 |
+| Closing recoverable balance | $8,048.39 | FR-015 |
+
+### A.4 `proration-q2`: Mid-quarter starter, rounded proration
+
+Quarter 2026-04-01 to 2026-06-30 (91 days). Carries US3 AS3.
+
+| Rep | Quota | Start date | Opening balance |
+|---|---|---|---|
+| Harper (`harper`) | $100,000.00 | 2026-05-16 | $0.00 |
+
+Deals:
+
+| Deal | Amount | Close date | Booking date | Credit | Refunds |
+|---|---|---|---|---|---|
+| P-3 | $60,000.00 | 2026-06-01 | 2026-06-03 | harper 100% | — |
+
+**Harper**
+
+| Item | Amount | Rule |
+|---|---|---|
+| Quarterly quota | $100,000.00 | FR-005 |
+| Prorated quota (46 of 91 days) | $50,549.45 | FR-010 |
+| P-3 booked 2026-06-03 | $60,000.00 | FR-008 |
+| 5% of $50,549.45 | $2,527.47 | FR-006 |
+| 8% of $9,450.55 | $756.04 | FR-006 |
+| Commission before refunds | $3,283.51 | FR-006 |
+| Earned commission | $3,283.51 | FR-015 |
+| Draw, April 2026 | $0.00 | FR-014 |
+| Draw, May 2026 | $2,064.52 | FR-014 |
+| Draw, June 2026 | $4,000.00 | FR-014 |
+| Opening recoverable balance | $0.00 | FR-015 |
+| Draw recovered | $3,283.51 | FR-015 |
+| Commission payable | $0.00 | FR-015 |
+| Closing recoverable balance | $2,781.01 | FR-015 |
+
+### A.5 `splits`: Split deals
+
+Quarter 2026-01-01 to 2026-03-31 (90 days). Carries US4 AS1–AS2.
+
+| Rep | Quota | Start date | Opening balance |
+|---|---|---|---|
+| Indigo (`indigo`) | $100,000.00 | 2025-06-01 | $0.00 |
+| Jules (`jules`) | $100,000.00 | 2025-06-01 | $0.00 |
+
+Deals:
+
+| Deal | Amount | Close date | Booking date | Credit | Refunds |
+|---|---|---|---|---|---|
+| S-1 | $80,000.00 | 2026-01-12 | 2026-01-13 | indigo 100% | — |
+| S-2 | $50,000.00 | 2026-02-17 | 2026-02-18 | indigo 60%, jules 40% | — |
+
+**Indigo**
+
+| Item | Amount | Rule |
+|---|---|---|
+| Quarterly quota | $100,000.00 | FR-005 |
+| S-1 booked 2026-01-13 | $80,000.00 | FR-008 |
+| S-2 booked 2026-02-18: 60% share of $50,000.00 | $30,000.00 | FR-012 |
+| 5% of $100,000.00 | $5,000.00 | FR-006 |
+| 8% of $10,000.00 | $800.00 | FR-006 |
+| Commission before refunds | $5,800.00 | FR-006 |
+| Earned commission | $5,800.00 | FR-015 |
+| Draw, January 2026 | $4,000.00 | FR-014 |
+| Draw, February 2026 | $4,000.00 | FR-014 |
+| Draw, March 2026 | $4,000.00 | FR-014 |
+| Opening recoverable balance | $0.00 | FR-015 |
+| Draw recovered | $5,800.00 | FR-015 |
+| Commission payable | $0.00 | FR-015 |
+| Closing recoverable balance | $6,200.00 | FR-015 |
+
+**Jules**
+
+| Item | Amount | Rule |
+|---|---|---|
+| Quarterly quota | $100,000.00 | FR-005 |
+| S-2 booked 2026-02-18: 40% share of $50,000.00 | $20,000.00 | FR-012 |
+| 5% of $20,000.00 | $1,000.00 | FR-006 |
+| Commission before refunds | $1,000.00 | FR-006 |
+| Earned commission | $1,000.00 | FR-015 |
+| Draw, January 2026 | $4,000.00 | FR-014 |
+| Draw, February 2026 | $4,000.00 | FR-014 |
+| Draw, March 2026 | $4,000.00 | FR-014 |
+| Opening recoverable balance | $0.00 | FR-015 |
+| Draw recovered | $1,000.00 | FR-015 |
+| Commission payable | $0.00 | FR-015 |
+| Closing recoverable balance | $11,000.00 | FR-015 |
+
+### A.6 `split-rounding`: Split shares to the cent
+
+Quarter 2026-01-01 to 2026-03-31 (90 days). Carries US4 AS3–AS4.
+
+| Rep | Quota | Start date | Opening balance |
+|---|---|---|---|
+| Kai (`kai`) | $100,000.00 | 2025-06-01 | $0.00 |
+| Lee (`lee`) | $100,000.00 | 2025-06-01 | $0.00 |
+| Mo (`mo`) | $100,000.00 | 2025-06-01 | $0.00 |
+| Nat (`nat`) | $100,000.00 | 2025-06-01 | $0.00 |
+| Oli (`oli`) | $100,000.00 | 2025-06-01 | $0.00 |
+
+Deals:
+
+| Deal | Amount | Close date | Booking date | Credit | Refunds |
+|---|---|---|---|---|---|
+| S-3 | $10.01 | 2026-02-02 | 2026-02-03 | kai 50%, lee 50% | — |
+| S-4 | $100.00 | 2026-03-05 | 2026-03-06 | mo 33.335%, nat 33.335%, oli 33.33% | — |
+
+**Kai**
+
+| Item | Amount | Rule |
+|---|---|---|
+| Quarterly quota | $100,000.00 | FR-005 |
+| S-3 booked 2026-02-03: 50% share of $10.01 | $5.01 | FR-012 |
+| 5% of $5.01 | $0.25 | FR-006 |
+| Commission before refunds | $0.25 | FR-006 |
+| Earned commission | $0.25 | FR-015 |
+| Draw, January 2026 | $4,000.00 | FR-014 |
+| Draw, February 2026 | $4,000.00 | FR-014 |
+| Draw, March 2026 | $4,000.00 | FR-014 |
+| Opening recoverable balance | $0.00 | FR-015 |
+| Draw recovered | $0.25 | FR-015 |
+| Commission payable | $0.00 | FR-015 |
+| Closing recoverable balance | $11,999.75 | FR-015 |
+
+**Lee**
+
+| Item | Amount | Rule |
+|---|---|---|
+| Quarterly quota | $100,000.00 | FR-005 |
+| S-3 booked 2026-02-03: 50% share of $10.01 | $5.00 | FR-012 |
+| 5% of $5.00 | $0.25 | FR-006 |
+| Commission before refunds | $0.25 | FR-006 |
+| Earned commission | $0.25 | FR-015 |
+| Draw, January 2026 | $4,000.00 | FR-014 |
+| Draw, February 2026 | $4,000.00 | FR-014 |
+| Draw, March 2026 | $4,000.00 | FR-014 |
+| Opening recoverable balance | $0.00 | FR-015 |
+| Draw recovered | $0.25 | FR-015 |
+| Commission payable | $0.00 | FR-015 |
+| Closing recoverable balance | $11,999.75 | FR-015 |
+
+**Mo**
+
+| Item | Amount | Rule |
+|---|---|---|
+| Quarterly quota | $100,000.00 | FR-005 |
+| S-4 booked 2026-03-06: 33.335% share of $100.00 | $33.34 | FR-012 |
+| 5% of $33.34 | $1.67 | FR-006 |
+| Commission before refunds | $1.67 | FR-006 |
+| Earned commission | $1.67 | FR-015 |
+| Draw, January 2026 | $4,000.00 | FR-014 |
+| Draw, February 2026 | $4,000.00 | FR-014 |
+| Draw, March 2026 | $4,000.00 | FR-014 |
+| Opening recoverable balance | $0.00 | FR-015 |
+| Draw recovered | $1.67 | FR-015 |
+| Commission payable | $0.00 | FR-015 |
+| Closing recoverable balance | $11,998.33 | FR-015 |
+
+**Nat**
+
+| Item | Amount | Rule |
+|---|---|---|
+| Quarterly quota | $100,000.00 | FR-005 |
+| S-4 booked 2026-03-06: 33.335% share of $100.00 | $33.33 | FR-012 |
+| 5% of $33.33 | $1.67 | FR-006 |
+| Commission before refunds | $1.67 | FR-006 |
+| Earned commission | $1.67 | FR-015 |
+| Draw, January 2026 | $4,000.00 | FR-014 |
+| Draw, February 2026 | $4,000.00 | FR-014 |
+| Draw, March 2026 | $4,000.00 | FR-014 |
+| Opening recoverable balance | $0.00 | FR-015 |
+| Draw recovered | $1.67 | FR-015 |
+| Commission payable | $0.00 | FR-015 |
+| Closing recoverable balance | $11,998.33 | FR-015 |
+
+**Oli**
+
+| Item | Amount | Rule |
+|---|---|---|
+| Quarterly quota | $100,000.00 | FR-005 |
+| S-4 booked 2026-03-06: 33.33% share of $100.00 | $33.33 | FR-012 |
+| 5% of $33.33 | $1.67 | FR-006 |
+| Commission before refunds | $1.67 | FR-006 |
+| Earned commission | $1.67 | FR-015 |
+| Draw, January 2026 | $4,000.00 | FR-014 |
+| Draw, February 2026 | $4,000.00 | FR-014 |
+| Draw, March 2026 | $4,000.00 | FR-014 |
+| Opening recoverable balance | $0.00 | FR-015 |
+| Draw recovered | $1.67 | FR-015 |
+| Commission payable | $0.00 | FR-015 |
+| Closing recoverable balance | $11,998.33 | FR-015 |
+
+### A.7 `draw`: Draw recovery
+
+Quarter 2026-01-01 to 2026-03-31 (90 days). Carries US5 AS1–AS4.
+
+| Rep | Quota | Start date | Opening balance |
+|---|---|---|---|
+| Parker (`parker`) | $100,000.00 | 2025-06-01 | $0.00 |
+| Quinn (`quinn`) | $100,000.00 | 2025-06-01 | $0.00 |
+| Reese (`reese`) | $100,000.00 | 2025-06-01 | $8,000.00 |
+
+Deals:
+
+| Deal | Amount | Close date | Booking date | Credit | Refunds |
+|---|---|---|---|---|---|
+| W-1 | $200,000.00 | 2026-02-20 | 2026-02-23 | parker 100% | — |
+| W-2 | $80,000.00 | 2026-03-11 | 2026-03-12 | quinn 100% | — |
+| W-3 | $200,000.00 | 2026-01-26 | 2026-01-27 | reese 100% | — |
+
+**Parker**
+
+| Item | Amount | Rule |
+|---|---|---|
+| Quarterly quota | $100,000.00 | FR-005 |
+| W-1 booked 2026-02-23 | $200,000.00 | FR-008 |
+| 5% of $100,000.00 | $5,000.00 | FR-006 |
+| 8% of $50,000.00 | $4,000.00 | FR-006 |
+| 12% of $50,000.00 | $6,000.00 | FR-006 |
+| Commission before refunds | $15,000.00 | FR-006 |
+| Earned commission | $15,000.00 | FR-015 |
+| Draw, January 2026 | $4,000.00 | FR-014 |
+| Draw, February 2026 | $4,000.00 | FR-014 |
+| Draw, March 2026 | $4,000.00 | FR-014 |
+| Opening recoverable balance | $0.00 | FR-015 |
+| Draw recovered | $12,000.00 | FR-015 |
+| Commission payable | $3,000.00 | FR-015 |
+| Closing recoverable balance | $0.00 | FR-015 |
+
+**Quinn**
+
+| Item | Amount | Rule |
+|---|---|---|
+| Quarterly quota | $100,000.00 | FR-005 |
+| W-2 booked 2026-03-12 | $80,000.00 | FR-008 |
+| 5% of $80,000.00 | $4,000.00 | FR-006 |
+| Commission before refunds | $4,000.00 | FR-006 |
+| Earned commission | $4,000.00 | FR-015 |
+| Draw, January 2026 | $4,000.00 | FR-014 |
+| Draw, February 2026 | $4,000.00 | FR-014 |
+| Draw, March 2026 | $4,000.00 | FR-014 |
+| Opening recoverable balance | $0.00 | FR-015 |
+| Draw recovered | $4,000.00 | FR-015 |
+| Commission payable | $0.00 | FR-015 |
+| Closing recoverable balance | $8,000.00 | FR-015 |
+
+**Reese**
+
+| Item | Amount | Rule |
+|---|---|---|
+| Quarterly quota | $100,000.00 | FR-005 |
+| W-3 booked 2026-01-27 | $200,000.00 | FR-008 |
+| 5% of $100,000.00 | $5,000.00 | FR-006 |
+| 8% of $50,000.00 | $4,000.00 | FR-006 |
+| 12% of $50,000.00 | $6,000.00 | FR-006 |
+| Commission before refunds | $15,000.00 | FR-006 |
+| Earned commission | $15,000.00 | FR-015 |
+| Draw, January 2026 | $4,000.00 | FR-014 |
+| Draw, February 2026 | $4,000.00 | FR-014 |
+| Draw, March 2026 | $4,000.00 | FR-014 |
+| Opening recoverable balance | $8,000.00 | FR-015 |
+| Draw recovered | $15,000.00 | FR-015 |
+| Commission payable | $0.00 | FR-015 |
+| Closing recoverable balance | $5,000.00 | FR-015 |
+
+### A.8 `refunds`: Refunds inside the quarter
+
+Quarter 2026-01-01 to 2026-03-31 (90 days). Carries US6 AS1, AS3, AS4, AS5 (Q1), AS6.
+
+| Rep | Quota | Start date | Opening balance |
+|---|---|---|---|
+| Sage (`sage`) | $100,000.00 | 2025-06-01 | $0.00 |
+| Tatum (`tatum`) | $100,000.00 | 2025-06-01 | $0.00 |
+| Uma (`uma`) | $100,000.00 | 2025-06-01 | $0.00 |
+| Val (`val`) | $100,000.00 | 2025-06-01 | $0.00 |
+| Wren (`wren`) | $100,000.00 | 2025-06-01 | $0.00 |
+
+Deals:
+
+| Deal | Amount | Close date | Booking date | Credit | Refunds |
+|---|---|---|---|---|---|
+| R-1 | $60,000.00 | 2026-01-09 | 2026-01-10 | sage 100% | $60,000.00 on 2026-02-15 |
+| R-2 | $60,000.00 | 2026-02-09 | 2026-02-10 | sage 100% | — |
+| R-3 | $60,000.00 | 2026-01-09 | 2026-01-10 | tatum 100% | $20,000.00 on 2026-04-20 |
+| R-4 | $60,000.00 | 2026-02-09 | 2026-02-10 | tatum 100% | — |
+| R-5 | $60,000.00 | 2026-01-09 | 2026-01-10 | uma 100% | $30,000.00 on 2026-03-01 |
+| R-6 | $60,000.00 | 2026-02-09 | 2026-02-10 | uma 100% | — |
+| R-7 | $60,000.00 | 2026-01-09 | 2026-01-10 | val 100% | $20,000.00 on 2026-02-20, $20,000.00 on 2026-05-05 |
+| R-8 | $60,000.00 | 2026-02-09 | 2026-02-10 | val 100% | — |
+| R-9 | $60,000.00 | 2026-01-09 | 2026-01-10 | wren 100% | $60,000.00 on 2026-02-20 |
+| R-10 | $60,000.00 | 2026-01-12 | 2026-01-13 | wren 100% | $60,000.00 on 2026-03-10 |
+
+**Sage**
+
+| Item | Amount | Rule |
+|---|---|---|
+| Quarterly quota | $100,000.00 | FR-005 |
+| R-1 booked 2026-01-10 | $60,000.00 | FR-008 |
+| R-2 booked 2026-02-10 | $60,000.00 | FR-008 |
+| 5% of $100,000.00 | $5,000.00 | FR-006 |
+| 8% of $20,000.00 | $1,600.00 | FR-006 |
+| Commission before refunds | $6,600.00 | FR-006 |
+| Clawback: R-1 refund $60,000.00 on 2026-02-15 | $3,600.00 | FR-016 |
+| Earned commission | $3,000.00 | FR-015 |
+| Draw, January 2026 | $4,000.00 | FR-014 |
+| Draw, February 2026 | $4,000.00 | FR-014 |
+| Draw, March 2026 | $4,000.00 | FR-014 |
+| Opening recoverable balance | $0.00 | FR-015 |
+| Draw recovered | $3,000.00 | FR-015 |
+| Commission payable | $0.00 | FR-015 |
+| Closing recoverable balance | $9,000.00 | FR-015 |
+
+**Tatum**
+
+| Item | Amount | Rule |
+|---|---|---|
+| Quarterly quota | $100,000.00 | FR-005 |
+| R-3 booked 2026-01-10 | $60,000.00 | FR-008 |
+| R-4 booked 2026-02-10 | $60,000.00 | FR-008 |
+| 5% of $100,000.00 | $5,000.00 | FR-006 |
+| 8% of $20,000.00 | $1,600.00 | FR-006 |
+| Commission before refunds | $6,600.00 | FR-006 |
+| Earned commission | $6,600.00 | FR-015 |
+| Draw, January 2026 | $4,000.00 | FR-014 |
+| Draw, February 2026 | $4,000.00 | FR-014 |
+| Draw, March 2026 | $4,000.00 | FR-014 |
+| Opening recoverable balance | $0.00 | FR-015 |
+| Draw recovered | $6,600.00 | FR-015 |
+| Commission payable | $0.00 | FR-015 |
+| Closing recoverable balance | $5,400.00 | FR-015 |
+
+**Uma**
+
+| Item | Amount | Rule |
+|---|---|---|
+| Quarterly quota | $100,000.00 | FR-005 |
+| R-5 booked 2026-01-10 | $60,000.00 | FR-008 |
+| R-6 booked 2026-02-10 | $60,000.00 | FR-008 |
+| 5% of $100,000.00 | $5,000.00 | FR-006 |
+| 8% of $20,000.00 | $1,600.00 | FR-006 |
+| Commission before refunds | $6,600.00 | FR-006 |
+| Clawback: R-5 refund $30,000.00 on 2026-03-01 | $2,100.00 | FR-016 |
+| Earned commission | $4,500.00 | FR-015 |
+| Draw, January 2026 | $4,000.00 | FR-014 |
+| Draw, February 2026 | $4,000.00 | FR-014 |
+| Draw, March 2026 | $4,000.00 | FR-014 |
+| Opening recoverable balance | $0.00 | FR-015 |
+| Draw recovered | $4,500.00 | FR-015 |
+| Commission payable | $0.00 | FR-015 |
+| Closing recoverable balance | $7,500.00 | FR-015 |
+
+**Val**
+
+| Item | Amount | Rule |
+|---|---|---|
+| Quarterly quota | $100,000.00 | FR-005 |
+| R-7 booked 2026-01-10 | $60,000.00 | FR-008 |
+| R-8 booked 2026-02-10 | $60,000.00 | FR-008 |
+| 5% of $100,000.00 | $5,000.00 | FR-006 |
+| 8% of $20,000.00 | $1,600.00 | FR-006 |
+| Commission before refunds | $6,600.00 | FR-006 |
+| Clawback: R-7 refund $20,000.00 on 2026-02-20 | $1,600.00 | FR-016 |
+| Earned commission | $5,000.00 | FR-015 |
+| Draw, January 2026 | $4,000.00 | FR-014 |
+| Draw, February 2026 | $4,000.00 | FR-014 |
+| Draw, March 2026 | $4,000.00 | FR-014 |
+| Opening recoverable balance | $0.00 | FR-015 |
+| Draw recovered | $5,000.00 | FR-015 |
+| Commission payable | $0.00 | FR-015 |
+| Closing recoverable balance | $7,000.00 | FR-015 |
+
+**Wren**
+
+| Item | Amount | Rule |
+|---|---|---|
+| Quarterly quota | $100,000.00 | FR-005 |
+| R-9 booked 2026-01-10 | $60,000.00 | FR-008 |
+| R-10 booked 2026-01-13 | $60,000.00 | FR-008 |
+| 5% of $100,000.00 | $5,000.00 | FR-006 |
+| 8% of $20,000.00 | $1,600.00 | FR-006 |
+| Commission before refunds | $6,600.00 | FR-006 |
+| Clawback: R-9 refund $60,000.00 on 2026-02-20 | $3,600.00 | FR-016 |
+| Clawback: R-10 refund $60,000.00 on 2026-03-10 | $3,000.00 | FR-016 |
+| Earned commission | $0.00 | FR-015 |
+| Draw, January 2026 | $4,000.00 | FR-014 |
+| Draw, February 2026 | $4,000.00 | FR-014 |
+| Draw, March 2026 | $4,000.00 | FR-014 |
+| Opening recoverable balance | $0.00 | FR-015 |
+| Draw recovered | $0.00 | FR-015 |
+| Commission payable | $0.00 | FR-015 |
+| Closing recoverable balance | $12,000.00 | FR-015 |
+
+### A.9 `refund-splits`: Refunds on split deals
+
+Quarter 2026-01-01 to 2026-03-31 (90 days). Carries US6 AS7, AS9.
+
+| Rep | Quota | Start date | Opening balance |
+|---|---|---|---|
+| Xan (`xan`) | $100,000.00 | 2025-06-01 | $0.00 |
+| Yael (`yael`) | $100,000.00 | 2025-06-01 | $0.00 |
+| Ari (`ari`) | $100,000.00 | 2025-06-01 | $0.00 |
+| Bo (`bo`) | $100,000.00 | 2025-06-01 | $0.00 |
+| Cy (`cy`) | $100,000.00 | 2025-06-01 | $0.00 |
+
+Deals:
+
+| Deal | Amount | Close date | Booking date | Credit | Refunds |
+|---|---|---|---|---|---|
+| X-1 | $10,000.20 | 2026-01-06 | 2026-01-07 | xan 50%, yael 50% | $100.01 on 2026-02-10 |
+| X-2 | $10.09 | 2026-01-06 | 2026-01-07 | cy 100% | — |
+| X-3 | $0.06 | 2026-01-08 | 2026-01-09 | ari 45%, bo 45%, cy 10% | $0.01 on 2026-02-11 |
+
+**Xan**
+
+| Item | Amount | Rule |
+|---|---|---|
+| Quarterly quota | $100,000.00 | FR-005 |
+| X-1 booked 2026-01-07: 50% share of $10,000.20 | $5,000.10 | FR-012 |
+| 5% of $5,000.10 | $250.01 | FR-006 |
+| Commission before refunds | $250.01 | FR-006 |
+| Clawback: X-1 refund $100.01 on 2026-02-10 | $2.50 | FR-016 |
+| Earned commission | $247.51 | FR-015 |
+| Draw, January 2026 | $4,000.00 | FR-014 |
+| Draw, February 2026 | $4,000.00 | FR-014 |
+| Draw, March 2026 | $4,000.00 | FR-014 |
+| Opening recoverable balance | $0.00 | FR-015 |
+| Draw recovered | $247.51 | FR-015 |
+| Commission payable | $0.00 | FR-015 |
+| Closing recoverable balance | $11,752.49 | FR-015 |
+
+**Yael**
+
+| Item | Amount | Rule |
+|---|---|---|
+| Quarterly quota | $100,000.00 | FR-005 |
+| X-1 booked 2026-01-07: 50% share of $10,000.20 | $5,000.10 | FR-012 |
+| 5% of $5,000.10 | $250.01 | FR-006 |
+| Commission before refunds | $250.01 | FR-006 |
+| Clawback: X-1 refund $100.01 on 2026-02-10 | $2.51 | FR-016 |
+| Earned commission | $247.50 | FR-015 |
+| Draw, January 2026 | $4,000.00 | FR-014 |
+| Draw, February 2026 | $4,000.00 | FR-014 |
+| Draw, March 2026 | $4,000.00 | FR-014 |
+| Opening recoverable balance | $0.00 | FR-015 |
+| Draw recovered | $247.50 | FR-015 |
+| Commission payable | $0.00 | FR-015 |
+| Closing recoverable balance | $11,752.50 | FR-015 |
+
+**Ari**
+
+| Item | Amount | Rule |
+|---|---|---|
+| Quarterly quota | $100,000.00 | FR-005 |
+| X-3 booked 2026-01-09: 45% share of $0.06 | $0.03 | FR-012 |
+| 5% of $0.03 | $0.00 | FR-006 |
+| Commission before refunds | $0.00 | FR-006 |
+| Clawback: X-3 refund $0.01 on 2026-02-11 | $0.00 | FR-016 |
+| Earned commission | $0.00 | FR-015 |
+| Draw, January 2026 | $4,000.00 | FR-014 |
+| Draw, February 2026 | $4,000.00 | FR-014 |
+| Draw, March 2026 | $4,000.00 | FR-014 |
+| Opening recoverable balance | $0.00 | FR-015 |
+| Draw recovered | $0.00 | FR-015 |
+| Commission payable | $0.00 | FR-015 |
+| Closing recoverable balance | $12,000.00 | FR-015 |
+
+**Bo**
+
+| Item | Amount | Rule |
+|---|---|---|
+| Quarterly quota | $100,000.00 | FR-005 |
+| X-3 booked 2026-01-09: 45% share of $0.06 | $0.03 | FR-012 |
+| 5% of $0.03 | $0.00 | FR-006 |
+| Commission before refunds | $0.00 | FR-006 |
+| Clawback: X-3 refund $0.01 on 2026-02-11 | $0.00 | FR-016 |
+| Earned commission | $0.00 | FR-015 |
+| Draw, January 2026 | $4,000.00 | FR-014 |
+| Draw, February 2026 | $4,000.00 | FR-014 |
+| Draw, March 2026 | $4,000.00 | FR-014 |
+| Opening recoverable balance | $0.00 | FR-015 |
+| Draw recovered | $0.00 | FR-015 |
+| Commission payable | $0.00 | FR-015 |
+| Closing recoverable balance | $12,000.00 | FR-015 |
+
+**Cy**
+
+| Item | Amount | Rule |
+|---|---|---|
+| Quarterly quota | $100,000.00 | FR-005 |
+| X-2 booked 2026-01-07 | $10.09 | FR-008 |
+| X-3 booked 2026-01-09: 10% share of $0.06 | $0.00 | FR-012 |
+| 5% of $10.09 | $0.50 | FR-006 |
+| Commission before refunds | $0.50 | FR-006 |
+| Clawback: X-3 refund $0.01 on 2026-02-11 | −$0.01 | FR-016 |
+| Earned commission | $0.51 | FR-015 |
+| Draw, January 2026 | $4,000.00 | FR-014 |
+| Draw, February 2026 | $4,000.00 | FR-014 |
+| Draw, March 2026 | $4,000.00 | FR-014 |
+| Opening recoverable balance | $0.00 | FR-015 |
+| Draw recovered | $0.51 | FR-015 |
+| Commission payable | $0.00 | FR-015 |
+| Closing recoverable balance | $11,999.49 | FR-015 |
+
+### A.10 `refunds-q2`: Refunds of earlier-quarter deals
+
+Quarter 2026-04-01 to 2026-06-30 (91 days). Carries US6 AS2, AS5 (Q2), AS8.
+
+| Rep | Quota | Start date | Opening balance |
+|---|---|---|---|
+| Sage (`sage`) | $100,000.00 | 2025-06-01 | $0.00 |
+| Val (`val`) | $100,000.00 | 2025-06-01 | $0.00 |
+| Zion (`zion`) | $100,000.00 | 2025-06-01 | $0.00 |
+
+Deals:
+
+| Deal | Amount | Close date | Booking date | Credit | Refunds |
+|---|---|---|---|---|---|
+| Q2-1 | $40,000.00 | 2026-05-01 | 2026-05-04 | sage 100% | — |
+
+Booking-quarter data, 2026-01-01 to 2026-03-31: reps `sage` (quota $100,000.00, start 2025-06-01), `val` (quota $100,000.00, start 2025-06-01), `zion` (quota $100,000.00, start 2025-06-01); partners not on the roster: `yves` (start 2025-06-01).
+
+| Deal | Amount | Close date | Booking date | Credit | Refunds |
+|---|---|---|---|---|---|
+| R-11 | $60,000.00 | 2026-01-09 | 2026-01-10 | sage 100% | $60,000.00 on 2026-04-15 |
+| R-12 | $60,000.00 | 2026-02-09 | 2026-02-10 | sage 100% | — |
+| R-7 | $60,000.00 | 2026-01-09 | 2026-01-10 | val 100% | $20,000.00 on 2026-02-20, $20,000.00 on 2026-05-05 |
+| R-8 | $60,000.00 | 2026-02-09 | 2026-02-10 | val 100% | — |
+| D1 | $60,000.00 | 2026-01-14 | 2026-01-15 | zion 100% | $60,000.00 on 2026-04-20 |
+| D2 | $40,000.00 | 2026-02-24 | 2026-02-25 | zion 50%, yves 50% | — |
+
+**Sage**
+
+| Item | Amount | Rule |
+|---|---|---|
+| Quarterly quota | $100,000.00 | FR-005 |
+| Q2-1 booked 2026-05-04 | $40,000.00 | FR-008 |
+| 5% of $40,000.00 | $2,000.00 | FR-006 |
+| Commission before refunds | $2,000.00 | FR-006 |
+| Clawback: R-11 refund $60,000.00 on 2026-04-15 | $3,600.00 | FR-016 |
+| Earned commission | −$1,600.00 | FR-015 |
+| Draw, April 2026 | $4,000.00 | FR-014 |
+| Draw, May 2026 | $4,000.00 | FR-014 |
+| Draw, June 2026 | $4,000.00 | FR-014 |
+| Opening recoverable balance | $0.00 | FR-015 |
+| Draw recovered | $0.00 | FR-015 |
+| Commission payable | $0.00 | FR-015 |
+| Closing recoverable balance | $13,600.00 | FR-015 |
+
+**Val**
+
+| Item | Amount | Rule |
+|---|---|---|
+| Quarterly quota | $100,000.00 | FR-005 |
+| Commission before refunds | $0.00 | FR-006 |
+| Clawback: R-7 refund $20,000.00 on 2026-05-05 | $1,000.00 | FR-016 |
+| Earned commission | −$1,000.00 | FR-015 |
+| Draw, April 2026 | $4,000.00 | FR-014 |
+| Draw, May 2026 | $4,000.00 | FR-014 |
+| Draw, June 2026 | $4,000.00 | FR-014 |
+| Opening recoverable balance | $0.00 | FR-015 |
+| Draw recovered | $0.00 | FR-015 |
+| Commission payable | $0.00 | FR-015 |
+| Closing recoverable balance | $13,000.00 | FR-015 |
+
+**Zion**
+
+| Item | Amount | Rule |
+|---|---|---|
+| Quarterly quota | $100,000.00 | FR-005 |
+| Commission before refunds | $0.00 | FR-006 |
+| Clawback: D1 refund $60,000.00 on 2026-04-20 | $3,000.00 | FR-016 |
+| Earned commission | −$3,000.00 | FR-015 |
+| Draw, April 2026 | $4,000.00 | FR-014 |
+| Draw, May 2026 | $4,000.00 | FR-014 |
+| Draw, June 2026 | $4,000.00 | FR-014 |
+| Opening recoverable balance | $0.00 | FR-015 |
+| Draw recovered | $0.00 | FR-015 |
+| Commission payable | $0.00 | FR-015 |
+| Closing recoverable balance | $15,000.00 | FR-015 |
+
+### A.11 `invalid`: Invalid data (rejected)
+
+Quarter 2026-01-01 to 2026-03-31. Carries US4 AS5 and the FR-011 edge cases. The scenario MUST be
+rejected with all four errors listed and no statements (FR-004):
+
+| Rep | Quota | Start date |
+|---|---|---|
+| Mara (`mara`) | $100,000.00 | 2025-06-01 |
+| Nico (`nico`) | $100,000.00 | 2026-02-01 |
+| Ollie (`ollie`) | $100,000.00 | 2026-04-10 |
+
+| Deal | Amount | Close date | Booking date | Credit | Refunds |
+|---|---|---|---|---|---|
+| V-1 | $50,000.00 | 2026-02-01 | 2026-02-02 | mara 60%, nico 30% | — |
+| V-2 | $10,000.00 | 2026-01-14 | 2026-01-15 | nico 100% | — |
+| V-3 | $10.005 | 2026-03-01 | 2026-03-02 | mara 100% | — |
+
+Expected errors: V-1's split percentages sum to 90% (FR-013); V-2 is booked 2026-01-15, before
+Nico's start date of 2026-02-01 (FR-011); Ollie starts 2026-04-10, after the quarter ends
+(FR-011); V-3's amount $10.005 is not a whole number of cents (FR-004).
