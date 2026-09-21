@@ -53,7 +53,7 @@ No number is stated, so none is invented.
 | IV. Evidence before assertion | PASS | research.md tags every decision; two recalled assumptions were corrected by spikes (R3 VSTest packages, R12 `dotnet run` at root) and the corrections are kept. |
 | V. Clean architecture, warnings-as-errors | PASS | Engine has no dependency on web, file system or clock; web depends on engine only; money is `decimal`; `TreatWarningsAsErrors` in `Directory.Build.props`, identical in CI. |
 | VI. Accessible by default | PASS | Server-rendered semantic HTML per contracts/ui.md; structure asserted by web tests; stylesheet checks by unit test for WCAG 2.2 1.4.3, 1.4.11, 2.5.8, 2.4.11 and 1.4.12 (tasks T031); keyboard-only operation and 1.4.10 reflow at 320 px driven through the browser (T033); VoiceOver by the maintainer (T034). Not claimed: a full WCAG audit — no automated browser scan (axe) runs, so criteria outside the list above are covered only by the semantic-HTML structure asserted in T030, and are not asserted to pass. |
-| VII. Runtime environment is part of the feature | PASS | New runtime dependency: the seeded JSON files, copied to output by the project file and exercised by CI's smoke run. No environment variables, secrets, ports beyond the ASP.NET default, or services. |
+| VII. Runtime environment is part of the feature | PASS | New runtime dependency: the seeded JSON files, copied to build and publish output by the Web SDK's default content items with no project-file entry (research R17), and exercised by CI's smoke runs. No environment variables, secrets, ports beyond the ASP.NET default, or services. |
 
 ### Standing Gates *(agentic-sdlc kit)*
 

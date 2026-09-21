@@ -18,7 +18,7 @@ dotnet run --project src/CommissionCalculator.Web
 ```bash
 dotnet build -warnaserror
 dotnet test --fail-skips on --report-trx --coverage --coverage-output-format cobertura
-dotnet run --project tools/CommissionCalculator.Tools -- trace $(find . -name '*.trx' -path '*TestResults*')
+dotnet run --project tools/CommissionCalculator.Tools -- trace $(find . -name '*.trx' \( -path '*TestResults*' -o -path '*ci-evidence*' \))
 ```
 
 ## Validation steps (each falsifiable)
@@ -30,7 +30,8 @@ dotnet run --project tools/CommissionCalculator.Tools -- trace $(find . -name '*
 2. **No network at run time (SC-004).** Condition: no network — evidence: `docker inspect` shows
    `NetworkMode: none` immediately before the request. CI's offline-smoke job runs the published app
    in `mcr.microsoft.com/dotnet/aspnet:10.0.12` with `--network none` and requests
-   `/?scenario=tiers`; expect a rep table (T035).
+   `/?scenario=tiers` from a curl container sharing that network namespace; expect a rep table, and
+   expect the same sidecar's request to an external host to fail (T035).
 3. **Every seeded amount matches the spec (SC-001).** Run the test command; expect the
    `SeededScenarios.feature` scenarios to pass and zero skipped (the run fails on any skip).
 4. **Every line cites an FR (FR-003, SC-002).** Web tests assert every breakdown row's Rule cell is

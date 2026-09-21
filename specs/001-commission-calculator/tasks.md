@@ -72,7 +72,8 @@ analyze step can hold this list to them. Where anything above or below conflicts
   commands **before** they exist (`[Trait("Principle", "II")]`) (fixture files under `tests/CommissionCalculator.Tools.Tests/
   Fixtures/`): `CoverageGateTests` — engine line rate 0.85 passes, 0.79 fails, report with no
   engine package fails *unless* the engine assembly contains no types (then passes with the message
-  "no engine lines yet"); `TrxTestListTests` — lists fully qualified `className.name` for xUnit and
+  "no engine lines yet"), using a fixture report that *has* an engine package so the floor can
+  bite; `TrxTestListTests` — lists fully qualified `className.name` for xUnit and
   Reqnroll tests from a fixture TRX (the Reqnroll display-name case from research R15). Run; record
   failing.
 - [ ] T006 Create `tools/CommissionCalculator.Tools/` (console app; commands `coverage-gate` and
@@ -83,8 +84,9 @@ analyze step can hold this list to them. Where anything above or below conflicts
   --coverage-output-format cobertura`, `coverage-gate` on the engine (floor 80%, rate written to
   the job summary), upload TRX and coverage as artifacts.
   *Guard (warnings)*: on a local throwaway change add an unused variable in Engine; confirm the
-  build fails; revert; record. *Guard (coverage)*: run `coverage-gate` with floor 101% against a
-  real report; confirm non-zero exit; record.
+  build fails; revert; record. *Guard (coverage)*: run `coverage-gate` with floor 101% against the
+  Tools.Tests fixture report that contains an engine package (the real report has no engine lines
+  until Phase 2); confirm non-zero exit; record. Repeat against the real report in T063.
 - [ ] T008 CI per-test isolation step: for **every** test in all test projects (list from the suite
   TRX via `list-tests`), run `dotnet test --project <proj> --filter-method <className.name>` alone;
   fail if any fails. *Guard*: on a local throwaway branch add two Tools tests where one passes only
@@ -142,8 +144,10 @@ reader that every story uses.
   *Guard*: make the catalog stop at the first failing file and confirm the "does not hide the
   others" test fails; record. Run; record failing.
 - [ ] T024 Implement `ScenarioCatalog/ScenarioFileReader.cs` and `ScenarioCatalog.cs` (loads every
-  `Scenarios/*.json` from `AppContext.BaseDirectory` — the build/publish output, not the content
-  root, so a file missing from output is missing at run time) until T022–T023 pass.
+  `Scenarios/*.json` from a directory set by an options value that defaults to
+  `Path.Combine(AppContext.BaseDirectory, "Scenarios")` — the build/publish output, not the content
+  root, so a file missing from output is missing at run time; tests can point it at a directory
+  they create) until T022–T023 pass.
 - [ ] T025 Confirm in the real solution that `Scenarios/*.json` reaches build and publish output
   through the Web SDK's default content items, with **no** project-file entry (research R17: an
   explicit `<Content Include>` fails the build with NETSDK1022) — structural; proven by T035's smoke
@@ -173,13 +177,16 @@ reader that every story uses.
   `Calculation/QuarterCredit.cs` wired into `StatementBuilder` (credit lines FR-008, tier lines
   FR-006, "Commission before refunds", attainment FR-009) until T027–T028 pass.
 - [ ] T030 [P] [US1] Write `Features/UI_Page.feature` in Specs, driven through the web host
-  (`@FR-001 @FR-002 @FR-003 @FR-021 @SC-002 @SC-005`): picker form structure per contracts/ui.md;
+  (`@FR-001 @FR-002 @FR-003 @FR-021 @SC-002`): picker form structure per contracts/ui.md;
   `?scenario=tiers` shows one section per rep with `h2`, caption, `th scope=col` Item/Amount/Rule;
   every Rule cell is an FR ID that exists in spec.md (read from the committed spec file); each rep's
   summary `dl` shows quota, prorated quota, credited bookings, attainment (Avery: "80.00%"),
   earned, draws paid, payable and closing balance; unknown id → 404 with the picker; a load error
-  is shown. *Guard*: return 200 for an unknown id and confirm that scenario fails; record. Run;
-  record failing.
+  is shown — for this one scenario the host's scenario directory is a temp directory the scenario
+  creates (one valid file, one malformed), never the shared build output. *Guard*: return 200 for an unknown id and confirm that scenario fails; record. Run;
+  record failing. Add `AttainmentFormatTests` in Web.Tests (`FR-002`): 0.8 → "80.00%", 0.12345 →
+  "12.35%" (midpoint, half away from zero), 1.6 → "160.00%". *Guard*: format with banker's rounding
+  and confirm the midpoint case fails ("12.34%"); record.
 - [ ] T031 [P] [US1] Write `StylesheetAccessibilityTests` in Web.Tests (`FR-021`), reading
   `wwwroot/css/site.css`: 1.4.3 text contrast — body, table and link text on their backgrounds
   ≥ 4.5:1; 1.4.11 non-text contrast — focus indicator and `select`/`button` borders ≥ 3:1 against
@@ -207,7 +214,9 @@ reader that every story uses.
   `/?scenario=tiers` and require a `<table>` containing "Avery" — proving the running app loaded the
   seed files. Add a second CI job, **offline smoke**: `dotnet publish` the web app, run it in
   `mcr.microsoft.com/dotnet/aspnet:10.0.12` with `docker run --network none`, and request
-  `/?scenario=tiers` from inside the container (SC-004; evidence: `docker inspect` shows
+  `/?scenario=tiers` from a `curlimages/curl` container started with `--network container:<app>`
+  (the runtime image has no HTTP client; research R16); as a negative control the same sidecar's
+  request to an external host must fail (SC-004; evidence: `docker inspect` shows
   `NetworkMode: none`, printed immediately before the request). Both jobs write a TRX-shaped result
   (`ci-evidence/*.trx`) naming their check with category `SC-004` (and `FR-020` for the smoke step),
   pass or fail, so the trace sees them as tests. *Guard*: on a throwaway branch add
@@ -216,7 +225,8 @@ reader that every story uses.
   record.
 - [ ] T036 [US1] Checkpoint: PR "Phase 3: US1", CI green, maintainer approves squash-merge. Record
   the offline job's first run in research R16 (Docker on the runner) and confirm the plan's
-  Provenance gate.
+  Provenance gate; propose to the maintainer a PATCH amendment adding Docker (a CI-only dependency
+  of the offline-smoke job) to constitution C7 and its pairwise note.
 
 ---
 
@@ -327,12 +337,13 @@ reader that every story uses.
   (4,950.10 / 4,950.09). Add validator tests (`FR-004`): refunds totalling more than the deal;
   missing/incomplete booking-quarter data; booking quarter overlapping or malformed; rep start-date
   mismatch; partner listed with start date accepted; deal in both lists differing → rejected; a
-  refund of 0.00 or less → rejected. Add a statement test: a refund on a split deal adds a re-split
+  refund of 0.00 or less → rejected; a booking-quarter deal booked before the start date of a
+  credited roster rep or partner → rejected naming the deal and the rep (FR-011). Add a statement test: a refund on a split deal adds a re-split
   line citing FR-017 before its clawback line; a refund on a single-rep deal adds none.
   *Guard*: (a) size each refund against the untouched quarter and confirm AS6 fails; (b) remove
   the refund-date filter and confirm AS3 and AS5 (Q1) fail; (c) floor clawbacks at zero and
-  confirm AS9 fails; (d) remove each new validation check (including refund ≤ 0) and confirm its
-  test fails; record all.
+  confirm AS9 fails; (d) remove each new validation check (including refund ≤ 0 and the
+  booking-quarter start-date check) and confirm its test fails; record all.
   Run; record failing.
 - [ ] T057 [P] [US6] Write `Features/UI_NegativeAmounts.feature` in Specs, driven through the web
   host (`@FR-021 @FR-015`): `?scenario=refunds-q2` renders Sage's earned commission as "−$1,600.00"
@@ -351,23 +362,35 @@ reader that every story uses.
 - [ ] T060 [P] Write `Features/SeededScenarios.feature` (`@SC-001 @SC-003`): for every file in
   `Scenarios/`, load it through the real reader and assert every rep's statement equals Appendix A
   line for line (description, amount to the cent, FR), and `invalid.json` lists exactly the four
-  Appendix A.11 errors; assert each of the brief's eight rules is exercised by at least one seeded
-  scenario (SC-003). Run; any failure is a spec question, not a test edit.
+  Appendix A.11 errors. SC-003 check: the brief's rules map to FRs as rule 1 → FR-005, rule 2 →
+  FR-006, rule 3 → FR-010, rule 4 → FR-012, rule 5 → FR-014/FR-015, rule 6 → FR-016, rule 7 →
+  FR-008 (an excluded-by-booking-date line), rule 8 → FR-019 (satisfied by scope, as in T061); assert
+  that for rules 1–7 at least one seeded statement contains a line citing the mapped FR. *Guard*:
+  remove `booking-dates.json` from the check's input and confirm rule 7 fails; record. Run; any failure is a spec question, not a test edit.
 - [ ] T061 Traceability generator, test first: add `TraceabilityTests` to Tools.Tests
   (`[Trait("Principle", "III")]`; fixture spec with FR-001..FR-003 and SC-001, fixture TRX, fixture
   assembly metadata) — an ID with no test and an ID with no member both appear under "Gaps"; an ID
   declared in the scope-only list appears under "Satisfied by scope" with its reason and not under
-  Gaps; tests carrying a `Principle` trait appear under "Tooling tests" and not against any FR; a
+  Gaps; an SC in the evidence-only list with tests and no member is not a gap, and with no tests it
+  is; tests carrying a `Principle` trait appear under "Tooling tests" and not against any FR; a
   CI evidence TRX (`ci-evidence/*.trx`) contributes its categories like any other TRX.
   *Guard*: disable gap detection and confirm the gaps test fails; record. Run; record failing. Then add the
   `trace` command to `tools/CommissionCalculator.Tools` (FR/SC IDs from spec.md; test → IDs from
   TRX categories/traits; member → IDs from `[Implements]` via reflection over the built engine and
-  web assemblies; scope-only list: FR-019 — "USD only; tax, currency conversion and multi-year are
-  out of scope, so no member implements them") writing
-  `specs/001-commission-calculator/traceability.md`; add a CI step that runs it and uploads the file.
-- [ ] T062 Add `[Implements]` to every engine and web member that implements an FR; run `trace`;
-  every FR/SC except the scope-only FR-019 has at least one member and one test.
+  web assemblies; scope-only list: FR-019 — "USD only; tax, currency conversion and
+  multi-year are out of scope, so no member implements them"; evidence-only list: SC-001 — seed
+  files and Appendix A, SC-003 — the seeded scenarios, SC-004 — the smoke jobs, each verified by
+  tests but implemented by no single member; manual-evidence list: SC-005 and FR-021's
+  screen-reader clause — T033/T034, not visible to the trace) writing
+  `specs/001-commission-calculator/traceability.md`. Add a final CI job, `traceability`, that
+  depends on the build/test, smoke and offline-smoke jobs, downloads all their TRX artifacts (suite
+  and `ci-evidence/*.trx`), runs `trace` over them and uploads the result.
+- [ ] T062 Add `[Implements]` to every engine and web member that implements an FR; run `trace`
+  over every TRX (as the CI job does); every FR has at least one member and one test except the
+  scope-only FR-019; every SC has at least one test; the manual-evidence items are listed with the
+  PR links recorded in T033/T034/T064.
 - [ ] T063 Re-verify every failure-path guard added in T007, T008, T009, T010, T018, T020, T022, T023,
+  T030 (attainment format), T060,
   T030, T031, T035, T038, T043, T047, T048, T052, T056, T057, T061 still fails with its guarded
   behaviour removed; record each result here.
 - [ ] T064 Quickstart validation (standing rule 3): step 1 from a fresh clone (evidence:

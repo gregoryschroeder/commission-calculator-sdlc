@@ -170,6 +170,12 @@ correctness.
 - **Established**: registry — `mcr.microsoft.com/v2/dotnet/aspnet/tags/list`, 2026-09-21, lists
   `10.0.12`, `10.0` and `10.0-noble`. **Assumed until the first run of that job**: Docker is
   available on `ubuntu-latest` runners.
+- **Request method — spiked locally (Docker 29.8.0, 2026-09-21)**: the `aspnet:10.0.12` image has no
+  `curl` or `wget`, so the request cannot come from inside the app container. A published
+  `dotnet new webapp` ran with `--network none` (`docker inspect` → `NetworkMode=none`); a
+  `curlimages/curl` container started with `--network container:<app>` got HTTP 200 from
+  `http://127.0.0.1:8080/`, and its request to `https://example.com/` failed (curl exit 28) — the
+  negative control showing the shared namespace really has no network. (Found by analyze pass 4.)
 
 ## R17. Seed files reach build and publish output by default
 
