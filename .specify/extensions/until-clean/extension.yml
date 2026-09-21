@@ -1,0 +1,29 @@
+schema_version: "1.0"
+
+extension:
+  id: "until-clean"
+  name: "Analyze Until Clean"
+  version: "1.0.0"
+  description: "Fixes every analyze finding and re-analyzes until a pass is clean, stopping for decisions only the maintainer can make."
+  author: "Schroeder Studios"
+  repository: "https://github.com/Schroeder-Studios/agentic-sdlc"
+  license: "UNLICENSED"
+
+requires:
+  speckit_version: ">=0.14.0"
+
+provides:
+  commands:
+    - name: "speckit.until-clean.remediate"
+      file: "commands/remediate.md"
+      description: "Fix every finding from the analysis just reported, then re-run analyze, until a pass finds nothing"
+
+hooks:
+  after_analyze:
+    command: "speckit.until-clean.remediate"
+    optional: false
+    description: "Fix every finding from the analysis just reported, then re-run analyze, until a pass finds nothing."
+
+tags:
+  - "analyze"
+  - "fidelity"

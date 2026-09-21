@@ -1,0 +1,15 @@
+installed:
+- until-clean
+settings:
+  auto_execute_hooks: true
+hooks:
+  after_analyze:
+  - extension: until-clean
+    command: speckit.until-clean.remediate
+    enabled: true
+    optional: false
+    priority: 10
+    prompt: Execute speckit.until-clean.remediate?
+    description: Fix every finding from the analysis just reported, then re-run analyze,
+      until a pass finds nothing.
+    condition: null

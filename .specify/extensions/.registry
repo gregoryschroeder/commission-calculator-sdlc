@@ -1,0 +1,19 @@
+{
+  "schema_version": "1.0",
+  "extensions": {
+    "until-clean": {
+      "version": "1.0.0",
+      "source": "local",
+      "manifest_hash": "sha256:d98054a1035cdb73b157439255fbd5a63ea69cb3d5c78262753fb327f51a38a0",
+      "enabled": true,
+      "priority": 10,
+      "registered_commands": {
+        "claude": [
+          "speckit.until-clean.remediate"
+        ]
+      },
+      "registered_skills": [],
+      "installed_at": "2026-09-21T21:46:23.690620+00:00"
+    }
+  }
+}
