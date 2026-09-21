@@ -124,8 +124,8 @@ correctness.
   "Couldn't find a project to run … or pass the path to the project using --project."
 - **Decision**: the web project is the only runnable project; run it with
   `dotnet run --project src/CommissionCalculator.Web` from the root, or plain `dotnet run` from
-  `src/CommissionCalculator.Web`. Both are documented in the README and exercised by CI (a smoke
-  step starts the app and requests `/`). Putting the web `.csproj` at the root was rejected: its
+  `src/CommissionCalculator.Web`. Both are documented in the README; CI exercises the first (the
+  smoke step starts the app with `--project` and requests `/`). Putting the web `.csproj` at the root was rejected: its
   default file globs would compile the engine, tests and tools into the web assembly.
 - **Maintainer approval**: this interpretation of constraint C2 was approved at the plan gate,
   2026-09-21 ("2: yes", plan.md decision 2).
@@ -157,6 +157,12 @@ correctness.
   read-only. CI additionally runs every test in every test project individually
   (`--filter-method` per fully qualified `className.name` read from the suite run's TRX), so a test
   depending on another would fail there.
+- **Order (spiked 2026-09-21, found by analyze)**: xUnit v3 4.0.1's runner accepts a `[:seed]`
+  argument, but seeds 1, 2 and 3 all ran one class's five tests in the same order (T3, T5, T1, T2,
+  T4 — not declaration order), so a different order cannot be forced cheaply. "Any order" is
+  therefore enforced by design (no mutable shared state, Principle II) and by the per-test run, not
+  by reordering. Residual risk, stated rather than hidden: a test that leaves behind state that a
+  later test reads would only be caught if that state were shared, which the design forbids.
 - **Established**: spiked — `--filter-method` selected tests under MTP; `--list-tests` lists
   Reqnroll scenarios by display name ("rounding") rather than method name, which is why the loop
   takes names from the TRX `<TestMethod className=… name=…>` (e.g. `Bdd.Features.AddFeature` /

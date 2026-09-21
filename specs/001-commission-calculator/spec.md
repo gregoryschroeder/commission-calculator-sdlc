@@ -734,7 +734,7 @@ Deals:
 
 ### A.3 `proration`: Mid-quarter starters
 
-Quarter 2026-01-01 to 2026-03-31 (90 days). Carries US3 AS1–AS2, US5 AS5–AS6.
+Quarter 2026-01-01 to 2026-03-31 (90 days). Carries US3 AS1–AS2, US5 AS4–AS6.
 
 | Rep | Quota | Start date | Opening balance |
 |---|---|---|---|
@@ -996,7 +996,7 @@ Deals:
 
 ### A.7 `draw`: Draw recovery
 
-Quarter 2026-01-01 to 2026-03-31 (90 days). Carries US5 AS1–AS4.
+Quarter 2026-01-01 to 2026-03-31 (90 days). Carries US5 AS1–AS3.
 
 | Rep | Quota | Start date | Opening balance |
 |---|---|---|---|

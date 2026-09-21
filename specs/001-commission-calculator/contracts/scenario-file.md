@@ -1,7 +1,9 @@
 # Contract: Seeded scenario file
 
-One UTF-8 JSON file per scenario in `src/CommissionCalculator.Web/Scenarios/*.json`, mapped 1:1 to
-`ScenarioInput` (engine-api.md). Property names are camelCase; dates are `YYYY-MM-DD`; money and
+One UTF-8 JSON file per scenario in `src/CommissionCalculator.Web/Scenarios/*.json`, read into a
+web-side `ScenarioFile` record. `description` stays in the web catalog for display in the picker
+and page heading; every other property maps 1:1 to `ScenarioInput` (engine-api.md), which has no
+description because the engine does not use one. Property names are camelCase; dates are `YYYY-MM-DD`; money and
 percentages are JSON numbers read as `decimal` (exact — research R10). Unknown properties are an
 error. A file that is not valid JSON or does not match this shape is reported on the page as a
 scenario that failed to load, with the parser's message; it never crashes the app.

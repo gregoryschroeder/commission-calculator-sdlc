@@ -11,8 +11,9 @@ with every amount on its own line citing the FR that produced it. All payout log
 pure .NET 10 engine library (exact `decimal` money, `DateOnly` dates, no I/O); a Razor Pages app
 loads seeded scenarios from local JSON files and renders the engine's statements without
 recomputing anything. Tests: xUnit v3 unit tests for the engine; Reqnroll Gherkin features
-mirroring every acceptance scenario, to the cent; web tests asserting the rendered structure and
-FR citations. CI (GitHub Actions) is the review gate. Evidence for each choice is in
+mirroring every acceptance scenario, to the cent; host-level scenarios asserting the rendered structure and
+FR citations (web-host tests are Gherkin too, in the Specs project). CI (GitHub Actions) is the
+review gate. Evidence for each choice is in
 [research.md](research.md).
 
 ## Technical Context
@@ -52,14 +53,14 @@ No number is stated, so none is invented.
 | III. Spec fidelity and traceability | PASS | Tests carry FR/SC traits/tags; engine members carry `[Implements]`; the tools project's `trace` command generates traceability.md from TRX + reflection + spec.md, listing gaps; every breakdown line carries its FR. |
 | IV. Evidence before assertion | PASS | research.md tags every decision; two recalled assumptions were corrected by spikes (R3 VSTest packages, R12 `dotnet run` at root) and the corrections are kept. |
 | V. Clean architecture, warnings-as-errors | PASS | Engine has no dependency on web, file system or clock; web depends on engine only; money is `decimal`; `TreatWarningsAsErrors` in `Directory.Build.props`, identical in CI. |
-| VI. Accessible by default | PASS | Server-rendered semantic HTML per contracts/ui.md; structure asserted by web tests; stylesheet checks by unit test for WCAG 2.2 1.4.3, 1.4.11, 2.5.8, 2.4.11 and 1.4.12 (tasks T031); keyboard-only operation and 1.4.10 reflow at 320 px driven through the browser (T033); VoiceOver by the maintainer (T034). Not claimed: a full WCAG audit — no automated browser scan (axe) runs, so criteria outside the list above are covered only by the semantic-HTML structure asserted in T030, and are not asserted to pass. |
+| VI. Accessible by default | PASS | Server-rendered semantic HTML per contracts/ui.md; structure asserted by host-level Gherkin scenarios (T030); stylesheet checks by unit test for WCAG 2.2 1.4.3, 1.4.11, 2.5.8, 2.4.11 and 1.4.12 (tasks T031); keyboard-only operation and 1.4.10 reflow at 320 px driven through the browser (T033); VoiceOver by the maintainer (T034). Not claimed: a full WCAG audit — no automated browser scan (axe) runs, so criteria outside the list above are covered only by the semantic-HTML structure asserted in T030, and are not asserted to pass. |
 | VII. Runtime environment is part of the feature | PASS | New runtime dependency: the seeded JSON files, copied to build and publish output by the Web SDK's default content items with no project-file entry (research R17), and exercised by CI's smoke runs. No environment variables, secrets, ports beyond the ASP.NET default, or services. |
 
 ### Standing Gates *(agentic-sdlc kit)*
 
 | Gate | Status | Notes |
 |---|---|---|
-| Provenance | PASS | Principle IV. Every research.md decision says how it was established and when. Three claims remain **assumed**, none load-bearing for correctness: R14 (the CI runner resolves SDK 10.0.4xx via setup-dotnet), R15 (the per-test isolation loop's CI time) and R16 (Docker is available on `ubuntu-latest`); the first CI runs prove or disprove each (tasks T012). |
+| Provenance | PASS | Principle IV. Every research.md decision says how it was established and when. Three claims remain **assumed**, none load-bearing for correctness: R14 (the CI runner resolves SDK 10.0.4xx via setup-dotnet), R15 (the per-test isolation loop's CI time) and R16 (Docker is available on `ubuntu-latest`); the first CI runs prove or disprove each (tasks T012 for R14–R15, T036 for R16). |
 | Degraded window | N/A | Principle VII. Nothing is deployed or scaled; the app runs on the developer's machine for as long as they run it. No cold start, pause or reclaim is accepted. |
 
 ## Project Structure
@@ -118,7 +119,7 @@ src/
 tests/
 ├── CommissionCalculator.Engine.Tests/    # xUnit v3 unit tests, [Trait("Requirement", ...)]
 ├── CommissionCalculator.Specs/           # Reqnroll: one .feature per user story + seeded scenarios
-├── CommissionCalculator.Web.Tests/       # WebApplicationFactory + AngleSharp
+├── CommissionCalculator.Web.Tests/       # xUnit unit tests of single web classes (reader, catalog, formatters, stylesheet)
 └── CommissionCalculator.Tools.Tests/     # tests for the CI helper and traceability commands
 
 tools/CommissionCalculator.Tools/         # console app: coverage-gate, list-tests, trace (R8)

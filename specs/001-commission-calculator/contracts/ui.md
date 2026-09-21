@@ -6,7 +6,7 @@ Single Razor Page at `/`, server-rendered, no client script.
 - `GET /?scenario={id}` — the picker with `{id}` selected and its results. An unknown id shows a
   "scenario not found" message (HTTP 404) and the picker.
 
-## Structure (asserted by the web tests; FR-001–FR-004, FR-021, SC-002, SC-005)
+## Structure (asserted by host-level Gherkin scenarios in the Specs project; FR-001–FR-004, FR-021, SC-002)
 
 - `<html lang="en">`, a `<title>` of the form "{scenario name} — Commission Calculator", one
   `<h1>`, a `<main>` landmark, and a skip link to it.

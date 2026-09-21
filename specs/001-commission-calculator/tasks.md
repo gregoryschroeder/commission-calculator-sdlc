@@ -35,8 +35,10 @@ analyze step can hold this list to them. Where anything above or below conflicts
 4. **Every phase is one pull request.** Each phase ends with a checkpoint task: open the phase's
    PR, CI green, maintainer approves the squash-merge. No PR spans two phases; phases run in order.
 5. **Runtime dependencies are tasks.** This feature adds one runtime dependency: the seeded
-   scenario JSON files. The Web SDK's default content items copy them to build and publish output
-   (T025, research R17), and the smoke steps (T010, T035) prove the running app loads them. It adds no environment variables, secrets, services or
+   scenario JSON files, added in Phase 9 (T060a) after the check that compares them with Appendix A
+   (T060) is written and seen failing. The Web SDK's default content items copy them to build and
+   publish output (T025, research R17), and the smoke assertion added in T060b proves the running
+   app loads them. Before Phase 9, host-level tests use scenario folders they create themselves. It adds no environment variables, secrets, services or
    configuration.
 6. **Every test names what it verifies**: `[Trait("Requirement", "FR-0xx")]` on unit tests,
    `@FR-0xx` / `@SC-00x` tags on Gherkin scenarios; tests of project tooling carry
@@ -183,7 +185,8 @@ reader that every story uses.
   (`@FR-001 @FR-002 @FR-003 @FR-021 @SC-002`): picker form structure per contracts/ui.md;
   `?scenario=tiers` shows one section per rep with `h2`, caption, `th scope=col` Item/Amount/Rule;
   every Rule cell is an FR ID that exists in spec.md (read from the committed spec file); each rep's
-  page has a `<title>` naming the selected scenario (WCAG 2.4.2); summary `dl` shows quota, prorated quota, credited bookings, attainment (Avery: "80.00%"),
+  page has a `<title>` naming the selected scenario (WCAG 2.4.2); these scenarios run against a scenario directory the scenario itself creates (a temp folder holding the Appendix A.1 inputs
+  as JSON), never the shipped `Scenarios/` folder, which is only added in Phase 9 (T060a); summary `dl` shows quota, prorated quota, credited bookings, attainment (Avery: "80.00%"),
   earned, draws paid, payable and closing balance; unknown id → 404 with the picker; a load error
   is shown — for this one scenario the host's scenario directory is a temp directory the scenario
   creates (one valid file, one malformed), never the shared build output. *Guard*: return 200 for an unknown id and confirm that scenario fails; record. Run;
@@ -201,10 +204,11 @@ reader that every story uses.
   1.4.12 text spacing — no fixed `height` and no `overflow: hidden` on text containers.
   *Guard*: set the text token to a light grey, and separately set the button's min-height to 16px;
   confirm each makes its test fail; record. Run; record failing.
-- [ ] T032 [US1] Add `Scenarios/tiers.json` (Appendix A.1 inputs) and implement the page (picker,
+- [ ] T032 [US1] Implement the page (picker, the empty state "No scenarios are installed",
   statements, summary `dl`, breakdown tables, `$#,##0.00` with a minus sign, `site.css` colour
   tokens and visible focus styles) until T030–T031 pass.
-- [ ] T033 [US1] Keyboard-only check (FR-021, SC-005; standing rule 3): drive the running app with
+- [ ] T033 [US1] Keyboard-only check (FR-021, SC-005; standing rule 3): run the app with its
+  scenario directory pointed at a folder holding the Appendix A.1 and A.2 inputs, and drive it with
   key presses only through the in-app browser (evidence: the action log contains no pointer
   events); Tab to the picker, change scenario with arrow keys, submit with Enter, Tab through each
   table; confirm visible focus at every stop. Then resize the viewport to 320 CSS px wide (1.4.10
@@ -213,22 +217,18 @@ reader that every story uses.
   and screenshot in the PR.
 - [ ] T034 [US1] Screen-reader check (FR-021; standing rule 3) — **maintainer step**: with
   VoiceOver on (evidence: VoiceOver caption panel visible in a screenshot), navigate by headings
-  and tables on `?scenario=tiers`; confirm each rep's `h2`, the table caption and column headers are
+  and tables on `?scenario=tiers` (app run as in T033); confirm each rep's `h2`, the table caption and column headers are
   announced. The agent does not change system accessibility settings; the maintainer records the
   result on the PR.
-- [ ] T035 [US1] Extend the CI smoke step (T010): after HTTP 200 on `/`, request
-  `/?scenario=tiers` and require a `<table>` containing "Avery" — proving the running app loaded the
-  seed files. Add a second CI job, **offline smoke**: `dotnet publish` the web app, run it in
-  `mcr.microsoft.com/dotnet/aspnet:10.0.12` with `docker run --network none`, and request
-  `/?scenario=tiers` from a `curlimages/curl` container started with `--network container:<app>`
+- [ ] T035 [US1] Add a second CI job, **offline smoke**: `dotnet publish` the web app, run it in
+  `mcr.microsoft.com/dotnet/aspnet:10.0.12` with `docker run --network none`, and request `/` (HTTP
+  200 with the picker; the seed-table assertion joins it in T060b) from a `curlimages/curl` container started with `--network container:<app>`
   (the runtime image has no HTTP client; research R16); as a negative control the same sidecar's
   request to an external host must fail (SC-004; evidence: `docker inspect` shows
   `NetworkMode: none`, printed immediately before the request). Both jobs write a TRX-shaped result
   (`ci-evidence/*.trx`) naming their check with category `SC-004` (and `FR-020` for the smoke step),
-  pass or fail, so the trace sees them as tests. *Guard*: on a throwaway branch add
-  `<Content Update="Scenarios/*.json" CopyToOutputDirectory="Never" CopyToPublishDirectory="Never"
-  />` and confirm the smoke assertion fails (R17 observed that this removes the files from output);
-  record.
+  pass or fail, so the trace sees them as tests. *Guard*: point the sidecar's request at a path
+  that returns 404 and confirm the job fails; record.
 - [ ] T036 [US1] Checkpoint: PR "Phase 3: US1", CI green, maintainer approves squash-merge. Record
   the offline job's first run in research R16 (Docker on the runner) and confirm the plan's
   Provenance gate; propose to the maintainer a PATCH amendment adding Docker (a CI-only dependency
@@ -249,11 +249,11 @@ reader that every story uses.
   switch crediting to close date and confirm AS1 (B-1) and AS2 (B-2) fail; remove the refund-date
   check and confirm its test fails; record. Run; record failing.
 - [ ] T039 [P] [US2] Write `Features/US1_ScenarioSwitch.feature` in Specs, driven through the web
-  host (`@FR-001`, US1 AS5 — placed here because it needs a second seeded scenario): with `tiers`
-  and `booking-dates` present, selecting `booking-dates` shows only Emery, and selecting `tiers`
+  host (`@FR-001`, US1 AS5 — placed here because it needs the second scenario's rules): with
+  a scenario directory the scenario itself creates (a temp folder holding the Appendix A.1 and A.2 inputs
+  as JSON), never the shipped `Scenarios/` folder, which is only added in Phase 9 (T060a) — both present, selecting `booking-dates` shows only Emery, and selecting `tiers`
   shows only Avery–Devon. Run; record failing.
-- [ ] T040 [US2] Implement booking-date crediting and excluded-deal lines; add
-  `Scenarios/booking-dates.json` (Appendix A.2) until T037–T039 pass.
+- [ ] T040 [US2] Implement booking-date crediting and excluded-deal lines until T037–T039 pass.
 - [ ] T041 [US2] Checkpoint: PR "Phase 4: US2", CI green, maintainer approves squash-merge.
 
 ---
@@ -272,8 +272,7 @@ reader that every story uses.
   booked before a credited rep's start → rejected naming deal and rep. *Guard*: remove each
   rejection check and confirm its test fails; record. Run; record failing.
 - [ ] T044 [US3] Implement `Calculation/QuotaProration.cs` and the FR-011/FR-004 start-date rules
-  until T042–T043 pass; add `Scenarios/proration.json` and `Scenarios/proration-q2.json`
-  (Appendix A.3, A.4).
+  until T042–T043 pass.
 - [ ] T045 [US3] Checkpoint: PR "Phase 5: US3", CI green, maintainer approves squash-merge.
 
 ---
@@ -293,15 +292,14 @@ reader that every story uses.
   accepted. *Guard*: replace largest remainder with independent rounding and confirm the 10.01
   case fails; remove the sum check and confirm the FR-013 tests fail; record. Run; record failing.
 - [ ] T048 [P] [US4] Write `Features/UI_RejectedScenario.feature` in Specs, driven through the web
-  host (`@FR-004`): `?scenario=invalid` renders an element with `role="alert"` listing four errors,
+  host (`@FR-004`), against a scenario directory the scenario itself creates (a temp folder holding the Appendix A..11 inputs
+  as JSON), never the shipped `Scenarios/` folder, which is only added in Phase 9 (T060a): `?scenario=invalid` renders an element with `role="alert"` listing four errors,
   each with its FR ID, and no rep table. *Guard*: stop rendering the alert's error list and confirm
   the scenario fails; record. ("No rep table" needs no separate guard: `RejectedScenario` carries
   no statements, and T020 guards the engine side.) Run;
   record failing.
 - [ ] T049 [US4] Implement `Calculation/SplitAllocation.cs`, split crediting in `QuarterCredit`
-  (share lines cite FR-012), the FR-013 rule and the rejected-scenario view until T046–T048 pass;
-  add `Scenarios/splits.json`, `Scenarios/split-rounding.json` and `Scenarios/invalid.json`
-  (Appendix A.5, A.6, A.11).
+  (share lines cite FR-012), the FR-013 rule and the rejected-scenario view until T046–T048 pass.
 - [ ] T050 [US4] Checkpoint: PR "Phase 6: US4", CI green, maintainer approves squash-merge.
 
 ---
@@ -324,7 +322,7 @@ reader that every story uses.
   property check, not a failure-path guard — recorded here per standing rule 2. Run; record
   failing.
 - [ ] T053 [US5] Implement `Calculation/DrawSchedule.cs` and `Calculation/DrawRecovery.cs` and
-  their statement lines until T051–T052 pass; add `Scenarios/draw.json` (Appendix A.7).
+  their statement lines until T051–T052 pass.
 - [ ] T054 [US5] Checkpoint: PR "Phase 7: US5", CI green, maintainer approves squash-merge.
 
 ---
@@ -342,7 +340,8 @@ reader that every story uses.
   after quarter end ignored; negative clawback from a re-split; split refund re-split
   (4,950.10 / 4,950.09). Add validator tests (`FR-004`): refunds totalling more than the deal;
   missing/incomplete booking-quarter data; booking quarter overlapping or malformed; rep start-date
-  mismatch; partner listed with start date accepted; deal in both lists differing → rejected; a
+  mismatch; a booking-quarter deal whose booking date is outside that quarter's dates → rejected;
+  partner listed with start date accepted; deal in both lists differing → rejected; a
   refund of 0.00 or less → rejected; a booking-quarter deal booked before the start date of a
   credited roster rep or partner → rejected naming the deal and the rep (FR-011). Add a statement test: a refund on a split deal adds a re-split
   line citing FR-017 before its clawback line; a refund on a single-rep deal adds none.
@@ -353,14 +352,13 @@ reader that every story uses.
   Run; record failing.
 - [ ] T057 [P] [US6] Write `Features/UI_NegativeAmounts.feature` in Specs, driven through the web
   host (`@FR-021 @FR-015`): `?scenario=refunds-q2` renders Sage's earned commission as "−$1,600.00"
-  with a minus sign in the text (not colour alone). Its first red is recorded with its actual
-  cause (the `refunds-q2` scenario does not exist yet); the formatting itself was test-driven in
-  T030's `MoneyFormatTests`. *Guard*: format with `Math.Abs` and confirm the test fails; record.
+  with a minus sign in the text (not colour alone), against a scenario directory the scenario itself creates (a temp folder holding the Appendix A..10 inputs
+  as JSON), never the shipped `Scenarios/` folder, which is only added in Phase 9 (T060a). Its
+  first red is recorded with its actual cause (no clawback line yet, so earned is not negative);
+  the formatting itself was test-driven in T030's `MoneyFormatTests`. *Guard*: format with `Math.Abs` and confirm the test fails; record.
   Run; record failing.
 - [ ] T058 [US6] Implement `Calculation/ClawbackCalculator.cs`, refund-aware `QuarterCredit`,
-  booking-quarter validation and clawback lines until T055–T057 pass; add
-  `Scenarios/refunds.json`, `Scenarios/refund-splits.json`, `Scenarios/refunds-q2.json`
-  (Appendix A.8–A.10).
+  booking-quarter validation and clawback lines until T055–T057 pass.
 - [ ] T059 [US6] Checkpoint: PR "Phase 8: US6", CI green, maintainer approves squash-merge.
 
 ---
@@ -374,7 +372,18 @@ reader that every story uses.
   FR-006, rule 3 → FR-010, rule 4 → FR-012, rule 5 → FR-014/FR-015, rule 6 → FR-016, rule 7 →
   FR-008 (an excluded-by-booking-date line), rule 8 → FR-019 (satisfied by scope, as in T061); assert
   that for rules 1–7 at least one seeded statement contains a line citing the mapped FR. *Guard*:
-  remove `booking-dates.json` from the check's input and confirm rule 7 fails; record. Run; any failure is a spec question, not a test edit.
+  remove `booking-dates.json` from the check's input and confirm rule 7 fails; record. The feature
+  lists the eleven expected files by name, so before T060a it fails on every one ("scenario file
+  not found"); run it and record that red. Any later failure is a spec question, not a test edit.
+- [ ] T060a Add the eleven seed files `src/CommissionCalculator.Web/Scenarios/{tiers,
+  booking-dates, proration, proration-q2, splits, split-rounding, draw, refunds, refund-splits,
+  refunds-q2, invalid}.json`, transcribing Appendix A.1–A.11 inputs, until T060 passes. A mismatch
+  is fixed in the seed file, never in Appendix A or the test.
+- [ ] T060b Extend the CI smoke step (T010) and the offline-smoke job (T035): request
+  `/?scenario=tiers` and require a `<table>` containing "Avery" — proving the running app loaded the
+  seed files from its output. *Guard*: on a throwaway branch add `<Content Update="Scenarios/*.json"
+  CopyToOutputDirectory="Never" CopyToPublishDirectory="Never" />` and confirm both assertions fail
+  (research R17 observed that this removes the files from output); record.
 - [ ] T061 Traceability generator, test first: add `TraceabilityTests` to Tools.Tests
   (`[Trait("Principle", "III")]`; fixture spec with FR-001..FR-003 and SC-001, fixture TRX, fixture
   assembly metadata) — an ID with no test and an ID with no member both appear under "Gaps"; an ID
@@ -389,7 +398,7 @@ reader that every story uses.
   web assemblies; scope-only list: FR-019 — "USD only; tax, currency conversion and
   multi-year are out of scope, so no member implements them"; evidence-only list: SC-001 — seed
   files and Appendix A, SC-003 — the seeded scenarios, SC-004 — the smoke jobs, each verified by
-  tests but implemented by no single member (SC-002 — every line cites an FR, verified by T030 and T060); manual-evidence list:
+  tests but implemented by no single member, and SC-002 — every line cites an FR, verified by T030 and T060; manual-evidence list:
   SC-005 and FR-021's
   screen-reader clause — T033/T034, not visible to the trace) writing
   `specs/001-commission-calculator/traceability.md`. Add a final CI job, `traceability`, that
@@ -400,7 +409,7 @@ reader that every story uses.
   scope-only FR-019; every SC except the manual-evidence SC-005 has at least one test; the
   manual-evidence items are listed with the PR links recorded in T033/T034/T064.
 - [ ] T063 Re-verify every failure-path guard added in T007, T008, T009, T010, T018, T020, T022, T023,
-  T030 (attainment format), T060,
+  T030 (attainment and money format), T060, T060b,
   T030, T031, T035, T038, T043, T047, T048, T052, T056, T057, T061 still fails with its guarded
   behaviour removed; record each result here.
 - [ ] T064 Quickstart validation (standing rule 3): step 1 from a fresh clone (evidence:
@@ -416,9 +425,10 @@ reader that every story uses.
   (standing rule 4). Stories are sequential for one reviewer even where independent.
 - Within a phase: test tasks first (seen failing), then implementation; `[P]` test tasks can be
   written together.
-- US1 (MVP) delivers a usable app: pick `tiers`, see tier lines with FR citations.
-- US2–US6 each add their rules and seed files; Polish adds the full-statement check (SC-001),
-  which can only pass once every rule exists.
+- US1 (MVP) delivers the page and tier lines with FR citations, verified against test-created
+  scenario folders; the shipped app shows "No scenarios are installed" until Phase 9.
+- US2–US6 each add their rules. Polish writes the full-statement check (SC-001) first, sees it fail,
+  then adds the eleven seed files it checks (T060, T060a) — so seed contents are test-driven.
 
 ## Parallel examples
 
