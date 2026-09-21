@@ -98,8 +98,7 @@ analyze step can hold this list to them. Where anything above or below conflicts
 - [ ] T011 `README.md`: what it is, `dotnet run --project src/CommissionCalculator.Web` (or
   `dotnet run` inside that folder), test commands, where the spec lives.
 - [ ] T012 Checkpoint: open PR "Phase 1: Setup", CI green, maintainer approves squash-merge. Record
-  the first CI run's outcome in research R14 (SDK resolution), R15 (isolation-step time) and R16
-  (Docker on the runner, once T035's job has run), and
+  the first CI run's outcome in research R14 (SDK resolution) and R15 (isolation-step time), and
   propose to the maintainer the PATCH amendment that marks constitution C7 as confirmed.
 
 ---
@@ -143,7 +142,8 @@ reader that every story uses.
   *Guard*: make the catalog stop at the first failing file and confirm the "does not hide the
   others" test fails; record. Run; record failing.
 - [ ] T024 Implement `ScenarioCatalog/ScenarioFileReader.cs` and `ScenarioCatalog.cs` (loads every
-  `Scenarios/*.json` at startup) until T022–T023 pass.
+  `Scenarios/*.json` from `AppContext.BaseDirectory` — the build/publish output, not the content
+  root, so a file missing from output is missing at run time) until T022–T023 pass.
 - [ ] T025 Confirm in the real solution that `Scenarios/*.json` reaches build and publish output
   through the Web SDK's default content items, with **no** project-file entry (research R17: an
   explicit `<Content Include>` fails the build with NETSDK1022) — structural; proven by T035's smoke
@@ -180,18 +180,24 @@ reader that every story uses.
   earned, draws paid, payable and closing balance; unknown id → 404 with the picker; a load error
   is shown. *Guard*: return 200 for an unknown id and confirm that scenario fails; record. Run;
   record failing.
-- [ ] T031 [P] [US1] Write `ContrastTests` (`FR-021`): parse the colour tokens declared in
-  `wwwroot/css/site.css` and compute WCAG 2.2 contrast ratios — body text and table text on their
-  backgrounds ≥ 4.5:1, focus indicator against adjacent background ≥ 3:1, link text ≥ 4.5:1.
-  *Guard*: set the text token to a light grey and confirm the test fails; record. Run; record
-  failing.
+- [ ] T031 [P] [US1] Write `StylesheetAccessibilityTests` in Web.Tests (`FR-021`), reading
+  `wwwroot/css/site.css`: 1.4.3 text contrast — body, table and link text on their backgrounds
+  ≥ 4.5:1; 1.4.11 non-text contrast — focus indicator and `select`/`button` borders ≥ 3:1 against
+  adjacent colours; 2.5.8 target size — `select`, `button` and the skip link have a minimum height
+  and width of at least 24px; 2.4.11 focus not obscured — no `position: fixed` or `sticky` rules;
+  1.4.12 text spacing — no fixed `height` and no `overflow: hidden` on text containers.
+  *Guard*: set the text token to a light grey, and separately set the button's min-height to 16px;
+  confirm each makes its test fail; record. Run; record failing.
 - [ ] T032 [US1] Add `Scenarios/tiers.json` (Appendix A.1 inputs) and implement the page (picker,
   statements, summary `dl`, breakdown tables, `$#,##0.00` with a minus sign, `site.css` colour
   tokens and visible focus styles) until T030–T031 pass.
 - [ ] T033 [US1] Keyboard-only check (FR-021, SC-005; standing rule 3): drive the running app with
   key presses only through the in-app browser (evidence: the action log contains no pointer
   events); Tab to the picker, change scenario with arrow keys, submit with Enter, Tab through each
-  table; confirm visible focus at every stop. Record the log excerpt in the PR.
+  table; confirm visible focus at every stop. Then resize the viewport to 320 CSS px wide (1.4.10
+  reflow; evidence: the viewport width reported by the browser just before the screenshot) and
+  confirm no horizontal page scroll other than inside the breakdown tables. Record the log excerpt
+  and screenshot in the PR.
 - [ ] T034 [US1] Screen-reader check (FR-021; standing rule 3) — **maintainer step**: with
   VoiceOver on (evidence: VoiceOver caption panel visible in a screenshot), navigate by headings
   and tables on `?scenario=tiers`; confirm each rep's `h2`, the table caption and column headers are
@@ -202,11 +208,15 @@ reader that every story uses.
   seed files. Add a second CI job, **offline smoke**: `dotnet publish` the web app, run it in
   `mcr.microsoft.com/dotnet/aspnet:10.0.12` with `docker run --network none`, and request
   `/?scenario=tiers` from inside the container (SC-004; evidence: `docker inspect` shows
-  `NetworkMode: none`, printed immediately before the request). *Guard*: on a throwaway branch add
+  `NetworkMode: none`, printed immediately before the request). Both jobs write a TRX-shaped result
+  (`ci-evidence/*.trx`) naming their check with category `SC-004` (and `FR-020` for the smoke step),
+  pass or fail, so the trace sees them as tests. *Guard*: on a throwaway branch add
   `<Content Update="Scenarios/*.json" CopyToOutputDirectory="Never" CopyToPublishDirectory="Never"
   />` and confirm the smoke assertion fails (R17 observed that this removes the files from output);
   record.
-- [ ] T036 [US1] Checkpoint: PR "Phase 3: US1", CI green, maintainer approves squash-merge.
+- [ ] T036 [US1] Checkpoint: PR "Phase 3: US1", CI green, maintainer approves squash-merge. Record
+  the offline job's first run in research R16 (Docker on the runner) and confirm the plan's
+  Provenance gate.
 
 ---
 
@@ -268,7 +278,9 @@ reader that every story uses.
   case fails; remove the sum check and confirm the FR-013 tests fail; record. Run; record failing.
 - [ ] T048 [P] [US4] Write `Features/UI_RejectedScenario.feature` in Specs, driven through the web
   host (`@FR-004`): `?scenario=invalid` renders an element with `role="alert"` listing four errors,
-  each with its FR ID, and no rep table. *Guard*: render statements even when rejected and confirm the test fails; record. Run;
+  each with its FR ID, and no rep table. *Guard*: stop rendering the alert's error list and confirm
+  the scenario fails; record. ("No rep table" needs no separate guard: `RejectedScenario` carries
+  no statements, and T020 guards the engine side.) Run;
   record failing.
 - [ ] T049 [US4] Implement `Calculation/SplitAllocation.cs`, split crediting in `QuarterCredit`
   (share lines cite FR-012), the FR-013 rule and the rejected-scenario view until T046–T048 pass;
@@ -345,7 +357,8 @@ reader that every story uses.
   (`[Trait("Principle", "III")]`; fixture spec with FR-001..FR-003 and SC-001, fixture TRX, fixture
   assembly metadata) — an ID with no test and an ID with no member both appear under "Gaps"; an ID
   declared in the scope-only list appears under "Satisfied by scope" with its reason and not under
-  Gaps; tests carrying a `Principle` trait appear under "Tooling tests" and not against any FR.
+  Gaps; tests carrying a `Principle` trait appear under "Tooling tests" and not against any FR; a
+  CI evidence TRX (`ci-evidence/*.trx`) contributes its categories like any other TRX.
   *Guard*: disable gap detection and confirm the gaps test fails; record. Run; record failing. Then add the
   `trace` command to `tools/CommissionCalculator.Tools` (FR/SC IDs from spec.md; test → IDs from
   TRX categories/traits; member → IDs from `[Implements]` via reflection over the built engine and
@@ -354,7 +367,7 @@ reader that every story uses.
   `specs/001-commission-calculator/traceability.md`; add a CI step that runs it and uploads the file.
 - [ ] T062 Add `[Implements]` to every engine and web member that implements an FR; run `trace`;
   every FR/SC except the scope-only FR-019 has at least one member and one test.
-- [ ] T063 Re-verify every failure-path guard added in T007, T008, T009, T010, T018, T020, T022,
+- [ ] T063 Re-verify every failure-path guard added in T007, T008, T009, T010, T018, T020, T022, T023,
   T030, T031, T035, T038, T043, T047, T048, T052, T056, T057, T061 still fails with its guarded
   behaviour removed; record each result here.
 - [ ] T064 Quickstart validation (standing rule 3): step 1 from a fresh clone (evidence:

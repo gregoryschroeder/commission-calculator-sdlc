@@ -78,6 +78,9 @@ correctness.
 
 - **Decision**: `Microsoft.Testing.Extensions.TrxReport` (`--report-trx`). Unit tests carry
   `[Trait("Requirement", "FR-0xx")]`; Gherkin scenarios carry `@FR-0xx` / `@SC-00x` tags.
+- **Version**: `Microsoft.Testing.Extensions.TrxReport` 2.4.0 — the version spiked. Registry,
+  2026-09-21: 2.4.1 (published 2026-09-16) is the latest; 2.4.0 stays pinned because it is the one
+  observed working, and a bump is a normal dependency update.
 - **Established**: spiked — in the TRX, a Reqnroll tag appears as
   `<TestCategoryItem TestCategory="FR-006" />` and an xUnit trait value appears in the test's
   properties; both were found by searching the TRX for the IDs.
