@@ -59,7 +59,7 @@ No number is stated, so none is invented.
 
 | Gate | Status | Notes |
 |---|---|---|
-| Provenance | PASS | Principle IV. Every research.md decision says how it was established and when. Two claims remain **assumed**, neither load-bearing for correctness: R14 (the CI runner resolves SDK 10.0.4xx via setup-dotnet — the first CI run proves or disproves it) and R15 (the per-test isolation loop's CI time). |
+| Provenance | PASS | Principle IV. Every research.md decision says how it was established and when. Three claims remain **assumed**, none load-bearing for correctness: R14 (the CI runner resolves SDK 10.0.4xx via setup-dotnet), R15 (the per-test isolation loop's CI time) and R16 (Docker is available on `ubuntu-latest`); the first CI runs prove or disprove each (tasks T012). |
 | Degraded window | N/A | Principle VII. Nothing is deployed or scaled; the app runs on the developer's machine for as long as they run it. No cold start, pause or reclaim is accepted. |
 
 ## Project Structure

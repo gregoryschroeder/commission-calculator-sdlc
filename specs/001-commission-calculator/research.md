@@ -167,3 +167,13 @@ correctness.
 - **Established**: registry — `mcr.microsoft.com/v2/dotnet/aspnet/tags/list`, 2026-09-21, lists
   `10.0.12`, `10.0` and `10.0-noble`. **Assumed until the first run of that job**: Docker is
   available on `ubuntu-latest` runners.
+
+## R17. Seed files reach build and publish output by default
+
+- **Decision**: no project-file entry for `Scenarios/*.json`.
+- **Established**: spiked on SDK 10.0.400 (2026-09-21, found by analyze pass 2 and re-run
+  independently): in a `dotnet new webapp` project, `Scenarios/x.json` appeared in
+  `bin/Debug/net10.0/Scenarios/` and in `dotnet publish` output with no project-file entry; adding
+  `<Content Include="Scenarios/*.json" …>` failed the build with NETSDK1022 (duplicate Content
+  items); `<Content Update="Scenarios/*.json" CopyToOutputDirectory="Never" …>` removed the file
+  from build output — the positive control that makes the smoke guard (tasks T035) able to fail.

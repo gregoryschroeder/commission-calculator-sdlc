@@ -22,7 +22,8 @@ fixed.
 - Every acceptance-scenario example is tested with its exact inputs and asserted to the cent.
 - Never change a test to make it pass. If a test looks wrong, the spec is wrong: stop and say so.
 - A failure-path test is watched failing with the guarded code removed; record the result.
-- Every test names the FR/SC it verifies. Every breakdown line in the UI cites its FR.
+- Every product test names the FR/SC it verifies; a tooling test names the principle it enforces.
+  Every breakdown line in the UI cites its FR.
 - Money is `decimal`, never `double`/`float`. The engine never reads the clock.
 - Warnings are errors. No silent skips.
 

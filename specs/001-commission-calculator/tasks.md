@@ -28,18 +28,21 @@ analyze step can hold this list to them. Where anything above or below conflicts
    (a rejection, a clawback, a negative-earnings path, a CI gate) names how its guarded behaviour
    will be removed to show the test failing, and the observed result is written into the task when
    it is ticked. If a guard cannot be made to fail, that is recorded as a finding. Polish re-checks
-   every such guard (T062).
+   every such guard (T063).
 3. **Condition-dependent checks evidence the condition.** A check that only means something under
    a condition (fresh clone, no network, keyboard only, screen reader on) records evidence that the
    condition held just before the observation.
 4. **Every phase is one pull request.** Each phase ends with a checkpoint task: open the phase's
    PR, CI green, maintainer approves the squash-merge. No PR spans two phases; phases run in order.
 5. **Runtime dependencies are tasks.** This feature adds one runtime dependency: the seeded
-   scenario JSON files. T025 copies them to the web app's output, and the smoke steps (T010, T035)
-   prove the running app loads them. It adds no environment variables, secrets, services or
+   scenario JSON files. The Web SDK's default content items copy them to build and publish output
+   (T025, research R17), and the smoke steps (T010, T035) prove the running app loads them. It adds no environment variables, secrets, services or
    configuration.
-6. **Every test names what it verifies**: `[Trait("Requirement", "FR-0xx")]` on unit/web tests,
-   `@FR-0xx` / `@SC-00x` tags on Gherkin scenarios. Every acceptance example is tested with its
+6. **Every test names what it verifies**: `[Trait("Requirement", "FR-0xx")]` on unit tests,
+   `@FR-0xx` / `@SC-00x` tags on Gherkin scenarios; tests of project tooling carry
+   `[Trait("Principle", "II")]` / `("III")` for the principle they enforce (constitution v1.1.0).
+   Tests that exercise the running web host are integration tests and are Gherkin scenarios in the
+   Specs project; only single-class checks (file reader, catalog, stylesheet contrast) are xUnit. Every acceptance example is tested with its
    exact inputs and asserted to the cent — breakdown lines *and* statement summary values
    (attainment, credited bookings, total draw, re-split shares). A test is never edited to make it
    pass; a test that looks wrong is a spec question for the maintainer.
@@ -58,14 +61,15 @@ analyze step can hold this list to them. Where anything above or below conflicts
 - [ ] T002 Create `src/CommissionCalculator.Engine/CommissionCalculator.Engine.csproj` (no package
   references) and `src/CommissionCalculator.Web/CommissionCalculator.Web.csproj` (Razor Pages,
   references Engine only; `public partial class Program` for tests) — structural, no test.
-- [ ] T003 Create `tests/CommissionCalculator.Web.Tests/` (xunit.v3, Mvc.Testing, AngleSharp,
-  TrxReport, CodeCoverage) and write the first test **before** the page exists:
-  `HomePage_ReturnsOk_WithLangAndMain` (`[Trait("Requirement","FR-020")]`) — GET `/` returns 200,
-  `<html lang="en">`, one `<main>`. Run it; record it failing.
+- [ ] T003 Create `tests/CommissionCalculator.Specs/` (Reqnroll.xUnit.v3, Mvc.Testing, AngleSharp,
+  TrxReport, CodeCoverage) with a `WebApplicationFactory<Program>` hook, and write the first
+  scenario **before** the page exists: `Features/AppHost.feature` (`@FR-020`) — "the app serves its
+  page": GET `/` returns 200 with `<html lang="en">` and one `<main>`. Run it; record it failing.
 - [ ] T004 Implement the minimal `Program.cs` and `Pages/Index.cshtml` (layout with `lang`, skip
-  link, `<main>`, local `wwwroot/css/site.css`) until T003 passes.
+  link, `<main>`, local `wwwroot/css/site.css`) until T003 passes. (`Web.Tests` is created in T022
+  together with its first tests: a test project with no tests makes `dotnet test` exit non-zero.)
 - [ ] T005 Create `tests/CommissionCalculator.Tools.Tests/` and write tests for the CI helper
-  commands **before** they exist (fixture files under `tests/CommissionCalculator.Tools.Tests/
+  commands **before** they exist (`[Trait("Principle", "II")]`) (fixture files under `tests/CommissionCalculator.Tools.Tests/
   Fixtures/`): `CoverageGateTests` — engine line rate 0.85 passes, 0.79 fails, report with no
   engine package fails *unless* the engine assembly contains no types (then passes with the message
   "no engine lines yet"); `TrxTestListTests` — lists fully qualified `className.name` for xUnit and
@@ -83,8 +87,8 @@ analyze step can hold this list to them. Where anything above or below conflicts
   real report; confirm non-zero exit; record.
 - [ ] T008 CI per-test isolation step: for **every** test in all test projects (list from the suite
   TRX via `list-tests`), run `dotnet test --project <proj> --filter-method <className.name>` alone;
-  fail if any fails. *Guard*: on a local throwaway branch add a Web test that passes only when
-  another test ran first (static flag); confirm the suite passes and this step fails; delete it;
+  fail if any fails. *Guard*: on a local throwaway branch add two Tools tests where one passes only
+  when the other ran first (static flag); confirm the suite passes and this step fails; delete it;
   record. Record the step's CI duration in research R15 on the first run.
 - [ ] T009 *Guard (skip gate)*: on a local throwaway change add `[Fact(Skip="probe")]`, run the CI
   test command; confirm a non-zero exit ("Failed!"); remove it; record.
@@ -94,7 +98,8 @@ analyze step can hold this list to them. Where anything above or below conflicts
 - [ ] T011 `README.md`: what it is, `dotnet run --project src/CommissionCalculator.Web` (or
   `dotnet run` inside that folder), test commands, where the spec lives.
 - [ ] T012 Checkpoint: open PR "Phase 1: Setup", CI green, maintainer approves squash-merge. Record
-  the first CI run's outcome in research R14 (SDK resolution) and R15 (isolation-step time), and
+  the first CI run's outcome in research R14 (SDK resolution), R15 (isolation-step time) and R16
+  (Docker on the runner, once T035's job has run), and
   propose to the maintainer the PATCH amendment that marks constitution C7 as confirmed.
 
 ---
@@ -127,19 +132,22 @@ reader that every story uses.
   fails; record. Run; record failing.
 - [ ] T021 Implement `CommissionEngine.Calculate` and `Calculation/StatementBuilder.cs` (validation
   first, then statement assembly) until T020 passes.
-- [ ] T022 Write `ScenarioFileReaderTests` in Web.Tests (`FR-001`, `FR-004`): a file matching
+- [ ] T022 Create `tests/CommissionCalculator.Web.Tests/` (xunit.v3 unit tests of single web
+  classes) and write `ScenarioFileReaderTests` (`FR-001`, `FR-004`): a file matching
   contracts/scenario-file.md maps to the expected `ScenarioInput`; `10.005` is read exactly;
   unknown property, malformed JSON and a missing required field each produce a load error naming
   the file, never an exception out of the reader. *Guard*: remove the reader's error capture and
   confirm the malformed-JSON test fails with an escaped exception; record. Run; record failing.
 - [ ] T023 Write `ScenarioCatalogTests` in Web.Tests (`FR-001`): files are listed ordered by file
-  name; a file that fails to load is listed as a load error and does not hide the others. Run;
-  record failing.
+  name; a file that fails to load is listed as a load error and does not hide the others.
+  *Guard*: make the catalog stop at the first failing file and confirm the "does not hide the
+  others" test fails; record. Run; record failing.
 - [ ] T024 Implement `ScenarioCatalog/ScenarioFileReader.cs` and `ScenarioCatalog.cs` (loads every
   `Scenarios/*.json` at startup) until T022–T023 pass.
-- [ ] T025 Add `<Content Include="Scenarios/*.json" CopyToOutputDirectory="PreserveNewest" />` to
-  the web project (the runtime dependency of standing rule 5) — structural; proven by T035's smoke
-  assertion.
+- [ ] T025 Confirm in the real solution that `Scenarios/*.json` reaches build and publish output
+  through the Web SDK's default content items, with **no** project-file entry (research R17: an
+  explicit `<Content Include>` fails the build with NETSDK1022) — structural; proven by T035's smoke
+  assertion and guard.
 - [ ] T026 Checkpoint: PR "Phase 2: Foundational", CI green, maintainer approves squash-merge.
 
 ---
@@ -150,8 +158,8 @@ reader that every story uses.
 **Independent test**: `Features/US1_TieredCommission.feature` passes; the page renders the
 `tiers` scenario.
 
-- [ ] T027 [P] [US1] Create `tests/CommissionCalculator.Specs/` (Reqnroll.xUnit.v3) with step
-  definitions that build `ScenarioInput` from Gherkin tables and assert, to the cent, both
+- [ ] T027 [P] [US1] In `tests/CommissionCalculator.Specs/`, add step definitions that build
+  `ScenarioInput` from Gherkin tables and assert, to the cent, both
   statement lines (description, amount, FR) and statement summary fields (`Attainment`,
   `CreditedBookings`, `ProratedQuota`, `DrawPaid`, `EarnedCommission`, `Payable`,
   `ClosingRecoverableBalance`). Write `Features/US1_TieredCommission.feature` with US1 AS1–AS4
@@ -164,11 +172,14 @@ reader that every story uses.
 - [ ] T029 [US1] Implement `Calculation/TierSchedule.cs` and crediting of single-rep deals in
   `Calculation/QuarterCredit.cs` wired into `StatementBuilder` (credit lines FR-008, tier lines
   FR-006, "Commission before refunds", attainment FR-009) until T027–T028 pass.
-- [ ] T030 [P] [US1] Write `IndexPageTests` (`FR-001`, `FR-002`, `FR-003`, `FR-021`, `SC-002`,
-  `SC-005`): picker form structure per contracts/ui.md; `?scenario=tiers` shows one section per
-  rep with `h2`, caption, `th scope=col` Item/Amount/Rule; every Rule cell is an FR ID that exists
-  in spec.md (read from the spec file); unknown id → 404 with the picker; a load error is shown.
-  *Guard*: return 200 for an unknown id and confirm that test fails; record. Run; record failing.
+- [ ] T030 [P] [US1] Write `Features/UI_Page.feature` in Specs, driven through the web host
+  (`@FR-001 @FR-002 @FR-003 @FR-021 @SC-002 @SC-005`): picker form structure per contracts/ui.md;
+  `?scenario=tiers` shows one section per rep with `h2`, caption, `th scope=col` Item/Amount/Rule;
+  every Rule cell is an FR ID that exists in spec.md (read from the committed spec file); each rep's
+  summary `dl` shows quota, prorated quota, credited bookings, attainment (Avery: "80.00%"),
+  earned, draws paid, payable and closing balance; unknown id → 404 with the picker; a load error
+  is shown. *Guard*: return 200 for an unknown id and confirm that scenario fails; record. Run;
+  record failing.
 - [ ] T031 [P] [US1] Write `ContrastTests` (`FR-021`): parse the colour tokens declared in
   `wwwroot/css/site.css` and compute WCAG 2.2 contrast ratios — body text and table text on their
   backgrounds ≥ 4.5:1, focus indicator against adjacent background ≥ 3:1, link text ≥ 4.5:1.
@@ -191,8 +202,10 @@ reader that every story uses.
   seed files. Add a second CI job, **offline smoke**: `dotnet publish` the web app, run it in
   `mcr.microsoft.com/dotnet/aspnet:10.0.12` with `docker run --network none`, and request
   `/?scenario=tiers` from inside the container (SC-004; evidence: `docker inspect` shows
-  `NetworkMode: none`, printed immediately before the request). *Guard*: remove the Content
-  include from T025 on a throwaway branch and confirm the smoke assertion fails; record.
+  `NetworkMode: none`, printed immediately before the request). *Guard*: on a throwaway branch add
+  `<Content Update="Scenarios/*.json" CopyToOutputDirectory="Never" CopyToPublishDirectory="Never"
+  />` and confirm the smoke assertion fails (R17 observed that this removes the files from output);
+  record.
 - [ ] T036 [US1] Checkpoint: PR "Phase 3: US1", CI green, maintainer approves squash-merge.
 
 ---
@@ -209,9 +222,10 @@ reader that every story uses.
   `ScenarioValidatorTests` (`FR-004`): refund dated before booking date is rejected. *Guard*:
   switch crediting to close date and confirm AS1 (B-1) and AS2 (B-2) fail; remove the refund-date
   check and confirm its test fails; record. Run; record failing.
-- [ ] T039 [P] [US2] Write `ScenarioSwitchTests` in Web.Tests (`FR-001`, US1 AS5): with `tiers` and
-  `booking-dates` present, `?scenario=booking-dates` shows only Emery and `?scenario=tiers` shows
-  only Avery–Devon. Run; record failing.
+- [ ] T039 [P] [US2] Write `Features/US1_ScenarioSwitch.feature` in Specs, driven through the web
+  host (`@FR-001`, US1 AS5 — placed here because it needs a second seeded scenario): with `tiers`
+  and `booking-dates` present, selecting `booking-dates` shows only Emery, and selecting `tiers`
+  shows only Avery–Devon. Run; record failing.
 - [ ] T040 [US2] Implement booking-date crediting and excluded-deal lines; add
   `Scenarios/booking-dates.json` (Appendix A.2) until T037–T039 pass.
 - [ ] T041 [US2] Checkpoint: PR "Phase 4: US2", CI green, maintainer approves squash-merge.
@@ -252,9 +266,9 @@ reader that every story uses.
   fixed table of cases. Add validator tests (`FR-013`): sums of 99.999 and 100.001 rejected; 100
   accepted. *Guard*: replace largest remainder with independent rounding and confirm the 10.01
   case fails; remove the sum check and confirm the FR-013 tests fail; record. Run; record failing.
-- [ ] T048 [P] [US4] Write `RejectedScenarioPageTests` in Web.Tests (`FR-004`): `?scenario=invalid`
-  renders an element with `role="alert"` listing four errors, each with its FR ID, and no rep
-  table. *Guard*: render statements even when rejected and confirm the test fails; record. Run;
+- [ ] T048 [P] [US4] Write `Features/UI_RejectedScenario.feature` in Specs, driven through the web
+  host (`@FR-004`): `?scenario=invalid` renders an element with `role="alert"` listing four errors,
+  each with its FR ID, and no rep table. *Guard*: render statements even when rejected and confirm the test fails; record. Run;
   record failing.
 - [ ] T049 [US4] Implement `Calculation/SplitAllocation.cs`, split crediting in `QuarterCredit`
   (share lines cite FR-012), the FR-013 rule and the rejected-scenario view until T046–T048 pass;
@@ -292,22 +306,25 @@ reader that every story uses.
 **Goal**: clawbacks per refund, in the refund's quarter, sized by recomputing the booking quarter.
 **Independent test**: `Features/US6_Clawback.feature` passes.
 
-- [ ] T055 [P] [US6] Write `Features/US6_Clawback.feature`: US6 AS1–AS9 exact, including AS9's
-  re-split share of $0.01 and AS7's re-split shares (`@FR-016 @FR-017`), and the Q2 scenarios with
-  booking-quarter data. Run; record failing.
+- [ ] T055 [P] [US6] Write `Features/US6_Clawback.feature`: US6 AS1–AS9 exact, including the
+  re-split lines (FR-017) — AS7's $4,950.10 / $4,950.09 and AS9's $0.01 — (`@FR-016 @FR-017`), and
+  the Q2 scenarios with booking-quarter data. Run; record failing.
 - [ ] T056 [P] [US6] Write `ClawbackCalculatorTests` (`FR-016`, `FR-017`): full, partial and
   repeated refunds; refunds across deals ordered by date then deal then refund position; refund
   after quarter end ignored; negative clawback from a re-split; split refund re-split
   (4,950.10 / 4,950.09). Add validator tests (`FR-004`): refunds totalling more than the deal;
   missing/incomplete booking-quarter data; booking quarter overlapping or malformed; rep start-date
-  mismatch; partner listed with start date accepted; deal in both lists differing → rejected.
+  mismatch; partner listed with start date accepted; deal in both lists differing → rejected; a
+  refund of 0.00 or less → rejected. Add a statement test: a refund on a split deal adds a re-split
+  line citing FR-017 before its clawback line; a refund on a single-rep deal adds none.
   *Guard*: (a) size each refund against the untouched quarter and confirm AS6 fails; (b) remove
   the refund-date filter and confirm AS3 and AS5 (Q1) fail; (c) floor clawbacks at zero and
-  confirm AS9 fails; (d) remove each new validation check and confirm its test fails; record all.
+  confirm AS9 fails; (d) remove each new validation check (including refund ≤ 0) and confirm its
+  test fails; record all.
   Run; record failing.
-- [ ] T057 [P] [US6] Write `NegativeAmountRenderingTests` in Web.Tests (`FR-021`, `FR-015`):
-  `?scenario=refunds-q2` renders Sage's earned commission as "−$1,600.00" with a minus sign in the
-  text (not colour alone). *Guard*: format with `Math.Abs` and confirm the test fails; record.
+- [ ] T057 [P] [US6] Write `Features/UI_NegativeAmounts.feature` in Specs, driven through the web
+  host (`@FR-021 @FR-015`): `?scenario=refunds-q2` renders Sage's earned commission as "−$1,600.00"
+  with a minus sign in the text (not colour alone). *Guard*: format with `Math.Abs` and confirm the test fails; record.
   Run; record failing.
 - [ ] T058 [US6] Implement `Calculation/ClawbackCalculator.cs`, refund-aware `QuarterCredit`,
   booking-quarter validation and clawback lines until T055–T057 pass; add
@@ -324,10 +341,12 @@ reader that every story uses.
   line for line (description, amount to the cent, FR), and `invalid.json` lists exactly the four
   Appendix A.11 errors; assert each of the brief's eight rules is exercised by at least one seeded
   scenario (SC-003). Run; any failure is a spec question, not a test edit.
-- [ ] T061 Traceability generator, test first: add `TraceabilityTests` to Tools.Tests (fixture
-  spec with FR-001..FR-003 and SC-001, fixture TRX, fixture assembly metadata) — an ID with no test
-  and an ID with no member both appear under "Gaps"; an ID declared in the scope-only list appears
-  under "Satisfied by scope" with its reason and not under Gaps. Run; record failing. Then add the
+- [ ] T061 Traceability generator, test first: add `TraceabilityTests` to Tools.Tests
+  (`[Trait("Principle", "III")]`; fixture spec with FR-001..FR-003 and SC-001, fixture TRX, fixture
+  assembly metadata) — an ID with no test and an ID with no member both appear under "Gaps"; an ID
+  declared in the scope-only list appears under "Satisfied by scope" with its reason and not under
+  Gaps; tests carrying a `Principle` trait appear under "Tooling tests" and not against any FR.
+  *Guard*: disable gap detection and confirm the gaps test fails; record. Run; record failing. Then add the
   `trace` command to `tools/CommissionCalculator.Tools` (FR/SC IDs from spec.md; test → IDs from
   TRX categories/traits; member → IDs from `[Implements]` via reflection over the built engine and
   web assemblies; scope-only list: FR-019 — "USD only; tax, currency conversion and multi-year are

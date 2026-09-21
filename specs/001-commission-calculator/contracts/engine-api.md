@@ -48,7 +48,7 @@ public sealed record RepStatement(string RepId, string Name,
     decimal DrawPaid, decimal Recovered, decimal Payable, decimal ClosingRecoverableBalance,
     IReadOnlyList<BreakdownLine> Lines);
 
-public enum LineSection { Quota, Credit, Excluded, Tier, Clawback, Draw, Recovery }
+public enum LineSection { Quota, Credit, Excluded, Subtotal, Tier, Resplit, Clawback, Draw, Recovery }
 
 public sealed record BreakdownLine(LineSection Section, string Description, decimal Amount,
     string RequirementId);

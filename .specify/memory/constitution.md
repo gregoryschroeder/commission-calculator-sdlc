@@ -1,7 +1,23 @@
 <!--
 AMENDMENT LOG (newest first; earlier entries are kept, marked superseded, never deleted)
 
-## v1.0.0 — 2026-09-21 — initial ratification
+## v1.1.0 — 2026-09-21 — tooling tests and read-only repository files
+- Version change: 1.0.0 → 1.1.0 (MINOR: guidance in II and III materially expanded — it changes
+  what a compliant test may do and what it must name; no principle removed or redefined).
+- Modified: II (per-test independence wording), III (tests of project tooling).
+- Rationale: analyze pass 2 on feature 001 found two conflicts inside this document that the
+  ratification pairwise check missed. (1) II requires a test before any real logic, including CI
+  tooling (coverage gate, test lister, traceability generator), while III required every test to
+  name an FR/SC — tooling implements no FR, so the two could not both hold. (2) II said every test
+  passes "against nothing it did not create", while SC-001 of feature 001 requires tests that read
+  the shipped seed files and spec.md. Both resolutions were chosen by the maintainer (2026-09-21):
+  tooling tests name the principle they enforce; reading committed repository files is allowed,
+  mutable shared state is not.
+- Pairwise check re-run for the changed text (see the check below, entries dated 2026-09-21,
+  v1.1.0).
+- Deferred: none.
+
+## v1.0.0 — 2026-09-21 — initial ratification (superseded by v1.1.0)
 - Version change: (template) → 1.0.0
 - Principles added: I Payout Ambiguity Is the Maintainer's Decision (NON-NEGOTIABLE);
   II Test-First, Exact to the Cent (NON-NEGOTIABLE); III Spec Fidelity and Traceability;
@@ -61,7 +77,8 @@ made by someone with no authority to make it.
   raise it with the maintainer.
 - No false greens: no silent or conditional skips; the suite reports every test it did not run, by
   name and reason, and CI fails on any skip. Every test passes run alone and in any order, against
-  nothing it did not create.
+  no mutable shared state it did not create; reading files committed to the repository (seed
+  data, the spec) is allowed.
 - Coverage is reported on every CI run. 100% is the aim; below 80% line coverage of the engine is
   a defect. Coverage is a by-product: a test that asserts nothing is forbidden.
 
@@ -79,7 +96,9 @@ correct means; testing an easier substitute quietly narrows it.
   remediate loop reaches a stop condition.
 - Every number in a spec is tagged as a requirement or a placeholder to be measured.
 - Every functional requirement (FR) and success criterion (SC) traces to the member that implements
-  it and to the tests that verify it. Every test names the FR/SC it verifies. Every line of a
+  it and to the tests that verify it. Every test of product behaviour names the FR/SC it verifies;
+  a test of project tooling (CI gates, generators) names the constitution principle it enforces
+  instead, and the traceability report lists such tests in their own section. Every line of a
   payout breakdown shown to a user cites the FR that produced it. The trace is generated from test
   metadata by a script, never maintained by hand, and any FR/SC with no test or no implementation is
   listed as a gap.
@@ -190,6 +209,16 @@ whether both can hold at once. Pairs that needed an answer:
 
 No pair was found that cannot hold.
 
+**Pairwise check, v1.1.0 (2026-09-21).** Missed at ratification and found by analyze pass 2:
+
+- Principle II (a test before any real logic, including tooling) × Principle III (every test
+  names an FR/SC): could not both hold for tooling tests. Resolved by III's tooling clause.
+- Principle II (tests against nothing they did not create) × feature SC-001 (tests read the
+  shipped seed files): could not both hold. Resolved by II's committed-files clause.
+- Re-checked against the new text: III's tooling clause × III's generated trace (compatible —
+  the report lists tooling tests separately); II's committed-files clause × II's per-test
+  isolation in CI (compatible — committed files are read-only, so no order dependence arises).
+
 ## Development Workflow & Quality Gates
 
 - **Approval per action.** Commit only when the maintainer asks. Push, and merge a PR, only with
@@ -230,4 +259,4 @@ Compliance review: every plan's Constitution Check, and every analyze pass, read
 a subject as well as an authority — untagged external claims, expired revisit triggers and
 conflicting constraints are findings.
 
-**Version**: 1.0.0 | **Ratified**: 2026-09-21 | **Last Amended**: 2026-09-21
+**Version**: 1.1.0 | **Ratified**: 2026-09-21 | **Last Amended**: 2026-09-21
