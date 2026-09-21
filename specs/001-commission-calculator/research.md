@@ -127,7 +127,8 @@ correctness.
   `src/CommissionCalculator.Web`. Both are documented in the README and exercised by CI (a smoke
   step starts the app and requests `/`). Putting the web `.csproj` at the root was rejected: its
   default file globs would compile the engine, tests and tools into the web assembly.
-- **Needs maintainer approval**: this is the interpretation of constraint C2 (see plan).
+- **Maintainer approval**: this interpretation of constraint C2 was approved at the plan gate,
+  2026-09-21 ("2: yes", plan.md decision 2).
 
 ## R13. Seed data format
 

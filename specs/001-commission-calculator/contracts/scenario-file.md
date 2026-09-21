@@ -10,16 +10,16 @@ scenario that failed to load, with the parser's message; it never crashes the ap
 {
   "id": "tiers",
   "name": "Tiered rates",
-  "description": "One rep per tier example in spec US1.",
+  "description": "One rep per tier example in spec US1 (excerpt of Appendix A.1: Avery only).",
   "quarter": { "start": "2026-01-01", "end": "2026-03-31" },
   "roster": [
-    { "repId": "r1", "name": "Avery (80% attainment)", "quota": 100000.00,
+    { "repId": "avery", "name": "Avery", "quota": 100000.00,
       "startDate": "2025-06-01", "openingRecoverableBalance": 0.00 }
   ],
   "deals": [
-    { "dealId": "D-101", "amount": 80000.00, "closeDate": "2026-02-10",
+    { "dealId": "T-1", "amount": 80000.00, "closeDate": "2026-02-10",
       "bookingDate": "2026-02-12",
-      "splits": [ { "repId": "r1", "percent": 100 } ],
+      "splits": [ { "repId": "avery", "percent": 100 } ],
       "refunds": [] }
   ],
   "bookingQuarters": []

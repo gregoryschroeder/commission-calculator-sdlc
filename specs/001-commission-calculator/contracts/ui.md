@@ -8,7 +8,8 @@ Single Razor Page at `/`, server-rendered, no client script.
 
 ## Structure (asserted by the web tests; FR-001–FR-004, FR-021, SC-002, SC-005)
 
-- `<html lang="en">`, one `<h1>`, a `<main>` landmark, and a skip link to it.
+- `<html lang="en">`, a `<title>` of the form "{scenario name} — Commission Calculator", one
+  `<h1>`, a `<main>` landmark, and a skip link to it.
 - Picker: `<form method="get">` containing `<label for="scenario">`, `<select id="scenario"
   name="scenario">` with one `<option>` per seeded scenario, and a `<button type="submit">`.
 - Rejected scenario: an element with `role="alert"` listing each validation message and its FR.

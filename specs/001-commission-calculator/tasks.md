@@ -122,8 +122,11 @@ reader that every story uses.
 - [ ] T017 Implement quarter day/month helpers (internal, in `Calculation/`) until T016 passes.
 - [ ] T018 Write `ScenarioValidatorTests` for the shared rules (`FR-004`): quota ≤ 0, deal amount
   ≤ 0, sub-cent money, negative opening balance, empty roster, bad quarter shape, deal credited to
-  a rep not on the roster, same rep twice on a deal, split % ≤ 0 or > 100 — each yields its error
-  and the scenario is rejected with *all* errors listed. *Guard*: for each rule, comment out that
+  a rep not on the roster, same rep twice on a deal, split % ≤ 0 or > 100 — each test asserts
+  that its own error is among those listed and the scenario is rejected (not an exact error set:
+  later phases add rules such as FR-013 that a > 100% split also trips, and a test is never edited
+  to pass); one further test with three mutually independent violations (quota ≤ 0, sub-cent deal
+  amount, negative opening balance) asserts that all three are listed. *Guard*: for each rule, comment out that
   rule's check and confirm its test fails; record. Run; record failing.
 - [ ] T019 Implement `Validation/ScenarioValidator.cs` (shared rules) until T018 passes.
 - [ ] T020 Write `CommissionEngineTests` (`FR-003`, `FR-004`, `FR-005`): an invalid scenario returns
@@ -180,13 +183,16 @@ reader that every story uses.
   (`@FR-001 @FR-002 @FR-003 @FR-021 @SC-002`): picker form structure per contracts/ui.md;
   `?scenario=tiers` shows one section per rep with `h2`, caption, `th scope=col` Item/Amount/Rule;
   every Rule cell is an FR ID that exists in spec.md (read from the committed spec file); each rep's
-  summary `dl` shows quota, prorated quota, credited bookings, attainment (Avery: "80.00%"),
+  page has a `<title>` naming the selected scenario (WCAG 2.4.2); summary `dl` shows quota, prorated quota, credited bookings, attainment (Avery: "80.00%"),
   earned, draws paid, payable and closing balance; unknown id → 404 with the picker; a load error
   is shown — for this one scenario the host's scenario directory is a temp directory the scenario
   creates (one valid file, one malformed), never the shared build output. *Guard*: return 200 for an unknown id and confirm that scenario fails; record. Run;
   record failing. Add `AttainmentFormatTests` in Web.Tests (`FR-002`): 0.8 → "80.00%", 0.12345 →
   "12.35%" (midpoint, half away from zero), 1.6 → "160.00%". *Guard*: format with banker's rounding
-  and confirm the midpoint case fails ("12.34%"); record.
+  and confirm the midpoint case fails ("12.34%"); record. Add `MoneyFormatTests` in Web.Tests
+  (`FR-021`, `FR-018`): 1234.5 → "$1,234.50", 0 → "$0.00", −1600 → "−$1,600.00" (minus sign in
+  the text). *Guard*: format with `Math.Abs` and confirm the negative case fails; record. (T032's
+  formatting is written against these, not against T057, which arrives in Phase 8.)
 - [ ] T031 [P] [US1] Write `StylesheetAccessibilityTests` in Web.Tests (`FR-021`), reading
   `wwwroot/css/site.css`: 1.4.3 text contrast — body, table and link text on their backgrounds
   ≥ 4.5:1; 1.4.11 non-text contrast — focus indicator and `select`/`button` borders ≥ 3:1 against
@@ -347,7 +353,9 @@ reader that every story uses.
   Run; record failing.
 - [ ] T057 [P] [US6] Write `Features/UI_NegativeAmounts.feature` in Specs, driven through the web
   host (`@FR-021 @FR-015`): `?scenario=refunds-q2` renders Sage's earned commission as "−$1,600.00"
-  with a minus sign in the text (not colour alone). *Guard*: format with `Math.Abs` and confirm the test fails; record.
+  with a minus sign in the text (not colour alone). Its first red is recorded with its actual
+  cause (the `refunds-q2` scenario does not exist yet); the formatting itself was test-driven in
+  T030's `MoneyFormatTests`. *Guard*: format with `Math.Abs` and confirm the test fails; record.
   Run; record failing.
 - [ ] T058 [US6] Implement `Calculation/ClawbackCalculator.cs`, refund-aware `QuarterCredit`,
   booking-quarter validation and clawback lines until T055–T057 pass; add
@@ -372,7 +380,8 @@ reader that every story uses.
   assembly metadata) — an ID with no test and an ID with no member both appear under "Gaps"; an ID
   declared in the scope-only list appears under "Satisfied by scope" with its reason and not under
   Gaps; an SC in the evidence-only list with tests and no member is not a gap, and with no tests it
-  is; tests carrying a `Principle` trait appear under "Tooling tests" and not against any FR; a
+  is; an ID in the manual-evidence list appears under "Manual evidence" with its task reference and
+  not under Gaps; tests carrying a `Principle` trait appear under "Tooling tests" and not against any FR; a
   CI evidence TRX (`ci-evidence/*.trx`) contributes its categories like any other TRX.
   *Guard*: disable gap detection and confirm the gaps test fails; record. Run; record failing. Then add the
   `trace` command to `tools/CommissionCalculator.Tools` (FR/SC IDs from spec.md; test → IDs from
@@ -380,15 +389,16 @@ reader that every story uses.
   web assemblies; scope-only list: FR-019 — "USD only; tax, currency conversion and
   multi-year are out of scope, so no member implements them"; evidence-only list: SC-001 — seed
   files and Appendix A, SC-003 — the seeded scenarios, SC-004 — the smoke jobs, each verified by
-  tests but implemented by no single member; manual-evidence list: SC-005 and FR-021's
+  tests but implemented by no single member (SC-002 — every line cites an FR, verified by T030 and T060); manual-evidence list:
+  SC-005 and FR-021's
   screen-reader clause — T033/T034, not visible to the trace) writing
   `specs/001-commission-calculator/traceability.md`. Add a final CI job, `traceability`, that
   depends on the build/test, smoke and offline-smoke jobs, downloads all their TRX artifacts (suite
   and `ci-evidence/*.trx`), runs `trace` over them and uploads the result.
 - [ ] T062 Add `[Implements]` to every engine and web member that implements an FR; run `trace`
   over every TRX (as the CI job does); every FR has at least one member and one test except the
-  scope-only FR-019; every SC has at least one test; the manual-evidence items are listed with the
-  PR links recorded in T033/T034/T064.
+  scope-only FR-019; every SC except the manual-evidence SC-005 has at least one test; the
+  manual-evidence items are listed with the PR links recorded in T033/T034/T064.
 - [ ] T063 Re-verify every failure-path guard added in T007, T008, T009, T010, T018, T020, T022, T023,
   T030 (attainment format), T060,
   T030, T031, T035, T038, T043, T047, T048, T052, T056, T057, T061 still fails with its guarded
