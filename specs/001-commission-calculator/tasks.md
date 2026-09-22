@@ -360,7 +360,7 @@ reader that every story uses.
 **Goal**: only deals booked in the quarter count; excluded deals are listed with the reason.
 **Independent test**: `Features/US2_BookingDate.feature` passes.
 
-- [ ] T037 [P] [US2] Write `Features/US2_BookingDate.feature`: US2 AS1–AS4 with exact dates and
+- [X] T037 [P] [US2] Write `Features/US2_BookingDate.feature`: US2 AS1–AS4 with exact dates and
   amounts (`@FR-008`), including the excluded-deal line citing FR-008. Run; record failing —
   expected red: AS1 (booked 2026-04-02, after the quarter) and AS4 (both dates outside), because
   Phase 3's T029 credits every deal of the rep, so they are still counted. AS2 (closed 2025-12-29,
@@ -369,7 +369,8 @@ reader that every story uses.
   AS3 — *Guard*: make crediting exclude every deal and confirm AS3 fails; record. Record which
   scenarios were red and which green at write time (labels checked against spec.md US2 AS1–AS4,
   2026-09-22).
-- [ ] T038 [P] [US2] Write `QuarterCreditTests` (`FR-008`): booked the day before/after the quarter
+  **Result**: Recorded 2026-09-22: AS1 and AS4 red (Phase 3 still counted the excluded deals); AS2 and AS3 green at write time, as declared. Red evidence: close-date crediting failed AS1 and AS2; excluding every deal failed AS3.
+- [X] T038 [P] [US2] Write `QuarterCreditTests` (`FR-008`): booked the day before/after the quarter
   is excluded (expected red: Phase 3 credits every deal); booked on the first and last day counts,
   and close date never changes the result (expected green at write time — Phase 3 already credits
   them; red evidence is the guards below plus an inclusive-bounds guard: make the bounds exclusive
@@ -380,9 +381,11 @@ reader that every story uses.
   crediting to close date and confirm AS1 (B-1) and AS2 (B-2) fail; remove each refund check and
   confirm its tests fail; validate refunds only on the scenario's own list and confirm the
   booking-quarter cases fail; record. Run; record failing.
-- [ ] T039 (Moved into T030 by analyze, 2026-09-22: US1 AS5 asserts only which reps a scenario shows,
+  **Result**: Recorded: the 6 `QuarterCreditTests` were red at write time from the new quarter-aware overload's stub, including the three declared green. That declaration assumed they would run against Phase 3's crediting, but they call the new overload. The 4 new refund-rule cases were red on the real assertion. Guards: close-date crediting failed the day-before, day-after and close-date tests; exclusive bounds failed the first-day and last-day tests; removing the refund-date check failed its 2 cases; removing the refund-total check failed its 2 cases; checking refunds only on the scenario's own list failed all 4 booking-quarter refund cases.
+- [X] T039 (Moved into T030 by analyze, 2026-09-22: US1 AS5 asserts only which reps a scenario shows,
   which Phase 3 already renders, so it could not be seen failing here.)
-- [ ] T040 [US2] Implement booking-date crediting and excluded-deal lines until T037–T038 pass.
+- [X] T040 [US2] Implement booking-date crediting and excluded-deal lines until T037–T038 pass.
+  **Result**: Done; 115/115 green locally, engine coverage 98.09%, every test passes alone. Excluded deals appear in deal-list order with Appendix A.2's wording.
 - [ ] T041 [US2] Checkpoint: PR "Phase 4: US2", CI green, maintainer approves squash-merge.
 
 ---

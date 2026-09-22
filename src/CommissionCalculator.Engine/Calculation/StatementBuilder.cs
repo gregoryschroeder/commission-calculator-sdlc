@@ -7,9 +7,9 @@ internal static class StatementBuilder
 {
     private static readonly CultureInfo Invariant = CultureInfo.InvariantCulture;
 
-    public static RepStatement Build(RepInput rep, IReadOnlyList<DealInput> deals)
+    public static RepStatement Build(RepInput rep, QuarterPeriod quarter, IReadOnlyList<DealInput> deals)
     {
-        var credits = QuarterCredit.For(rep.RepId, deals);
+        var credits = QuarterCredit.For(rep.RepId, quarter, deals);
         var creditedBookings = credits.Sum(credit => credit.Share);
         var proratedQuota = rep.Quota;
         var tiers = TierSchedule.Lines(creditedBookings, proratedQuota);
@@ -33,10 +33,13 @@ internal static class StatementBuilder
     private static BreakdownLine QuotaLine(RepInput rep) =>
         new(LineSection.Quota, "Quarterly quota", rep.Quota, "FR-005");
 
-    private static BreakdownLine CreditLineFor(CreditLine credit) =>
-        new(LineSection.Credit,
-            $"{credit.Deal.DealId} booked {Date(credit.Deal.BookingDate)} (closed {Date(credit.Deal.CloseDate)})",
-            credit.Share, "FR-008");
+    private static BreakdownLine CreditLineFor(DealCredit credit)
+    {
+        var booked = $"{credit.Deal.DealId} booked {Date(credit.Deal.BookingDate)} (closed {Date(credit.Deal.CloseDate)})";
+        return credit.Counted
+            ? new BreakdownLine(LineSection.Credit, booked, credit.Share, "FR-008")
+            : new BreakdownLine(LineSection.Excluded, $"{booked}: excluded, booked outside the quarter", 0m, "FR-008");
+    }
 
     private static BreakdownLine TierLineFor(TierLine tier) =>
         new(LineSection.Tier, $"{(tier.Rate * 100m).ToString("0.##", Invariant)}% of {Dollars(tier.Slice)}", tier.Amount, "FR-006");

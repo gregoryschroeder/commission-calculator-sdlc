@@ -45,6 +45,10 @@ public sealed class ScenarioValidatorTests
         new("own split percentage over 100", s => s.WithOwnDeal(d => d with { Splits = [new("sage", 100.5m)] }), "split percentage must be greater than 0% and at most 100%", "Q2-1"),
         new("booking-quarter split percentage zero", s => s.WithBookingDeal(5, d => d with { Splits = [new("zion", 0m), new("yves", 100m)] }), "split percentage must be greater than 0% and at most 100%", "D2"),
         new("booking-quarter split percentage over 100", s => s.WithBookingDeal(1, d => d with { Splits = [new("sage", 101m)] }), "split percentage must be greater than 0% and at most 100%", "R-12"),
+        new("own refund dated before booking", s => s.WithOwnDeal(d => d with { Refunds = [new(1_000.00m, new(2026, 5, 1))] }), "is dated before its booking date", "Q2-1"),
+        new("booking-quarter refund dated before booking", s => s.WithBookingDeal(1, d => d with { Refunds = [new(1_000.00m, new(2026, 2, 1))] }), "is dated before its booking date", "R-12"),
+        new("own refunds total more than the deal", s => s.WithOwnDeal(d => d with { Refunds = [new(30_000.00m, May10), new(20_000.00m, May10)] }), "refunds total more than the deal amount", "Q2-1"),
+        new("booking-quarter refunds total more than the deal", s => s.WithBookingDeal(5, d => d with { Refunds = [new(25_000.00m, new(2026, 3, 1)), new(20_000.00m, new(2026, 3, 2))] }), "refunds total more than the deal amount", "D2"),
     ];
 
     public static TheoryData<RuleCase> Rules => [.. Cases];

@@ -15,6 +15,6 @@ public static class CommissionEngine
             return new RejectedScenario(errors);
         }
 
-        return new CalculatedScenario(scenario.Roster.Select(rep => StatementBuilder.Build(rep, scenario.Deals)).ToList());
+        return new CalculatedScenario(scenario.Roster.Select(rep => StatementBuilder.Build(rep, scenario.Quarter, scenario.Deals)).ToList());
     }
 }
