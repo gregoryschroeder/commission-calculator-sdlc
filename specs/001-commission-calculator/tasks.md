@@ -239,7 +239,7 @@ reader that every story uses.
   explicit `<Content Include>` fails the build with NETSDK1022) — structural; proven by T060b's smoke
   assertion and guard.
   **Result**: Confirmed 2026-09-22: a probe `Scenarios/probe.json` reached `bin/Debug/net10.0/Scenarios/` with no project-file entry (the csproj mentions `Scenarios` nowhere).
-- [ ] T026 Checkpoint: PR "Phase 2: Foundational", CI green, maintainer approves squash-merge.
+- [X] T026 Checkpoint: PR "Phase 2: Foundational", CI green, maintainer approves squash-merge.
 
 ---
 
@@ -330,7 +330,7 @@ reader that every story uses.
   reflow; evidence: the viewport width reported by the browser just before the screenshot) and
   confirm no horizontal page scroll other than inside the breakdown tables. Record the log excerpt
   and screenshot in the PR.
-  **Result**: Done 2026-09-22 in the in-app browser, key presses only (no pointer actions in the log). Verified: Tab reaches the skip link, then the scenario select, then Show, each with a visible focus outline; Enter on Show submits. **Not verified by the agent; confirmed by the maintainer in T034 (2026-09-22)**: changing the select's value by keyboard. ArrowDown, Down, typing "T" and Alt+ArrowDown all left the value unchanged while the select held focus, which points to the embedded browser's synthesized keys not driving the native select widget; this is handed to the maintainer with T034. Reflow (1.4.10) at a 320px viewport (`clientWidth` 320): first run found the summary amounts clipped at the right edge; after the T032 fix, no summary element extends past 320px (widest right edge 304px) and the page does not scroll horizontally.
+  **Result**: Done 2026-09-22 in the in-app browser, key presses only (no pointer actions in the log). Verified: Tab reaches the skip link, then the scenario select, then Show, each with a visible focus outline; Enter on Show submits. **Not verified by the agent; confirmed by the maintainer in T034 (2026-09-22)**: changing the select's value by keyboard. ArrowDown, Down, typing "T" and Alt+ArrowDown all left the value unchanged while the select held focus, which points to the embedded browser's synthesized keys not driving the native select widget; this is handed to the maintainer with T034. **Confirmed working by the maintainer 2026-09-22 (at the step-7 gate): selecting a scenario by keyboard works; the failure was the in-app browser's synthesized keys, not the page.** Reflow (1.4.10) at a 320px viewport (`clientWidth` 320): first run found the summary amounts clipped at the right edge; after the T032 fix, no summary element extends past 320px (widest right edge 304px) and the page does not scroll horizontally.
 - [X] T034 [US1] Screen-reader check (FR-021; standing rule 3) — **maintainer step**: with
   VoiceOver on (evidence: VoiceOver caption panel visible in a screenshot), navigate by headings
   and tables on `?scenario=tiers` (app run as in T033); confirm each rep's `h2`, the table caption and column headers are
@@ -396,7 +396,7 @@ reader that every story uses.
   as intended" — the VoiceOver pass over `?scenario=tiers`, and with it the keyboard behaviour of
   the scenario select that T033 could not drive through the in-app browser. T033's unverified item
   is therefore closed by this check, not by the agent.
-- [ ] T041 [US2] Checkpoint: PR "Phase 4: US2", CI green, maintainer approves squash-merge.
+- [X] T041 [US2] Checkpoint: PR "Phase 4: US2", CI green, maintainer approves squash-merge.
 
 ---
 
@@ -427,7 +427,7 @@ reader that every story uses.
   rejection rule, so T056's test for that rule is red for the reason it states)
   until T042–T043 pass.
   **Result**: Done; 124/124 green. The duplicate-repId test caught a real defect in the first implementation: building the start-date lookup with `ToDictionary` threw on a duplicate id, which the contract forbids (the engine never throws for invalid data). The lookup now keeps the earliest start date per id.
-- [ ] T045 [US3] Checkpoint: PR "Phase 5: US3", CI green, maintainer approves squash-merge.
+- [X] T045 [US3] Checkpoint: PR "Phase 5: US3", CI green, maintainer approves squash-merge.
 
 ---
 
@@ -462,7 +462,7 @@ reader that every story uses.
 - [X] T049 [US4] Implement `Calculation/SplitAllocation.cs`, split crediting in `QuarterCredit`
   (share lines cite FR-012), the FR-013 rule and the rejected-scenario view until T046–T048 pass.
   **Result**: Done; 146/146 green. Per-rule requirement ids added so each error cites its own FR, as Appendix A.11 states them.
-- [ ] T050 [US4] Checkpoint: PR "Phase 6: US4", CI green, maintainer approves squash-merge.
+- [X] T050 [US4] Checkpoint: PR "Phase 6: US4", CI green, maintainer approves squash-merge.
 
 ---
 
@@ -488,7 +488,7 @@ reader that every story uses.
 - [X] T053 [US5] Implement `Calculation/DrawSchedule.cs` and `Calculation/DrawRecovery.cs` and
   their statement lines until T051–T052 pass.
   **Result**: Done; 172/172 green, engine coverage 98.16%, every test passes alone. The "Earned commission" line (FR-015) is added here; the "Clawbacks" line above it is Phase 8's.
-- [ ] T054 [US5] Checkpoint: PR "Phase 7: US5", CI green, maintainer approves squash-merge.
+- [X] T054 [US5] Checkpoint: PR "Phase 7: US5", CI green, maintainer approves squash-merge.
 
 ---
 
@@ -536,13 +536,13 @@ reader that every story uses.
 - [X] T058 [US6] Implement `Calculation/ClawbackCalculator.cs`, refund-aware `QuarterCredit`,
   booking-quarter validation and clawback lines until T055–T057 pass.
   **Result**: Done; 200/200 green, engine coverage 98.63%, every test passes alone. One message was reworded (not the test) when a date interpolated into the middle of the phrase a test matched on.
-- [ ] T059 [US6] Checkpoint: PR "Phase 8: US6", CI green, maintainer approves squash-merge.
+- [X] T059 [US6] Checkpoint: PR "Phase 8: US6", CI green, maintainer approves squash-merge.
 
 ---
 
 ## Phase 9: Polish & cross-cutting — PR 9
 
-- [ ] T060 [P] Write `Features/SeededScenarios.feature` (`@SC-001 @SC-002 @SC-003`): for every file in
+- [X] T060 [P] Write `Features/SeededScenarios.feature` (`@SC-001 @SC-002 @SC-003`): for every file in
   `Scenarios/`, load it through the real reader and assert every rep's statement equals Appendix A
   line for line (description, amount to the cent, FR), and that each `RepStatement` summary field
   equals its Appendix A line (Quarterly quota → `Quota`; Prorated quota, or the quota when there is
@@ -572,11 +572,11 @@ reader that every story uses.
   strict reader, so its expected failure is that load error. The feature
   lists the eleven expected files by name, so before T060a it fails on every one ("scenario file
   not found"); run it and record that red. Any later failure is a spec question, not a test edit.
-- [ ] T060a Add the eleven seed files `src/CommissionCalculator.Web/Scenarios/{tiers,
+- [X] T060a Add the eleven seed files `src/CommissionCalculator.Web/Scenarios/{tiers,
   booking-dates, proration, proration-q2, splits, split-rounding, draw, refunds, refund-splits,
   refunds-q2, invalid}.json`, transcribing Appendix A.1–A.11 inputs, until T060 passes. A mismatch
   is fixed in the seed file, never in Appendix A or the test.
-- [ ] T060b Extend the CI smoke job (T010) and the offline-smoke job (T035): request
+- [X] T060b Extend the CI smoke job (T010) and the offline-smoke job (T035): request
   `/?scenario=tiers` and require a `<table>` containing "Avery" — proving the running app loaded the
   seed files from its output. *Guard*: on a throwaway branch add `<Content Update="Scenarios/*.json"
   CopyToOutputDirectory="Never" CopyToPublishDirectory="Never" />` and confirm both assertions fail
@@ -720,15 +720,17 @@ reader that every story uses.
   `/?scenario=tiers`. Unchanged from T033: pressing Down while the select held focus left
   `value`/`selectedIndex` untouched (10, "tiers") — the in-app browser's synthesized keys do not
   drive the native select widget; the maintainer confirmed that behaviour natively at the Phase 7
-  gate. Reflow at 320px: `clientWidth` 320, widest right edge 304px, no horizontal scroll.
-- [ ] T065 Checkpoint: PR "Phase 9: Polish", CI green, maintainer approves squash-merge.
+  gate and again at the step-7 gate (2026-09-22), together with the VoiceOver re-check: both are
+  complete and working as intended, so SC-005 and FR-021's screen-reader clause are satisfied. Reflow at 320px: `clientWidth` 320, widest right edge 304px, no horizontal scroll.
+- [X] T065 Checkpoint: PR "Phase 9: Polish", CI green, maintainer approves squash-merge.
 
   **Status**: PR #12 open, CI green on run 35776592291 (build-test, smoke, offline-smoke,
   traceability). Leak check before the push: 0 non-installer hits over 15 library phrases, 3
   expected hits in `.specify/templates/overrides/` (installer output). The CI-generated report and
   the committed one are byte-identical apart from the CI-evidence run URL, which necessarily names
-  the run before the commit. Waiting on the maintainer: the VoiceOver re-check (T064) and approval
-  to squash-merge.
+  the run before the commit. Maintainer approved and PR #12 was squash-merged as commit 09e5200; the
+  VoiceOver re-check and the keyboard selection of a scenario were both confirmed working
+  2026-09-22.
 
 ---
 
@@ -753,3 +755,27 @@ reader that every story uses.
 MVP first (Phases 1–3), then one story per PR in priority order, each independently testable
 through its feature file. Each PR description lists the tests seen failing and the guards'
 observed results.
+
+---
+
+## Phase 10: Convergence
+
+Appended by `/speckit-converge` on 2026-09-22 after Phase 9 merged. Two findings, both records
+rather than behaviour: the assessment found no requirement, acceptance scenario, plan decision or
+constitution principle unmet by the code.
+
+- [X] T066 Tick the completed tasks whose phases are merged, leaving each `**Result**` untouched:
+  the checkpoints T026, T041, T045, T050, T054, T059 (PRs #4, #7, #8, #9, #10, #11, all
+  squash-merged) and T060, T060a, T060b (recorded complete in Phase 9, merged as PR #12), per
+  `tasks.md` (partial). A task that is done but shown open makes the record untrustworthy, which is
+  what Principle III's traceability rests on.
+- [X] T067 Update `README.md` per T061 (partial): it still says the traceability generator comes
+  "later", and its Test section names only the smoke job. State that `trace` exists, show the
+  command, name `specs/001-commission-calculator/traceability.md` as its committed output, and list
+  the offline-smoke and traceability CI jobs alongside the smoke job.
+
+  **Result** (T066, T067): Done 2026-09-22. T066 — the nine merged tasks and T065 are ticked, every
+  `**Result**` left as written; `tasks.md` now has no open task. T067 — `README.md` gains a
+  Traceability section (the `trace` command, the committed report, and what "Explained" means) and
+  a CI section naming the smoke, offline-smoke and traceability jobs; the "later" note under
+  `tools/` is gone.
