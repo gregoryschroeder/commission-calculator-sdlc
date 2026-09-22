@@ -85,7 +85,9 @@ public sealed class ScenarioValidatorTests
     [Fact, Trait("Requirement", "FR-004")]
     public void TheValidScenarioHasNoErrors() => Assert.Empty(ScenarioValidator.Validate(ValidScenario.Create()));
 
-    [Theory, Trait("Requirement", "FR-004"), MemberData(nameof(Rules))]
+    // The cases cover FR-004's shared rules and FR-011's start-date rules; each case states the
+    // requirement its message must cite.
+    [Theory, Trait("Requirement", "FR-004"), Trait("Requirement", "FR-011"), MemberData(nameof(Rules))]
     public void EachSharedRuleRejectsItsViolation(RuleCase rule)
     {
         var errors = ScenarioValidator.Validate(rule.Break(ValidScenario.Create()));

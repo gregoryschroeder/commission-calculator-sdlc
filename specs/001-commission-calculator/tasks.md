@@ -581,7 +581,7 @@ reader that every story uses.
   seed files from its output. *Guard*: on a throwaway branch add `<Content Update="Scenarios/*.json"
   CopyToOutputDirectory="Never" CopyToPublishDirectory="Never" />` and confirm both assertions fail
   (research R17 observed that this removes the files from output); record.
-- [ ] T061 Traceability generator, test first: add `TraceabilityTests` to Tools.Tests
+- [X] T061 Traceability generator, test first: add `TraceabilityTests` to Tools.Tests
   (`[Trait("Principle", "III")]`; fixture spec with FR-001..FR-003 and SC-001, fixture TRX, fixture
   assembly metadata, plus one case that runs the built tools executable **as a separate process**
   against a fixture DLL built from a committed fixture project,
@@ -622,11 +622,37 @@ reader that every story uses.
   `dotnet test` produce), runs `trace --assemblies
   <engine.dll> <web.dll> --results <files>` over them and uploads the result. The build/test job
   (T007) gains an upload of that build output.
-- [ ] T062 Add `[Implements]` to every engine and web member that implements an FR; run `trace`
+
+  **Result**: Done. `TraceabilityTests` (11 cases, `[Trait("Principle", "III")]`) written first and run
+  red 2026-09-22 (11 failed / 6 passed: every new case failed on `NotImplementedException`, and the
+  child-process case on the tools usage message, `trace` not yet being a command). Fixture project
+  `tools/CommissionCalculator.Tools.Fixture/` (Web SDK, `<OutputType>Library</OutputType>`, one
+  `[Implements("FR-001")]` Razor Pages model), referenced with `ReferenceOutputAssembly="false"`;
+  the in-process member test uses an `ImplementsAttribute` declared in the test assembly under the
+  engine's namespace, so full-type-name matching is what is proved. Implemented `Traceability` and
+  `Trace`; 17/17 Tools.Tests green. *Guards*: gap detection disabled (`&& DateTime.Now.Year < 0`,
+  because `if (false)` breaks the build under warnings-as-errors) — the five gap cases failed;
+  `FrameworkReference Include="Microsoft.AspNetCore.App"` removed from the tools project — the
+  child-process case failed with `Unhandled exception. System.Reflection.ReflectionTypeLoadException`
+  in the captured output. Both restored (`grep -c` 0 and 1 respectively) and green again. CI job
+  `traceability` added (needs build-test, smoke, offline-smoke; `actions/download-artifact@v8`;
+  `--strict`), and build-test now uploads the Debug build output.
+- [X] T062 Add `[Implements]` to every engine and web member that implements an FR; run `trace`
   with the same assemblies and result files the CI job uses; the report's "Unexplained" gaps are
   empty, and its "Explained" gaps are exactly the explained-gaps table of T061, with SC-004's CI
   record passing and the manual-evidence items carrying the PR links recorded in T033/T034 (the
   T064 re-check links are added to the report when T065's PR is opened).
+
+  **Result**: Done 2026-09-22. The first local trace reported three unexplained gaps: FR-011 (no test,
+  no member), FR-013 (no member), FR-020 (no member). Fixed at the source, not in the report:
+  `[Implements("FR-011")]` on `ScenarioValidator.StartDateFailure`, `[Implements("FR-013")]` on
+  `SplitSumFailure`, `[Implements("FR-020")]` on the web `Program` composition root; and the
+  validator rule theory, whose cases cover FR-011's start-date rules as well as FR-004's, now
+  carries both `Requirement` traits. Second run: **0 unexplained gaps**, `--strict` exit 0, and the
+  Explained table is exactly T061's six entries (FR-019 scope; SC-001..SC-003 evidence-only;
+  SC-004 CI evidence, record passing; SC-005 manual evidence with the T033/T034 PR links) plus the
+  SC-005 note on FR-021's screen-reader clause. 232/232 tests green. The committed report is
+  regenerated from the CI artifacts at T065, so its CI-evidence rows carry the real run URL.
 - [ ] T063 Re-verify every failure-path guard added in T007 (warnings, coverage), T008, T009,
   T010, T018, T020, T022 (error capture, unknown property, required field), T023 (first-failure, missing directory,
   duplicate id), T030 (unknown id, skip-link

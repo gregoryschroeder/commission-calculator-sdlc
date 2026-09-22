@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TestRun xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <TestDefinitions>
+    <UnitTest name="Fixture.EngineTests.CreditsTheDeal" id="1">
+      <Properties>
+        <Property>
+          <Key>Requirement</Key>
+          <Value>FR-001</Value>
+        </Property>
+      </Properties>
+      <TestMethod className="Fixture.EngineTests" name="CreditsTheDeal" />
+    </UnitTest>
+    <UnitTest name="FR-003 is covered by a scenario" id="2">
+      <TestCategory>
+        <TestCategoryItem TestCategory="FR-003" />
+        <TestCategoryItem TestCategory="FR-001" />
+      </TestCategory>
+      <TestMethod className="Fixture.Features.SomeFeature" name="FR003IsCoveredByAScenario" />
+    </UnitTest>
+    <UnitTest name="Fixture.ToolsTests.TheGateFails" id="3">
+      <TestCategory>
+        <TestCategoryItem TestCategory="FR-002" />
+      </TestCategory>
+      <Properties>
+        <Property>
+          <Key>Principle</Key>
+          <Value>III</Value>
+        </Property>
+      </Properties>
+      <TestMethod className="Fixture.ToolsTests" name="TheGateFails" />
+    </UnitTest>
+  </TestDefinitions>
+</TestRun>

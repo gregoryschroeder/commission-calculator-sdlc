@@ -25,6 +25,14 @@ jobs:
         with:
           name: test-results
           path: TestResults/
+      - name: Upload build output (the traceability job reflects over it)
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: build-output
+          path: |
+            src/CommissionCalculator.Engine/bin/Debug/net10.0/
+            src/CommissionCalculator.Web/bin/Debug/net10.0/
 
   smoke:
     runs-on: ubuntu-latest
@@ -35,7 +43,7 @@ jobs:
         run: git status --ignored --short
       - name: Start with one command and serve the page
         id: smoke
-        run: tools/ci/smoke.sh /
+        run: tools/ci/smoke.sh '/?scenario=tiers' Avery
       - name: Record CI evidence (SC-004, FR-020)
         if: always()
         run: tools/ci/evidence.sh smoke "clean checkout starts with one command and serves /" "SC-004,FR-020" "${{ steps.smoke.outcome }}"
@@ -53,7 +61,7 @@ jobs:
       - uses: actions/setup-dotnet@v6
       - name: Serve the published app with no network
         id: offline
-        run: tools/ci/offline-smoke.sh /
+        run: tools/ci/offline-smoke.sh '/?scenario=tiers' none Avery
       - name: Record CI evidence (SC-004)
         if: always()
         run: tools/ci/evidence.sh offline-smoke "published app serves / with no network" "SC-004" "${{ steps.offline.outcome }}"
@@ -63,3 +71,44 @@ jobs:
         with:
           name: ci-evidence-offline-smoke
           path: ci-evidence/
+
+  traceability:
+    runs-on: ubuntu-latest
+    needs: [build-test, smoke, offline-smoke]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+      - name: Download the test results
+        uses: actions/download-artifact@v8
+        with:
+          name: test-results
+          path: TestResults/
+      - name: Download the build output
+        uses: actions/download-artifact@v8
+        with:
+          name: build-output
+          path: build-output/
+      - name: Download the smoke evidence
+        uses: actions/download-artifact@v8
+        with:
+          name: ci-evidence-smoke
+          path: ci-evidence/
+      - name: Download the offline-smoke evidence
+        uses: actions/download-artifact@v8
+        with:
+          name: ci-evidence-offline-smoke
+          path: ci-evidence/
+      - name: Trace requirements to members and tests
+        run: |
+          dotnet run --project tools/CommissionCalculator.Tools -- trace \
+            --assemblies build-output/CommissionCalculator.Engine/bin/Debug/net10.0/CommissionCalculator.Engine.dll \
+                         build-output/CommissionCalculator.Web/bin/Debug/net10.0/CommissionCalculator.Web.dll \
+            --results TestResults/*.trx \
+            --evidence ci-evidence/*.json \
+            --out traceability-ci.md --strict | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Upload the traceability report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: traceability
+          path: traceability-ci.md

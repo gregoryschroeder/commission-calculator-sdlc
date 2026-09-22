@@ -1,0 +1,54 @@
+{
+  "id": "proration",
+  "name": "Mid-quarter starters",
+  "description": "Appendix A: Mid-quarter starters (carries US3 AS1\u2013AS2, US5 AS4\u2013AS6).",
+  "quarter": {
+    "start": "2026-01-01",
+    "end": "2026-03-31"
+  },
+  "roster": [
+    {
+      "repId": "finley",
+      "name": "Finley",
+      "quota": 90000.00,
+      "startDate": "2026-02-15",
+      "openingRecoverableBalance": 0.00
+    },
+    {
+      "repId": "gray",
+      "name": "Gray",
+      "quota": 90000.00,
+      "startDate": "2026-01-20",
+      "openingRecoverableBalance": 0.00
+    }
+  ],
+  "deals": [
+    {
+      "dealId": "P-1",
+      "amount": 50000.00,
+      "closeDate": "2026-03-09",
+      "bookingDate": "2026-03-10",
+      "splits": [
+        {
+          "repId": "finley",
+          "percent": 100.0
+        }
+      ],
+      "refunds": []
+    },
+    {
+      "dealId": "P-2",
+      "amount": 30000.00,
+      "closeDate": "2026-01-30",
+      "bookingDate": "2026-02-02",
+      "splits": [
+        {
+          "repId": "gray",
+          "percent": 100.0
+        }
+      ],
+      "refunds": []
+    }
+  ],
+  "bookingQuarters": []
+}

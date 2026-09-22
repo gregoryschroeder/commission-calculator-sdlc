@@ -1,0 +1,181 @@
+{
+  "id": "refunds-q2",
+  "name": "Refunds of earlier-quarter deals",
+  "description": "Appendix A: Refunds of earlier-quarter deals (carries US6 AS2, AS5 (Q2), AS8).",
+  "quarter": {
+    "start": "2026-04-01",
+    "end": "2026-06-30"
+  },
+  "roster": [
+    {
+      "repId": "sage",
+      "name": "Sage",
+      "quota": 100000.00,
+      "startDate": "2025-06-01",
+      "openingRecoverableBalance": 0.00
+    },
+    {
+      "repId": "val",
+      "name": "Val",
+      "quota": 100000.00,
+      "startDate": "2025-06-01",
+      "openingRecoverableBalance": 0.00
+    },
+    {
+      "repId": "zion",
+      "name": "Zion",
+      "quota": 100000.00,
+      "startDate": "2025-06-01",
+      "openingRecoverableBalance": 0.00
+    }
+  ],
+  "deals": [
+    {
+      "dealId": "Q2-1",
+      "amount": 40000.00,
+      "closeDate": "2026-05-01",
+      "bookingDate": "2026-05-04",
+      "splits": [
+        {
+          "repId": "sage",
+          "percent": 100.0
+        }
+      ],
+      "refunds": []
+    }
+  ],
+  "bookingQuarters": [
+    {
+      "quarter": {
+        "start": "2026-01-01",
+        "end": "2026-03-31"
+      },
+      "reps": [
+        {
+          "repId": "sage",
+          "quota": 100000.00,
+          "startDate": "2025-06-01"
+        },
+        {
+          "repId": "val",
+          "quota": 100000.00,
+          "startDate": "2025-06-01"
+        },
+        {
+          "repId": "zion",
+          "quota": 100000.00,
+          "startDate": "2025-06-01"
+        }
+      ],
+      "partners": [
+        {
+          "repId": "yves",
+          "startDate": "2025-06-01"
+        }
+      ],
+      "deals": [
+        {
+          "dealId": "R-11",
+          "amount": 60000.00,
+          "closeDate": "2026-01-09",
+          "bookingDate": "2026-01-10",
+          "splits": [
+            {
+              "repId": "sage",
+              "percent": 100.0
+            }
+          ],
+          "refunds": [
+            {
+              "amount": 60000.00,
+              "date": "2026-04-15"
+            }
+          ]
+        },
+        {
+          "dealId": "R-12",
+          "amount": 60000.00,
+          "closeDate": "2026-02-09",
+          "bookingDate": "2026-02-10",
+          "splits": [
+            {
+              "repId": "sage",
+              "percent": 100.0
+            }
+          ],
+          "refunds": []
+        },
+        {
+          "dealId": "R-7",
+          "amount": 60000.00,
+          "closeDate": "2026-01-09",
+          "bookingDate": "2026-01-10",
+          "splits": [
+            {
+              "repId": "val",
+              "percent": 100.0
+            }
+          ],
+          "refunds": [
+            {
+              "amount": 20000.00,
+              "date": "2026-02-20"
+            },
+            {
+              "amount": 20000.00,
+              "date": "2026-05-05"
+            }
+          ]
+        },
+        {
+          "dealId": "R-8",
+          "amount": 60000.00,
+          "closeDate": "2026-02-09",
+          "bookingDate": "2026-02-10",
+          "splits": [
+            {
+              "repId": "val",
+              "percent": 100.0
+            }
+          ],
+          "refunds": []
+        },
+        {
+          "dealId": "D1",
+          "amount": 60000.00,
+          "closeDate": "2026-01-14",
+          "bookingDate": "2026-01-15",
+          "splits": [
+            {
+              "repId": "zion",
+              "percent": 100.0
+            }
+          ],
+          "refunds": [
+            {
+              "amount": 60000.00,
+              "date": "2026-04-20"
+            }
+          ]
+        },
+        {
+          "dealId": "D2",
+          "amount": 40000.00,
+          "closeDate": "2026-02-24",
+          "bookingDate": "2026-02-25",
+          "splits": [
+            {
+              "repId": "zion",
+              "percent": 50.0
+            },
+            {
+              "repId": "yves",
+              "percent": 50.0
+            }
+          ],
+          "refunds": []
+        }
+      ]
+    }
+  ]
+}

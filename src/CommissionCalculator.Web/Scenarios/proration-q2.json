@@ -1,0 +1,34 @@
+{
+  "id": "proration-q2",
+  "name": "Mid-quarter starter, rounded proration",
+  "description": "Appendix A: Mid-quarter starter, rounded proration (carries US3 AS3).",
+  "quarter": {
+    "start": "2026-04-01",
+    "end": "2026-06-30"
+  },
+  "roster": [
+    {
+      "repId": "harper",
+      "name": "Harper",
+      "quota": 100000.00,
+      "startDate": "2026-05-16",
+      "openingRecoverableBalance": 0.00
+    }
+  ],
+  "deals": [
+    {
+      "dealId": "P-3",
+      "amount": 60000.00,
+      "closeDate": "2026-06-01",
+      "bookingDate": "2026-06-03",
+      "splits": [
+        {
+          "repId": "harper",
+          "percent": 100.0
+        }
+      ],
+      "refunds": []
+    }
+  ],
+  "bookingQuarters": []
+}

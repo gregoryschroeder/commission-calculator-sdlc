@@ -8,6 +8,9 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\tools\CommissionCalculator.Tools\CommissionCalculator.Tools.csproj" />
+    <!-- Built so the traceability test has a Razor Pages assembly to reflect over, but not
+         referenced: its ASP.NET types must never load in the test host (task T061). -->
+    <ProjectReference Include="..\..\tools\CommissionCalculator.Tools.Fixture\CommissionCalculator.Tools.Fixture.csproj" ReferenceOutputAssembly="false" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Fixtures\**" CopyToOutputDirectory="PreserveNewest" />
