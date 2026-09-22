@@ -10,7 +10,20 @@ public sealed record SplitCredit(string RepId, decimal Percent);
 public sealed record RefundInput(decimal Amount, DateOnly Date);
 
 public sealed record DealInput(string DealId, decimal Amount, DateOnly CloseDate,
-    DateOnly BookingDate, IReadOnlyList<SplitCredit> Splits, IReadOnlyList<RefundInput> Refunds);
+    DateOnly BookingDate, IReadOnlyList<SplitCredit> Splits, IReadOnlyList<RefundInput> Refunds)
+{
+    // The generated == compares Splits and Refunds by reference, so two deals read from the same
+    // JSON never come out equal. Compare the values instead wherever "the same deal" is the
+    // question (FR-004's rule about a deal listed in both the scenario's list and a booking
+    // quarter's).
+    public static bool HaveEqualValues(DealInput first, DealInput second) =>
+        first.DealId == second.DealId
+        && first.Amount == second.Amount
+        && first.CloseDate == second.CloseDate
+        && first.BookingDate == second.BookingDate
+        && first.Splits.SequenceEqual(second.Splits)
+        && first.Refunds.SequenceEqual(second.Refunds);
+}
 
 public sealed record BookingQuarterRep(string RepId, decimal Quota, DateOnly StartDate);
 

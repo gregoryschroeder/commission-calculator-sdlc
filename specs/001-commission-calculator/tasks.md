@@ -779,3 +779,68 @@ constitution principle unmet by the code.
   Traceability section (the `trace` command, the committed report, and what "Explained" means) and
   a CI section naming the smoke, offline-smoke and traceability jobs; the "later" note under
   `tools/` is gone.
+
+---
+
+## Phase 11: Adversarial review
+
+Step 7 of the brief: a fresh-context subagent was given only `spec.md` and the engine's public API
+— explicitly barred from the calculation internals, the validator and every test — and asked to
+find an input whose payout contradicts the spec. It built its own reference implementation from the
+requirements and ran ~4,950 differential scenarios against the engine. Two findings, both real and
+both confirmed here by reading the code before any test was written.
+
+- [X] T068 Fix the false rejection of an earlier-quarter deal listed in both the scenario's own deal
+  list and booking-quarter data, per FR-004 (contradicts). FR-004 rejects such a deal only when the
+  two entries **differ**; `DuplicatedDealErrors` compared them with `!=`, and the compiler-generated
+  equality on `DealInput` compares its `Splits` and `Refunds` lists **by reference**, so two entries
+  read from the same JSON are never equal. Every scenario with that overlap — the natural shape,
+  since FR-004 requires booking-quarter data to hold every deal of that quarter while FR-008 lists
+  the earlier-quarter deal as excluded — was rejected outright, showing no payout at all.
+
+  **Result**: Done 2026-09-22. Tests first, both watched failing: `ScenarioValidatorTests
+  .ADealListedInBothListsWithEqualValuesIsNotADifference` (rebuilds the deal with fresh split and
+  refund objects) and the integration scenario `US6 AS2 with the earlier-quarter deal listed in both
+  lists, unchanged`, which failed with `Expected: CalculatedScenario, Actual: RejectedScenario`.
+  Fix: `DealInput.HaveEqualValues` compares the values, `SequenceEqual` over splits and refunds, and
+  the validator uses it. The scenario now pays the AS2 figures — clawback $3,600.00, earned
+  −$1,600.00, payable $0.00, closing recoverable balance $13,600.00 — plus the FR-008 excluded line
+  for R-11 at $0.00; derived independently here before the fix and matching the subagent's. *Guard*:
+  make the comparison always equal and the existing "a deal listed in both lists differs between
+  them" case fails, so the rule still has teeth; recorded.
+- [X] T069 Fix the spurious "refunds total more than the deal amount" error on a deal with no
+  refunds, per FR-004 (contradicts). The check was `Refunds.Sum() > Amount`, and for a negative
+  amount `0 > -100` holds, so a deal with no refunds was accused of a refund rule. The scenario is
+  rejected either way, so no payout changes; the reason shown was wrong.
+
+  **Result**: Done 2026-09-22. Test first, watched failing: `ScenarioValidatorTests
+  .ADealWithNoRefundsIsNeverAccusedOfRefundsExceedingIt`. Fix: the rule applies only when the deal
+  has refunds. *Guard*: remove that condition and the test fails; recorded. Positive control from
+  the subagent's probe, re-checked here: a deal of $0.00 with no refunds never produced the message,
+  so it appeared exactly when the amount was negative.
+- [X] T070 Record what the adversarial pass reported and what was **not** changed, with the reason.
+
+  **Result**: 2026-09-22.
+  - **Clean areas** (probed hard, no finding): all of Appendix A; tier boundaries at exactly 100%
+    and 150% and a cent either side, including quotas whose 150% edge lands on a half-cent, where
+    the engine follows FR-018's rounded edge; proration on the first, second and last days, and
+    quotas that round to $0.00 (rejected) or $0.01; 89/90/91/92-day and leap quarters; draws
+    starting on a month's first and last day and on 2024-02-29; splits down to $0.01 across two to
+    seven reps, ties to the first-listed rep, and a four-way tie for two leftover cents; full,
+    partial, repeated and same-date refunds, negative clawbacks from re-splits, and refunds crossing
+    a tier boundary; earlier-quarter refunds with prorated or differing booking-quarter quotas, two
+    booking quarters, and off-roster partners; draw recovery above, below and exactly at the
+    recoverable total, with opening balances and negative earnings; 43 targeted validation probes;
+    and 4,800 randomised differential scenarios, zero numeric mismatches.
+  - **Not changed — `RepStatement.Attainment` is the raw ratio, not a two-decimal percentage.**
+    FR-002 makes attainment display-only, and the web formats it with `Format.Attainment` (rounded
+    half away from zero, asserted by `FormatTests` and the page tests). Rounding in the engine would
+    put presentation in the domain, against Principle I. Left as is, deliberately.
+  - **Not changed — two spec silences, each with a $0.00 differential, raised with the maintainer**:
+    (a) FR-017 fixes clawback order only *within* one booking quarter, so the order of lines from
+    two different quarters is unstated; the engine groups by quarter, own quarter first, and a
+    global refund-date order would be an equally valid reading — every amount is identical either
+    way. (b) Whether a re-split line shows for a refund dated outside the scenario's quarter; the
+    engine shows it only beside an in-quarter clawback, which is what Appendix A.9 does. Both are
+    presentation-order questions, not payout questions, so neither is a payout ambiguity that the
+    engine resolved on its own.
