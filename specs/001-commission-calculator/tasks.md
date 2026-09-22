@@ -653,7 +653,7 @@ reader that every story uses.
   SC-004 CI evidence, record passing; SC-005 manual evidence with the T033/T034 PR links) plus the
   SC-005 note on FR-021's screen-reader clause. 232/232 tests green. The committed report is
   regenerated from the CI artifacts at T065, so its CI-evidence rows carry the real run URL.
-- [ ] T063 Re-verify every failure-path guard added in T007 (warnings, coverage), T008, T009,
+- [X] T063 Re-verify every failure-path guard added in T007 (warnings, coverage), T008, T009,
   T010, T018, T020, T022 (error capture, unknown property, required field), T023 (first-failure, missing directory,
   duplicate id), T030 (unknown id, skip-link
   target, second `h1`, section labelling, attainment format, money format), T031 (all four),
@@ -661,6 +661,46 @@ reader that every story uses.
   T047 (largest remainder, sum check, sum-100 accepted, own-list-only), T048, T052, T055 (AS3), T056 (incl. partner accepted, detectable completeness,
   overlap, date range, start-date mismatch, differing duplicate, single-rep no re-split), T061 (framework reference), T057, T060 (every rule check, dollar check), T060b, T061 — each still fails with its guarded
   behaviour removed; record each result here.
+
+  **Result**: Done 2026-09-22; every guard re-run against the final code, each still failing with its
+  guarded behaviour removed. Source-level guards (guard runner restores the file and touches it, so
+  the next build recompiles; `&& DateTime.Now.Year < 0` stands in for `if (false)`, which
+  warnings-as-errors rejects):
+  - T018 (20 rules): every rule's own case failed when its check was disabled — empty roster,
+    quarter shape, quota > 0 and whole cents, opening balance ≥ 0 and whole cents, deal amount > 0
+    and whole cents, refund amount > 0 and whole cents, split range, same rep twice on a deal,
+    duplicate roster repId, duplicate dealId, rep not on the roster; and dropping
+    `BookingQuarters.SelectMany(BookingQuarterErrors)` failed 18 booking-quarter cases (own-data-only).
+  - T020 skip validation → `AnInvalidScenarioIsRejectedWithNoStatements`.
+  - T022 error capture (4 cases), unknown property, required field. T023 missing directory,
+    duplicate id, stop at the first failure — one case each.
+  - T030 skip-link target, section labelling, second `h1`, unknown id → 200, attainment format,
+    money format. T031 (a) light grey text, (b) 16px controls, (c) sticky rule, (d) fixed caption height.
+  - T037 exclude every deal → 39 failures (AS3's red evidence). T038 close-date crediting (features
+    and unit), exclusive bounds, refund-date check, refund-total check, refunds on the own list only.
+  - T042 prorate unconditionally → 25 failures (AS4). T043 start-after-quarter-end, zero prorated
+    quota, booked-before-start, start-date rules on own data only.
+  - T047 independent rounding instead of largest remainder (7), split-sum check removed (4),
+    sum check rejecting every deal (7, incl. `SplitPercentagesSummingToExactlyOneHundredAreAccepted`),
+    sum check on the scenario's own list only (5). T048 alert list not rendered.
+  - T052 negative-earned branch, start-month proration applied to every month (4).
+  - T055/T056 (a) refunds sized against the untouched quarter, (b) refund-date filter, (c) clawbacks
+    floored at zero, re-split line emitted for every refund, every booking-quarter partner rejected (5).
+  - T057 negatives formatted with `Math.Abs` alone → the money-format unit test and the page test
+    for a clawback larger than the quarter's commission.
+  Command-level guards: T007 warnings — an unused variable in Engine → `error CS0219`, build exit 1;
+  T007 coverage — `tools/ci/coverage-gate.sh 101` → "Engine line coverage: 98.63% (floor 101%) — FAIL",
+  exit 1 (the real floor of 80 passes). T008 isolation — an order-dependent probe pair passed in the
+  suite ("Test run summary: Passed!", 19/19) while the reader failed alone: `alone FAIL
+  CommissionCalculator.Tools.Tests.Probe.AaaReaderProbe`. T009 skip gate — `[Fact(Skip="probe")]`
+  with `--fail-skips on` → "Test run summary: Failed!", failed 1. T010/T060b smoke — the seeds kept
+  out of the build output gave 404 and exit 1. T035 no-network — `--network none` run passes
+  ("external request failed, as it must with no network", exit 0) and the positive control on
+  `bridge` fails ("an external request succeeded, so the app was not running without a network",
+  exit 1). T060 rule checks and T061 (gap detection disabled; ASP.NET framework reference removed →
+  `ReflectionTypeLoadException` in the child process) were verified earlier in this phase.
+  Afterwards: working tree clean apart from the quickstart edit, build green with `-warnaserror`,
+  232/232 tests passing, 0 skipped.
 - [ ] T064 Quickstart validation (standing rule 3): step 1 from a fresh clone (evidence:
   `git status --ignored` shows no build output before running); re-run T033's keyboard check on the
   final UI; the maintainer re-runs T034's VoiceOver check. Record results in the PR.
