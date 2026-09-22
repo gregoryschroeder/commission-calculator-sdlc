@@ -184,7 +184,10 @@ reader that every story uses.
 
 - [ ] T027 [P] [US1] In `tests/CommissionCalculator.Specs/`, add step definitions that build
   `ScenarioInput` from Gherkin tables and assert, to the cent, both
-  statement lines (description, amount, FR) and statement summary fields (`Attainment`,
+  statement lines (description, amount, FR) — as an **ordered subsequence**: the lines a scenario
+  names must appear in that order, and other lines may be present, because Phases 7–8 add draw,
+  recovery and clawback lines to every statement and a test is never edited to pass (full-list
+  equality is T060's job, in Phase 9) — and statement summary fields (`Attainment`,
   `CreditedBookings`, `ProratedQuota`, `Clawbacks`, `DrawPaid`, `Recovered`, `EarnedCommission`,
   `Payable`, `ClosingRecoverableBalance`). Write `Features/US1_TieredCommission.feature` with US1 AS1–AS4
   exact, including AS1's attainment of 80% (`@FR-006 @FR-007 @FR-009 @FR-018`). Run; record
@@ -197,7 +200,10 @@ reader that every story uses.
   `Calculation/QuarterCredit.cs` wired into `StatementBuilder` (credit lines FR-008, tier lines
   FR-006, "Commission before refunds", attainment FR-009) until T027–T028 pass.
 - [ ] T030 [P] [US1] Write `Features/UI_Page.feature` in Specs, driven through the web host
-  (`@FR-001 @FR-002 @FR-003 @FR-021 @SC-002`): picker form structure per contracts/ui.md;
+  (`@FR-001 @FR-002 @FR-003 @FR-021 @SC-002`): picker form structure per contracts/ui.md; exactly one
+  `h1`; a skip link whose `href` targets the `<main>` element's id; each rep `section`'s
+  `aria-labelledby` names its `h2`'s id (*Guard*: drop the skip link's target id, and separately
+  the section's `aria-labelledby`, and confirm each scenario fails; record);
   `?scenario=tiers` shows one section per rep with `h2`, caption, `th scope=col` Item/Amount/Rule;
   every Rule cell is an FR ID that exists in spec.md (read from the committed spec file); each rep's
   page has a `<title>` naming the selected scenario (WCAG 2.4.2); these scenarios run against a scenario directory the scenario itself creates (a temp folder holding the Appendix A.1 inputs
@@ -395,19 +401,22 @@ reader that every story uses.
   line for line (description, amount to the cent, FR), and `invalid.json` lists exactly the four
   Appendix A.11 errors. SC-003 check: the brief's rules map to FRs as rule 1 → FR-005, rule 2 →
   FR-006, rule 3 → FR-010, rule 4 → FR-012, rule 5 → FR-014/FR-015, rule 6 → FR-016, rule 7 →
-  FR-008, rule 8 → FR-019. Each rule's check is chosen so that removing the scenario that
-  exercises it makes the check fail: rule 1 — the seeded reps do not all have the same quota
-  (`proration`'s reps have $90,000.00; every other seeded rep has $100,000.00); rule 2 — a line at each rate,
-  5%, 8% and 12% (`tiers`); rule 3 — a "Prorated quota" line (FR-010); rule 4 — a share line
-  (FR-012); rule 5 — a non-zero "Draw recovered" and a non-zero "Commission payable" (`draw`,
-  Parker); rule 6 — a non-zero clawback line (FR-016); rule 7 — a line with section `Excluded`
-  citing FR-008 (every statement has an FR-008 "Credited bookings" line, so a plain FR-008 match
-  could not fail); rule 8 — every seeded file loads under the strict reader (no currency, tax or
-  term fields exist to set) and every rendered amount is in dollars, `$` or `−$`. Every breakdown
-  line's FR exists in spec.md (SC-002). *Guard*: for each of rules 2–7, remove the one scenario
-  named and confirm that rule's check fails; for rule 1 set both `proration` quotas to
-  $100,000.00 and confirm it fails; for rule 8 add a `"currency": "EUR"` property to one seed and
-  confirm it fails; record all. The feature
+  FR-008, rule 8 → FR-019. Each rule is a check function over a set of loaded statements:
+  rule 1 — the seeded reps do not all have the same quota; rule 2 — lines at 5%, 8% and 12%;
+  rule 3 — a "Prorated quota" line (FR-010); rule 4 — a share line (FR-012); rule 5 — a non-zero
+  "Draw recovered" and a non-zero "Commission payable"; rule 6 — a non-zero clawback line
+  (FR-016); rule 7 — a line with section `Excluded` citing FR-008 (every statement has an FR-008
+  "Credited bookings" line, so a plain FR-008 match could not fail); rule 8 — every seeded file
+  loads under the strict reader (no currency, tax or term fields exist to set) and every rendered
+  amount is in dollars, `$` or `−$`. Every breakdown line's FR exists in spec.md (SC-002).
+  Each check is shown able to fail by a **permanent** scenario that runs it over the seed set
+  with *every* scenario carrying that rule removed (carriers computed from Appendix A,
+  2026-09-22) and expects that check — not file loading — to report failure: rule 2 without
+  {tiers, draw} (the only 12% lines); rule 3 without {proration, proration-q2}; rule 4 without
+  {splits, split-rounding, refund-splits}; rule 5 without {draw} (the only non-zero payable,
+  Parker); rule 6 without {refunds, refund-splits, refunds-q2}; rule 7 without {booking-dates};
+  rule 1 with the `proration` quotas replaced by $100,000.00 in memory; rule 8 with a
+  `"currency": "EUR"` property added to one seed's JSON in memory. The feature
   lists the eleven expected files by name, so before T060a it fails on every one ("scenario file
   not found"); run it and record that red. Any later failure is a spec question, not a test edit.
 - [ ] T060a Add the eleven seed files `src/CommissionCalculator.Web/Scenarios/{tiers,
@@ -439,15 +448,18 @@ reader that every story uses.
   SC-005 and FR-021's
   screen-reader clause — T033/T034, not visible to the trace) writing
   `specs/001-commission-calculator/traceability.md`. Add a final CI job, `traceability`, that
-  depends on the build/test, smoke and offline-smoke jobs, downloads their artifacts with `actions/download-artifact@v8` (suite TRX files
-  and `ci-evidence/*.json`), runs `trace` over them and uploads the result.
+  depends on the build/test, smoke and offline-smoke jobs, downloads their artifacts with
+  `actions/download-artifact@v8` (suite TRX files, `ci-evidence/*.json`, and the build/test job's
+  uploaded Release build output of the engine and web assemblies), runs `trace --assemblies
+  <engine.dll> <web.dll> --results <files>` over them and uploads the result. The build/test job
+  (T007) gains an upload of that build output.
 - [ ] T062 Add `[Implements]` to every engine and web member that implements an FR; run `trace`
-  over every TRX (as the CI job does); every FR has at least one member and one test except the
+  with the same assemblies and result files the CI job uses; every FR has at least one member and one test except the
   scope-only FR-019; every SC has at least one test except SC-004 (a passing CI-evidence record)
   and SC-005 (manual evidence); the
   manual-evidence items are listed with the PR links recorded in T033/T034/T064.
 - [ ] T063 Re-verify every failure-path guard added in T007, T008, T009, T010, T018, T020, T022, T023,
-  T030 (unknown id, attainment format, money format), T060, T060b, T031, T035 (404 and no-network), T023 (missing directory), T038, T043, T047, T048, T052, T056, T057, T061 still fails with its guarded
+  T030 (unknown id, skip-link target, section labelling, attainment format, money format), T060, T060b, T031, T035 (404 and no-network), T023 (missing directory), T038, T043, T047, T048, T052, T056, T057, T061 still fails with its guarded
   behaviour removed; record each result here.
 - [ ] T064 Quickstart validation (standing rule 3): step 1 from a fresh clone (evidence:
   `git status --ignored` shows no build output before running); re-run T033's keyboard check on the
