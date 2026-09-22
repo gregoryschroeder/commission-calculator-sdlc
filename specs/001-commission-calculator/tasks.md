@@ -701,9 +701,23 @@ reader that every story uses.
   `ReflectionTypeLoadException` in the child process) were verified earlier in this phase.
   Afterwards: working tree clean apart from the quickstart edit, build green with `-warnaserror`,
   232/232 tests passing, 0 skipped.
-- [ ] T064 Quickstart validation (standing rule 3): step 1 from a fresh clone (evidence:
+- [X] T064 Quickstart validation (standing rule 3): step 1 from a fresh clone (evidence:
   `git status --ignored` shows no build output before running); re-run T033's keyboard check on the
   final UI; the maintainer re-runs T034's VoiceOver check. Record results in the PR.
+
+  **Result**: Done 2026-09-22 (the maintainer's VoiceOver re-check is the open item, taken at the
+  T065 gate). Step 1 from a fresh clone of this branch: `git status --ignored --short` printed
+  nothing before running (no `bin/`, no `obj/`; it lists them afterwards, which is the positive
+  control that the check can see them), then `dotnet run --project src/CommissionCalculator.Web`
+  alone served `GET /` → 200 and `GET /?scenario=tiers` → 200 with four rep tables and Avery's
+  figures, the picker listing all 11 shipped scenarios. Keyboard re-check on that same final UI,
+  key presses only: Tab reaches the skip link (`href="#main"`, and `#main` is the `main` landmark),
+  then the labelled `Scenario` select, then the `Show` submit button, each showing the 3px
+  `rgb(11, 87, 164)` focus outline; Enter on `Show` submitted the GET form and the URL became
+  `/?scenario=tiers`. Unchanged from T033: pressing Down while the select held focus left
+  `value`/`selectedIndex` untouched (10, "tiers") — the in-app browser's synthesized keys do not
+  drive the native select widget; the maintainer confirmed that behaviour natively at the Phase 7
+  gate. Reflow at 320px: `clientWidth` 320, widest right edge 304px, no horizontal scroll.
 - [ ] T065 Checkpoint: PR "Phase 9: Polish", CI green, maintainer approves squash-merge.
 
 ---
