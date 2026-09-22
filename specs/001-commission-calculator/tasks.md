@@ -362,6 +362,8 @@ reader that every story uses.
   only to the scenario's own data and confirm the booking-quarter cases fail; record. Run; record
   failing.
 - [ ] T044 [US3] Implement `Calculation/QuotaProration.cs` and the FR-011/FR-004 start-date rules
+  (a split partner with no start date is skipped by the FR-011 check until T058 adds its own
+  rejection rule, so T056's test for that rule is red for the reason it states)
   until T042–T043 pass.
 - [ ] T045 [US3] Checkpoint: PR "Phase 5: US3", CI green, maintainer approves squash-merge.
 
