@@ -236,8 +236,9 @@ reader that every story uses.
   FR-006, "Commission before refunds", attainment FR-009) until T027–T028 pass.
 - [ ] T030 [P] [US1] Write `Features/UI_Page.feature` in Specs, driven through the web host
   (`@FR-001 @FR-002 @FR-003 @FR-021 @SC-002`): picker form structure per contracts/ui.md; exactly one
-  `h1`; a skip link whose `href` targets the `<main>` element's id; each rep `section`'s
-  `aria-labelledby` names its `h2`'s id (*Guard*: drop the skip link's target id, and separately
+  `h1`; a skip link whose `href` targets the `<main>` element's id; on `?scenario=tiers` exactly four rep
+  `section`s (one per A.1 rep) exist — so the check is red until T032 renders them — and each
+  one's `aria-labelledby` names its `h2`'s id (*Guard*: drop the skip link's target id, and separately
   the section's `aria-labelledby`, and confirm each scenario fails; record). The `h1` and
   skip-link scenarios are expected **green** at write time, because T004 built the layout (with its
   `h1`) in
