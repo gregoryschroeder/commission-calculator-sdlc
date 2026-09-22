@@ -38,8 +38,10 @@ analyze step can hold this list to them. Where anything above or below conflicts
    scenario JSON files, added in Phase 9 (T060a) after the check that compares them with Appendix A
    (T060) is written and seen failing. The Web SDK's default content items copy them to build and
    publish output (T025, research R17), and the smoke assertion added in T060b proves the running
-   app loads them. Before Phase 9, host-level tests use scenario folders they create themselves. It adds no environment variables, secrets, services or
-   configuration.
+   app loads them. Before Phase 9, host-level tests use scenario folders they create themselves. It adds one
+   optional configuration value, `Scenarios:Directory` (default: `Scenarios` under the app's output
+   directory), bound through standard ASP.NET Core configuration and documented in the README
+   (T011, T024); no environment variables are required, and no secrets or services.
 6. **Every test names what it verifies**: `[Trait("Requirement", "FR-0xx")]` on unit tests,
    `@FR-0xx` / `@SC-00x` tags on Gherkin scenarios; tests of project tooling carry
    `[Trait("Principle", "II")]` / `("III")` for the principle they enforce (constitution v1.1.0).
@@ -75,7 +77,9 @@ analyze step can hold this list to them. Where anything above or below conflicts
   Fixtures/`): `CoverageGateTests` — engine line rate 0.85 passes, 0.79 fails, report with no
   engine package fails *unless* the engine assembly contains no types (then passes with the message
   "no engine lines yet"), using a fixture report that *has* an engine package so the floor can
-  bite; `TrxTestListTests` — lists fully qualified `className.name` for xUnit and
+  bite; several reports (one per test project) are merged — the engine's lines are the union
+  across reports and a line counts as covered if any report covers it — with fixtures where one
+  report lacks the engine package and another covers it partly; `TrxTestListTests` — lists fully qualified `className.name` for xUnit and
   Reqnroll tests from a fixture TRX (the Reqnroll display-name case from research R15). Run; record
   failing.
 - [ ] T006 Create `tools/CommissionCalculator.Tools/` (console app; commands `coverage-gate` and
@@ -83,8 +87,8 @@ analyze step can hold this list to them. Where anything above or below conflicts
   unit-tested; see research R8 correction.)
 - [ ] T007 Write `.github/workflows/ci.yml`: checkout@v7, setup-dotnet@v6 from `global.json`,
   `dotnet build -warnaserror`, `dotnet test --fail-skips on --report-trx --coverage
-  --coverage-output-format cobertura`, `coverage-gate` on the engine (floor 80%, rate written to
-  the job summary), upload TRX and coverage as artifacts.
+  --coverage-output-format cobertura`, `coverage-gate` over **all** cobertura files from the
+  run, merged per T005 (floor 80% on the engine, rate written to the job summary), upload TRX and coverage as artifacts.
   *Guard (warnings)*: on a local throwaway change add an unused variable in Engine; confirm the
   build fails; revert; record. *Guard (coverage)*: run `coverage-gate` with floor 101% against the
   Tools.Tests fixture report that contains an engine package (the real report has no engine lines
@@ -103,7 +107,9 @@ analyze step can hold this list to them. Where anything above or below conflicts
   `dotnet run` inside that folder), test commands, where the spec lives.
 - [ ] T012 Checkpoint: open PR "Phase 1: Setup", CI green, maintainer approves squash-merge. Record
   the first CI run's outcome in research R14 (SDK resolution) and R15 (isolation-step time), and
-  propose to the maintainer the PATCH amendment that marks constitution C7 as confirmed.
+  propose to the maintainer the PATCH amendment that marks constitution C7 as confirmed and, in its
+  pairwise note, qualifies "CI installs the pinned SDK" as confirmed by this run (until then it is
+  assumed, as research R14 says).
 
 ---
 
@@ -147,14 +153,17 @@ reader that every story uses.
   confirm the malformed-JSON test fails with an escaped exception; record. Run; record failing.
 - [ ] T023 Write `ScenarioCatalogTests` in Web.Tests (`FR-001`): files are listed ordered by file
   name; a file that fails to load is listed as a load error and does not hide the others; two
-  files declaring the same scenario id are both reported as a load error naming the id (FR-004).
+  files declaring the same scenario id are both reported as a load error naming the id (FR-004); a
+  scenario directory that does not exist yields an empty catalog, not an exception (the shipped app
+  has no `Scenarios/` folder until Phase 9). *Guard*: remove the existence check and confirm that
+  test fails with the escaped exception; record.
   *Guard*: make the catalog stop at the first failing file and confirm the "does not hide the
   others" test fails; record. Run; record failing.
 - [ ] T024 Implement `ScenarioCatalog/ScenarioFileReader.cs` and `ScenarioCatalog.cs` (loads every
   `Scenarios/*.json` from a directory set by an options value that defaults to
   `Path.Combine(AppContext.BaseDirectory, "Scenarios")` — the build/publish output, not the content
-  root, so a file missing from output is missing at run time; tests can point it at a directory
-  they create) until T022–T023 pass.
+  root, so a file missing from output is missing at run time; the value `Scenarios:Directory` can
+  override it, and tests point it at a directory they create) until T022–T023 pass.
 - [ ] T025 Confirm in the real solution that `Scenarios/*.json` reaches build and publish output
   through the Web SDK's default content items, with **no** project-file entry (research R17: an
   explicit `<Content Include>` fails the build with NETSDK1022) — structural; proven by T060b's smoke
@@ -189,7 +198,9 @@ reader that every story uses.
   every Rule cell is an FR ID that exists in spec.md (read from the committed spec file); each rep's
   page has a `<title>` naming the selected scenario (WCAG 2.4.2); these scenarios run against a scenario directory the scenario itself creates (a temp folder holding the Appendix A.1 inputs
   as JSON), never the shipped `Scenarios/` folder, which is only added in Phase 9 (T060a); summary `dl` shows quota, prorated quota, credited bookings, attainment (Avery: "80.00%"),
-  earned, draws paid, payable and closing balance; US1 AS5 — with the A.1 and A.2 inputs both in the
+  earned, clawbacks, draws paid, draw recovered, payable and closing balance; each rep's table has
+  exactly one row per engine `BreakdownLine`, in order, with the line's description, formatted
+  amount and FR (compared with `CommissionEngine.Calculate` on the same A.1 input); US1 AS5 — with the A.1 and A.2 inputs both in the
   folder, selecting `booking-dates` shows only Emery and selecting `tiers` only Avery–Devon; `GET /`
   with no `scenario` shows the first scenario by file name; an empty scenario folder shows "No
   scenarios are installed" and the picker with no options; unknown id → 404 with the picker; a load error
@@ -235,7 +246,10 @@ reader that every story uses.
   `FR-020`, result, commit SHA and run URL). These are CI gates, not tests; the trace lists them in
   their own "Verified by CI job" section and never counts them as tests (maintainer decision D1,
   2026-09-22). *Guard*: point the sidecar's request at a path
-  that returns 404 and confirm the job fails; record.
+  that returns 404 and confirm the job fails; *Guard (no network)*: run the job once with the app
+  container on the default bridge network instead of `--network none` and confirm the job fails
+  because the external request succeeds — the positive control for the "no network" evidence;
+  record both.
 - [ ] T036 [US1] Checkpoint: PR "Phase 3: US1", CI green, maintainer approves squash-merge. Record
   the offline job's first run in research R16 (Docker on the runner) and confirm the plan's
   Provenance gate; propose to the maintainer a PATCH amendment adding Docker (a CI-only dependency
@@ -375,7 +389,9 @@ reader that every story uses.
   Appendix A.11 errors. SC-003 check: the brief's rules map to FRs as rule 1 → FR-005, rule 2 →
   FR-006, rule 3 → FR-010, rule 4 → FR-012, rule 5 → FR-014/FR-015, rule 6 → FR-016, rule 7 →
   FR-008 (an excluded-by-booking-date line), rule 8 → FR-019 (satisfied by scope, as in T061); assert
-  that for rules 1–7 at least one seeded statement contains a line citing the mapped FR. *Guard*:
+  that for rules 1–6 at least one seeded statement contains a line citing the mapped FR, and for
+  rule 7 at least one line with section `Excluded` citing FR-008 (every statement has an FR-008
+  "Credited bookings" line, so a plain FR-008 match could not fail). *Guard*:
   remove `booking-dates.json` from the check's input and confirm rule 7 fails; record. The feature
   lists the eleven expected files by name, so before T060a it fails on every one ("scenario file
   not found"); run it and record that red. Any later failure is a spec question, not a test edit.
@@ -416,7 +432,7 @@ reader that every story uses.
   and SC-005 (manual evidence); the
   manual-evidence items are listed with the PR links recorded in T033/T034/T064.
 - [ ] T063 Re-verify every failure-path guard added in T007, T008, T009, T010, T018, T020, T022, T023,
-  T030 (unknown id, attainment format, money format), T060, T060b, T031, T035, T038, T043, T047, T048, T052, T056, T057, T061 still fails with its guarded
+  T030 (unknown id, attainment format, money format), T060, T060b, T031, T035 (404 and no-network), T023 (missing directory), T038, T043, T047, T048, T052, T056, T057, T061 still fails with its guarded
   behaviour removed; record each result here.
 - [ ] T064 Quickstart validation (standing rule 3): step 1 from a fresh clone (evidence:
   `git status --ignored` shows no build output before running); re-run T033's keyboard check on the
