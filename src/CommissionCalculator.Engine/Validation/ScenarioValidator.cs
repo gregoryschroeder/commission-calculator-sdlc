@@ -95,15 +95,30 @@ internal static class ScenarioValidator
             yield return $"Deal '{deal.DealId}': amount {Amount(deal.Amount)} is not a whole number of cents.";
         }
 
-        foreach (var error in deal.Refunds.SelectMany(refund => RefundErrors(deal.DealId, refund))
+        foreach (var error in deal.Refunds.SelectMany(refund => RefundErrors(deal, refund))
+                     .Concat(RefundTotalErrors(deal))
                      .Concat(SplitErrors(deal)))
         {
             yield return error;
         }
     }
 
-    private static IEnumerable<string> RefundErrors(string dealId, RefundInput refund)
+    private static IEnumerable<string> RefundTotalErrors(DealInput deal)
     {
+        if (deal.Refunds.Sum(refund => refund.Amount) > deal.Amount)
+        {
+            yield return $"Deal '{deal.DealId}': refunds total more than the deal amount.";
+        }
+    }
+
+    private static IEnumerable<string> RefundErrors(DealInput deal, RefundInput refund)
+    {
+        var dealId = deal.DealId;
+        if (refund.Date < deal.BookingDate)
+        {
+            yield return $"Deal '{dealId}': a refund dated {Date(refund.Date)} is dated before its booking date {Date(deal.BookingDate)}.";
+        }
+
         if (refund.Amount <= 0m)
         {
             yield return $"Deal '{dealId}': refund amount must be greater than zero.";
