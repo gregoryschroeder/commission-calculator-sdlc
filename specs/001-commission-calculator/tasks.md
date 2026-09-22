@@ -72,7 +72,8 @@ analyze step can hold this list to them. Where anything above or below conflicts
   `Directory.Packages.props` (central versions per plan.md), `.gitignore`, and
   `CommissionCalculator.slnx` — structural, no test.
 - [ ] T002 Create `src/CommissionCalculator.Engine/CommissionCalculator.Engine.csproj` (no package
-  references) and `src/CommissionCalculator.Web/CommissionCalculator.Web.csproj` (Razor Pages,
+  references; `<InternalsVisibleTo Include="CommissionCalculator.Engine.Tests" />` so unit tests can
+  reach internal calculation types — otherwise Engine.Tests fails with CS0122) and `src/CommissionCalculator.Web/CommissionCalculator.Web.csproj` (Razor Pages,
   references Engine only) with a minimal `Program.cs` — an empty pipeline plus `public partial class
   Program` — so the project builds and T003 fails on its assertions (`/` returns 404), not on a
   missing entry point (CS5001) — structural, no test.
@@ -163,13 +164,16 @@ reader that every story uses.
   contracts/scenario-file.md maps to the expected `ScenarioInput`; `10.005` is read exactly;
   unknown property, malformed JSON and a missing required field each produce a load error naming
   the file, never an exception out of the reader. *Guard*: remove the reader's error capture and
-  confirm the malformed-JSON test fails with an escaped exception; record. Run; record failing.
+  confirm the malformed-JSON test fails with an escaped exception; allow unmapped JSON members and
+  confirm the unknown-property test fails; drop the required-field check and confirm the
+  missing-field test fails; record all three. Run; record failing.
 - [ ] T023 Write `ScenarioCatalogTests` in Web.Tests (`FR-001`): files are listed ordered by file
   name; a file that fails to load is listed as a load error and does not hide the others; two
   files declaring the same scenario id are both reported as a load error naming the id (FR-004); a
   scenario directory that does not exist yields an empty catalog, not an exception (the shipped app
   has no `Scenarios/` folder until Phase 9). *Guard*: remove the existence check and confirm that
-  test fails with the escaped exception; record.
+  test fails with the escaped exception; skip the duplicate-id check and confirm the duplicate-id
+  test fails; record.
   *Guard*: make the catalog stop at the first failing file and confirm the "does not hide the
   others" test fails; record. Run; record failing.
 - [ ] T024 Implement `ScenarioCatalog/ScenarioFileReader.cs` and `ScenarioCatalog.cs` (loads every
@@ -327,7 +331,7 @@ reader that every story uses.
   unconditionally and confirm AS4 fails; record.
 - [ ] T043 [P] [US3] Write `QuotaProrationTests` (`FR-010`, `FR-004`, `FR-011`): 45/90 of
   90,000.00 = 45,000.00; 46/91 of 100,000.00 = 50,549.45; start on or before the first day → no
-  proration and no prorated-quota line; start on the last day → 1 day; prorated quota rounding to
+  proration (asserted on `QuotaProration`'s result, which is a stub until T044, so red); start on the last day → 1 day; prorated quota rounding to
   0.00 → rejected; start after quarter end → rejected naming the rep; any deal (counted or not)
   booked before a credited rep's start → rejected naming deal and rep. *Guard*: remove each
   rejection check and confirm its test fails; record. Run; record failing.
@@ -444,7 +448,8 @@ reader that every story uses.
   (FR-016); rule 7 — a line with section `Excluded` citing FR-008 (every statement has an FR-008
   "Credited bookings" line, so a plain FR-008 match could not fail); rule 8 — every seeded file
   loads under the strict reader (no currency, tax or term fields exist to set) and every rendered
-  amount is in dollars, `$` or `−$`. Every breakdown line's FR exists in spec.md (SC-002).
+  amount is in dollars, `$` or `−$` (a second permanent scenario feeds the dollar check an amount
+  formatted without `$` and expects it to fail). Every breakdown line's FR exists in spec.md (SC-002).
   Each check is shown able to fail by a **permanent** scenario that runs it over the seed set
   with *every* scenario carrying that rule removed (carriers computed from Appendix A,
   2026-09-22) and expects that check — not file loading — to report failure: rule 2 without
@@ -499,7 +504,8 @@ reader that every story uses.
   record passing and the manual-evidence items carrying the PR links recorded in
   T033/T034/T064.
 - [ ] T063 Re-verify every failure-path guard added in T007 (warnings, coverage), T008, T009,
-  T010, T018, T020, T022, T023 (first-failure, missing directory), T030 (unknown id, skip-link
+  T010, T018, T020, T022 (error capture, unknown property, required field), T023 (first-failure, missing directory,
+  duplicate id), T030 (unknown id, skip-link
   target, second `h1`, section labelling, attainment format, money format), T031 (all four),
   T035 (404, no-network), T037 (AS3 exclude-all), T038 (close date, bounds, refund date), T042 (AS4), T043,
   T047 (largest remainder, sum check, sum-100 accepted), T048, T052, T055 (AS3), T056 (incl. partner accepted and booking-quarter

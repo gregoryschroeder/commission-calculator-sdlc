@@ -1,7 +1,9 @@
 # Contract: Commission engine public API
 
 The engine (`CommissionCalculator.Engine`) is a library with no I/O. This is the whole public
-surface the web app and the tests use; everything else is `internal`. Names are the planned C#
+surface the web app and the Gherkin/web tests use; everything else is `internal`, and the engine's
+own unit tests reach internal calculation types through `InternalsVisibleTo`
+(`CommissionCalculator.Engine.Tests`). Names are the planned C#
 names; shapes, not bodies.
 
 ```csharp
