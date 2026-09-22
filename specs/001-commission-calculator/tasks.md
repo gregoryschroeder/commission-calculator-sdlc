@@ -63,7 +63,11 @@ analyze step can hold this list to them. Where anything above or below conflicts
 8. **Validation scope.** Each validation rule is tested once, in the task that introduces it, in
    every place it applies (scenario roster and deal list, booking-quarter reps, partners and deals,
    refunds), with a guard that restricts it to the scenario's own data and sees the other cases
-   fail. Later tasks do not re-test it.
+   fail. Later tasks do not re-test it. Test data for any validation or acceptance case is fully
+   valid under **every** FR-004/FR-011/FR-013 rule, including rules that later phases add, except
+   for the one violation under test — booking-quarter cases start from Appendix A.10's booking-
+   quarter block — so no rule landing later can reject an earlier test's data (T018, T038, T043,
+   T047, T056).
 ---
 
 ## Phase 1: Setup (shared infrastructure) — PR 1
