@@ -149,12 +149,22 @@ public sealed partial class PageSteps(AppHost host)
         }
     }
 
+    [Then("the summary for {string} shows earned commission {string}")]
+    public void ThenTheSummaryShowsEarnedCommission(string name, string amount) =>
+        Assert.Equal(amount, SummaryValue(name, "Earned commission"));
+
     [Then("the summary for {string} shows attainment {string}")]
     public void ThenTheSummaryShowsAttainment(string name, string attainment)
     {
         var section = RepSections.Single(candidate => candidate.QuerySelector("h2")!.TextContent.Trim() == name);
         var term = section.QuerySelectorAll("dl dt").Single(candidate => candidate.TextContent.Trim() == "Attainment");
         Assert.Equal(attainment, term.NextElementSibling!.TextContent.Trim());
+    }
+
+    private string SummaryValue(string name, string label)
+    {
+        var section = RepSections.Single(candidate => candidate.QuerySelector("h2")!.TextContent.Trim() == name);
+        return section.QuerySelectorAll("dl dt").Single(term => term.TextContent.Trim() == label).NextElementSibling!.TextContent.Trim();
     }
 
     [Then("every rep table lists exactly the engine's lines for {string}")]

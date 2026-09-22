@@ -7,9 +7,10 @@ internal static class StatementBuilder
 {
     private static readonly CultureInfo Invariant = CultureInfo.InvariantCulture;
 
-    public static RepStatement Build(RepInput rep, QuarterPeriod quarter, IReadOnlyList<DealInput> deals)
+    public static RepStatement Build(RepInput rep, ScenarioInput scenario)
     {
-        var credits = QuarterCredit.For(rep.RepId, quarter, deals);
+        var quarter = scenario.Quarter;
+        var credits = QuarterCredit.For(rep.RepId, quarter, scenario.Deals);
         var creditedBookings = credits.Sum(credit => credit.Share);
         var prorated = QuotaProration.For(rep.Quota, rep.StartDate, quarter);
         var proratedQuota = prorated.Amount;
@@ -28,7 +29,25 @@ internal static class StatementBuilder
         lines.AddRange(tiers.Select(TierLineFor));
         lines.Add(new BreakdownLine(LineSection.Subtotal, "Commission before refunds", commissionBeforeRefunds, "FR-006"));
 
-        var earnedCommission = commissionBeforeRefunds;
+        var clawbacks = ClawbackCalculator.For(rep, scenario);
+        foreach (var clawback in clawbacks)
+        {
+            if (clawback.ResplitShare is { } share)
+            {
+                lines.Add(new BreakdownLine(LineSection.Resplit,
+                    $"{clawback.Deal.DealId} re-split after refund on {Date(clawback.Refund.Date)}: share of {Dollars(clawback.ReducedAmount)}",
+                    share, "FR-017"));
+            }
+
+            lines.Add(new BreakdownLine(LineSection.Clawback,
+                $"Clawback: {clawback.Deal.DealId} refund {Dollars(clawback.Refund.Amount)} on {Date(clawback.Refund.Date)}",
+                clawback.Amount, "FR-016"));
+        }
+
+        var clawbackTotal = clawbacks.Sum(clawback => clawback.Amount);
+        lines.Add(new BreakdownLine(LineSection.Subtotal, "Clawbacks", clawbackTotal, "FR-016"));
+
+        var earnedCommission = commissionBeforeRefunds - clawbackTotal;
         lines.Add(new BreakdownLine(LineSection.Subtotal, "Earned commission", earnedCommission, "FR-015"));
 
         var draws = DrawSchedule.For(rep.StartDate, quarter);
@@ -45,7 +64,7 @@ internal static class StatementBuilder
         return new RepStatement(rep.RepId, rep.Name,
             Quota: rep.Quota, ProratedQuota: proratedQuota, CreditedBookings: creditedBookings,
             Attainment: Attainment(creditedBookings, proratedQuota),
-            CommissionBeforeRefunds: commissionBeforeRefunds, Clawbacks: 0m, EarnedCommission: earnedCommission,
+            CommissionBeforeRefunds: commissionBeforeRefunds, Clawbacks: clawbackTotal, EarnedCommission: earnedCommission,
             DrawPaid: drawPaid, Recovered: recovery.Recovered, Payable: recovery.Payable,
             ClosingRecoverableBalance: recovery.ClosingBalance,
             lines);

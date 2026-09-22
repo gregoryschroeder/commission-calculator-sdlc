@@ -13,6 +13,7 @@ internal static class ScenarioValidator
     public static IReadOnlyList<ValidationError> Validate(ScenarioInput scenario) =>
         ScenarioErrors(scenario)
             .Concat(scenario.BookingQuarters.SelectMany(BookingQuarterErrors))
+            .Concat(BookingQuarterDataErrors(scenario))
             .Select(error => new ValidationError(error.Message, error.Requirement))
             .ToList();
 
@@ -42,6 +43,66 @@ internal static class ScenarioValidator
         deals.SelectMany(deal => deal.Splits
             .Where(split => startDates.TryGetValue(split.RepId, out var start) && deal.BookingDate < start)
             .Select(split => StartDateFailure($"Deal '{deal.DealId}' is booked before the start date of rep '{split.RepId}' ({Date(startDates[split.RepId])})."))); 
+
+    // The booking-quarter data a clawback needs, as far as the engine can detect it missing
+    // (clarification 2026-09-22): the quarter itself, an entry for each credited roster rep, and a
+    // start date for each split partner. That the data lists *all* of those deals is a
+    // precondition on the scenario, not a check.
+    private static IEnumerable<Failure> BookingQuarterDataErrors(ScenarioInput scenario)
+    {
+        var roster = scenario.Roster.Select(rep => rep.RepId).ToHashSet();
+        var startDates = scenario.Roster.ToLookup(rep => rep.RepId, rep => rep.StartDate);
+
+        foreach (var bookingQuarter in scenario.BookingQuarters)
+        {
+            if (bookingQuarter.Quarter.Start <= scenario.Quarter.End && scenario.Quarter.Start <= bookingQuarter.Quarter.End)
+            {
+                yield return new Failure($"Booking quarter {Date(bookingQuarter.Quarter.Start)}..{Date(bookingQuarter.Quarter.End)} overlaps the scenario's quarter.");
+            }
+
+            foreach (var deal in bookingQuarter.Deals.Where(deal => deal.BookingDate < bookingQuarter.Quarter.Start || deal.BookingDate > bookingQuarter.Quarter.End))
+            {
+                yield return new Failure($"Deal '{deal.DealId}' is booked outside its booking quarter {Date(bookingQuarter.Quarter.Start)}..{Date(bookingQuarter.Quarter.End)}.");
+            }
+
+            foreach (var rep in bookingQuarter.Reps.Where(rep => startDates[rep.RepId].Any(start => start != rep.StartDate)))
+            {
+                yield return new Failure($"Rep '{rep.RepId}': the booking quarter's start date differs from the roster ({Date(rep.StartDate)}).");
+            }
+
+            var known = bookingQuarter.Reps.Select(rep => rep.RepId)
+                .Concat(bookingQuarter.Partners.Select(partner => partner.RepId)).ToHashSet();
+            foreach (var deal in bookingQuarter.Deals)
+            {
+                foreach (var split in deal.Splits.Where(split => !known.Contains(split.RepId)))
+                {
+                    yield return roster.Contains(split.RepId)
+                        ? new Failure($"Rep '{split.RepId}' is credited on booking-quarter deal '{deal.DealId}' but has no entry in the booking quarter's reps.")
+                        : new Failure($"Rep '{split.RepId}' on booking-quarter deal '{deal.DealId}' is neither on the roster nor listed as a partner with a start date.");
+                }
+            }
+        }
+
+        foreach (var error in DuplicatedDealErrors(scenario).Concat(MissingBookingQuarterErrors(scenario)))
+        {
+            yield return error;
+        }
+    }
+
+    private static IEnumerable<Failure> DuplicatedDealErrors(ScenarioInput scenario)
+    {
+        var bookingDeals = scenario.BookingQuarters.SelectMany(quarter => quarter.Deals).ToLookup(deal => deal.DealId);
+        return scenario.Deals
+            .Where(deal => bookingDeals[deal.DealId].Any(other => other != deal))
+            .Select(deal => new Failure($"Deal '{deal.DealId}' differs between the two lists."));
+    }
+
+    private static IEnumerable<Failure> MissingBookingQuarterErrors(ScenarioInput scenario) =>
+        scenario.Deals
+            .Where(deal => deal.BookingDate < scenario.Quarter.Start
+                && deal.Refunds.Any(refund => refund.Date >= scenario.Quarter.Start && refund.Date <= scenario.Quarter.End)
+                && !scenario.BookingQuarters.Any(quarter => deal.BookingDate >= quarter.Quarter.Start && deal.BookingDate <= quarter.Quarter.End))
+            .Select(deal => new Failure($"Deal '{deal.DealId}', refunded in this quarter, was booked {Date(deal.BookingDate)} and has no booking-quarter data."));
 
     private static IEnumerable<Failure> ScenarioErrors(ScenarioInput scenario)
     {
