@@ -54,7 +54,12 @@ analyze step can hold this list to them. Where anything above or below conflicts
 7. **Red or green at write time is declared, never assumed.** "Run; record failing" means the
    whole task's tests are expected red. Where a test already passes when written, because an
    earlier phase built what it checks, the task says so by name and names a guard that can make
-   it fail; the recorded result says which tests were red and which green.
+   it fail; the recorded result says which tests were red and which green. So that a declared-green
+   test can run, and every red fails on an assertion rather than a compile error, a test-writing
+   task first adds compile-only stubs for any new type or member its tests reference (signatures
+   only, bodies `throw new NotImplementedException()`); the implementation task replaces them. This
+   applies in particular to T030 (formatters), T047 (`SplitAllocation`) and T056
+   (`ClawbackCalculator`), whose projects also hold that task's declared-green tests.
 ---
 
 ## Phase 1: Setup (shared infrastructure) — PR 1
@@ -497,7 +502,7 @@ reader that every story uses.
   T010, T018, T020, T022, T023 (first-failure, missing directory), T030 (unknown id, skip-link
   target, second `h1`, section labelling, attainment format, money format), T031 (all four),
   T035 (404, no-network), T037 (AS3 exclude-all), T038 (close date, bounds, refund date), T042 (AS4), T043,
-  T047 (sum-100 accepted), T048, T052, T055 (AS3), T056 (incl. partner accepted and booking-quarter
+  T047 (largest remainder, sum check, sum-100 accepted), T048, T052, T055 (AS3), T056 (incl. partner accepted and booking-quarter
   list rules), T057, T060 (every rule check), T060b, T061 — each still fails with its guarded
   behaviour removed; record each result here.
 - [ ] T064 Quickstart validation (standing rule 3): step 1 from a fresh clone (evidence:
