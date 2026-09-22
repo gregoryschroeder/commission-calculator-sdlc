@@ -215,7 +215,11 @@ reader that every story uses.
 
 - [ ] T027 [P] [US1] In `tests/CommissionCalculator.Specs/`, add step definitions that build
   `ScenarioInput` from Gherkin tables and assert, to the cent, both
-  statement lines (description, amount, FR) — as an **ordered subsequence**: the lines a scenario
+  statement lines (description, amount, FR) — each description copied **exactly** from the
+  Appendix A scenario that carries the example (e.g. "T-1 booked 2026-02-12 (closed 2026-02-10)",
+  "5% of $80,000.00"), so T060's line-for-line check in Phase 9 can never disagree with an earlier
+  feature; this applies to every story feature file (T037, T042, T046, T051, T055) — as an
+  **ordered subsequence**: the lines a scenario
   names must appear in that order, and other lines may be present, because Phases 7–8 add draw,
   recovery and clawback lines to every statement and a test is never edited to pass (full-list
   equality is T060's job, in Phase 9) — and statement summary fields (`Attainment`,
@@ -508,8 +512,13 @@ reader that every story uses.
 - [ ] T061 Traceability generator, test first: add `TraceabilityTests` to Tools.Tests
   (`[Trait("Principle", "III")]`; fixture spec with FR-001..FR-003 and SC-001, fixture TRX, fixture
   assembly metadata, plus one case that runs the built tools executable **as a separate process**
-  against a prebuilt fixture DLL containing a Razor Pages `PageModel` marked `[Implements]` (Tools.Tests
-  has no ProjectReference to the web project, so the framework reference cannot arrive through it)
+  against a fixture DLL built from a committed fixture project,
+  `tests/CommissionCalculator.Tools.Fixture/` (Web SDK, one Razor Pages `PageModel` marked
+  `[Implements("FR-001")]`, referencing the Engine for `ImplementsAttribute`); Tools.Tests builds it
+  through a `ProjectReference` with `ReferenceOutputAssembly="false"` and loads it from the
+  fixture's output path in the child process, so no ASP.NET framework reference reaches the
+  tools process through the test. `trace` recognises the attribute by its full type name,
+  `CommissionCalculator.Engine.ImplementsAttribute`, via `CustomAttributeData`
   and expects its FR in the output — *Guard*: remove the framework reference from the tools project
   and confirm that case fails with `ReflectionTypeLoadException` in the child process's output;
   record) — an ID with no test and an ID with no member both appear under "Gaps"; an ID
