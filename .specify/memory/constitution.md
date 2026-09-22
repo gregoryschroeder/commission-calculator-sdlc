@@ -1,7 +1,22 @@
 <!--
 AMENDMENT LOG (newest first; earlier entries are kept, marked superseded, never deleted)
 
-## v1.1.0 — 2026-09-21 — tooling tests and read-only repository files
+## v1.1.1 — 2026-09-22 — C7 confirmed; the approved reading of `dotnet run`
+- Version change: 1.1.0 → 1.1.1 (PATCH: an assumption confirmed by evidence and an approved
+  interpretation written down; no principle or constraint changes what it permits).
+- Modified: C7 (assumed → confirmed, with a new revisit trigger); C2 and Principle VII (record the
+  maintainer's reading of "runs with `dotnet run`"); the pairwise note on II × C7.
+- Rationale: the first CI run (2026-09-22, run 35758821698, PR #2) resolved `global.json` to SDK
+  10.0.401 on GitHub Actions and passed every gate, so C7's "assumed at ratification" is now
+  measured. The same run carried GitHub's notice that `ubuntu-latest` moves to Ubuntu 26 from
+  2026-10-19, which becomes C7's revisit trigger. `dotnet run` at the repository root cannot start
+  an app when a solution file is present (spiked 2026-09-21, research R12); the maintainer approved
+  `dotnet run --project src/CommissionCalculator.Web` (or plain `dotnet run` inside that folder) at
+  the plan gate on 2026-09-21, and the constitution now says so. Docker, used only by the
+  offline-smoke CI job, stays assumed until that job first runs (tasks T036).
+- Deferred: none.
+
+## v1.1.0 — 2026-09-21 — tooling tests and read-only repository files (superseded by v1.1.1)
 - Version change: 1.0.0 → 1.1.0 (MINOR: guidance in II and III materially expanded — it changes
   what a compliant test may do and what it must name; no principle removed or redefined).
 - Modified: II (per-test independence wording), III (tests of project tooling).
@@ -148,7 +163,9 @@ breakdown that does not exist for them.
 
 ### VII. The Runtime Environment Is Part of the Feature
 
-The application's runtime environment is a developer machine running `dotnet run`. Any change that
+The application's runtime environment is a developer machine running `dotnet run --project
+src/CommissionCalculator.Web` (or plain `dotnet run` inside that folder; approved reading of
+"runs with `dotnet run`", plan decision 2, 2026-09-21). Any change that
 makes startup or a request path depend on something new — an environment variable, a file, a
 service, a port — is an explicit task that wires it into every place the app is run (the run
 instructions and CI), or the task list states in one line that the feature adds none. No degraded
@@ -165,12 +182,12 @@ Each external fact carries how it was established, when, and what would make it 
 | # | Constraint | Established | Revisit when |
 |---|---|---|---|
 | C1 | Target .NET 10 (LTS). It is the latest stable .NET: channel 10.0 is `active` LTS (EOL 2028-11-14); 11.0 is a release candidate (`11.0.0-rc.1`, `go-live`). | Vendor metadata: Microsoft `releases-index.json`, consulted 2026-09-21. Build SDK 10.0.400 measured with `dotnet --version`. | Microsoft's release index shows 11.0 with support phase `active`; or 2028-11-14. |
-| C2 | One self-contained solution that runs locally with `dotnet run`. No external services at runtime, no authentication, no database; data is in memory or a local file in the repository. | Maintainer's requirement (project brief, 2026-09-21). | Maintainer changes scope. |
+| C2 | One self-contained solution that runs locally with `dotnet run` — read as `dotnet run --project src/CommissionCalculator.Web` from the root, or plain `dotnet run` inside that folder, because `dotnet run` cannot start an app from a solution root (spiked 2026-09-21, research R12; reading approved by the maintainer 2026-09-21). No external services at runtime, no authentication, no database; data is in memory or a local file in the repository. | Maintainer's requirement (project brief, 2026-09-21). | Maintainer changes scope. |
 | C3 | Monetary amounts are USD. Tax, currency conversion and multi-year contract handling are out of scope. | Maintainer's requirement (project brief, 2026-09-21). | Maintainer changes scope. |
 | C4 | The repository is public (`gregoryschroeder/commission-calculator-sdlc`); the account in use has WRITE, not admin, permission, so branch protection and auto-delete-on-merge cannot be configured from here. | Measured: `gh repo view --json visibility,viewerPermission`, 2026-09-21 (PUBLIC, WRITE, empty). | Permission or visibility changes; re-check before relying on either. |
 | C5 | The private practice library is cited by document number only. Its documents are never copied into this repository or quoted at length. The only library-derived text committed is what its installer generates under `.specify/` and `.claude/`. | Maintainer's requirement (project brief, 2026-09-21). | Library visibility changes. |
 | C6 | Pipeline tooling is SpecKit 1.0.9 with the library's kit installed (commit recorded in `docs/PROVISIONING.md`). | Measured: `specify version`, `install.sh --check` exit 0, 2026-09-21. | SpecKit upgrade — re-run the installer and `--check`. |
-| C7 | CI runs on GitHub Actions for this repository. Test-only dependencies (test framework, BDD tool, coverage tool) are pinned package references restored by `dotnet`; none is a runtime dependency. | Assumed at ratification, to be confirmed by the first green CI run; package choices and their maintenance status are established in `research.md`. | First CI run; any package's maintenance status changes. |
+| C7 | CI runs on GitHub Actions for this repository. Test-only dependencies (test framework, BDD tool, coverage tool) are pinned package references restored by `dotnet`; none is a runtime dependency. | Measured: the first CI run (2026-09-22, run 35758821698, PR #2) installed SDK 10.0.401 from `global.json` via `setup-dotnet@v6` on `ubuntu-latest` and passed every gate. Package choices and their maintenance status are established in `research.md`. | The `ubuntu-latest` label moves to Ubuntu 26 from 2026-10-19 (GitHub annotation on that run) — re-check the first CI run after that date; any package's maintenance status changes. |
 
 **Library documents 07 and 08 (background).** 07 applies as a scope decision: requirements live
 in the repository (spec per feature, tasks, traceability) because this is a solo project with no
@@ -201,7 +218,8 @@ whether both can hold at once. Pairs that needed an answer:
 - Principle II (exact examples) × III (numbers tagged): compatible — an amount in an acceptance
   example is a requirement by definition.
 - Principle II (no skips; CI fails on a skip) × C7 (test tools restored by `dotnet`): compatible —
-  no test depends on a tool the runner lacks; CI installs the pinned SDK.
+  no test depends on a tool the runner lacks; CI installs the pinned SDK (confirmed by the first CI
+  run, 2026-09-22, SDK 10.0.401).
 - Principle V (engine has no clock) × dates in the rules (close/booking/start dates, quarters):
   compatible — dates are inputs, never read from the system clock.
 - Principle VI (accessibility) × C2 (no external services): compatible — no CDN assets are
@@ -259,4 +277,4 @@ Compliance review: every plan's Constitution Check, and every analyze pass, read
 a subject as well as an authority — untagged external claims, expired revisit triggers and
 conflicting constraints are findings.
 
-**Version**: 1.1.0 | **Ratified**: 2026-09-21 | **Last Amended**: 2026-09-21
+**Version**: 1.1.1 | **Ratified**: 2026-09-21 | **Last Amended**: 2026-09-22
