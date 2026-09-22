@@ -331,7 +331,7 @@ reader that every story uses.
   confirm no horizontal page scroll other than inside the breakdown tables. Record the log excerpt
   and screenshot in the PR.
   **Result**: Done 2026-09-22 in the in-app browser, key presses only (no pointer actions in the log). Verified: Tab reaches the skip link, then the scenario select, then Show, each with a visible focus outline; Enter on Show submits. **Not verified**: changing the select's value by keyboard. ArrowDown, Down, typing "T" and Alt+ArrowDown all left the value unchanged while the select held focus, which points to the embedded browser's synthesized keys not driving the native select widget; this is handed to the maintainer with T034. Reflow (1.4.10) at a 320px viewport (`clientWidth` 320): first run found the summary amounts clipped at the right edge; after the T032 fix, no summary element extends past 320px (widest right edge 304px) and the page does not scroll horizontally.
-- [ ] T034 [US1] Screen-reader check (FR-021; standing rule 3) — **maintainer step**: with
+- [X] T034 [US1] Screen-reader check (FR-021; standing rule 3) — **maintainer step**: with
   VoiceOver on (evidence: VoiceOver caption panel visible in a screenshot), navigate by headings
   and tables on `?scenario=tiers` (app run as in T033); confirm each rep's `h2`, the table caption and column headers are
   announced. The agent does not change system accessibility settings; the maintainer records the
@@ -392,6 +392,10 @@ reader that every story uses.
   which Phase 3 already renders, so it could not be seen failing here.)
 - [X] T040 [US2] Implement booking-date crediting and excluded-deal lines until T037–T038 pass.
   **Result**: Done; 115/115 green locally, engine coverage 98.09%, every test passes alone. Excluded deals appear in deal-list order with Appendix A.2's wording.
+  **Result**: Maintainer confirmed 2026-09-22 (at the Phase 7 gate): "T034 is complete and working
+  as intended" — the VoiceOver pass over `?scenario=tiers`, and with it the keyboard behaviour of
+  the scenario select that T033 could not drive through the in-app browser. T033's unverified item
+  is therefore closed by this check, not by the agent.
 - [ ] T041 [US2] Checkpoint: PR "Phase 4: US2", CI green, maintainer approves squash-merge.
 
 ---
