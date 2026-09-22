@@ -339,7 +339,7 @@ reader that every story uses.
   accepted. *Guard*: replace largest remainder with independent rounding and confirm the 10.01
   case fails; remove the sum check and confirm the FR-013 tests fail; record. Run; record failing.
 - [ ] T048 [P] [US4] Write `Features/UI_RejectedScenario.feature` in Specs, driven through the web
-  host (`@FR-004`), against a scenario directory the scenario itself creates (a temp folder holding the Appendix A..11 inputs
+  host (`@FR-004`), against a scenario directory the scenario itself creates (a temp folder holding the Appendix A.11 inputs
   as JSON), never the shipped `Scenarios/` folder, which is only added in Phase 9 (T060a): `?scenario=invalid` renders an element with `role="alert"` listing four errors,
   each with its FR ID, and no rep table. *Guard*: stop rendering the alert's error list and confirm
   the scenario fails; record. ("No rep table" needs no separate guard: `RejectedScenario` carries
@@ -399,7 +399,7 @@ reader that every story uses.
   Run; record failing.
 - [ ] T057 [P] [US6] Write `Features/UI_NegativeAmounts.feature` in Specs, driven through the web
   host (`@FR-021 @FR-015`): `?scenario=refunds-q2` renders Sage's earned commission as "−$1,600.00"
-  with a minus sign in the text (not colour alone), against a scenario directory the scenario itself creates (a temp folder holding the Appendix A..10 inputs
+  with a minus sign in the text (not colour alone), against a scenario directory the scenario itself creates (a temp folder holding the Appendix A.10 inputs
   as JSON), never the shipped `Scenarios/` folder, which is only added in Phase 9 (T060a). Its
   first red is recorded with its actual cause (no clawback line yet, so earned is not negative);
   the formatting itself was test-driven in T030's `MoneyFormatTests`. *Guard*: format with `Math.Abs` and confirm the test fails; record.
