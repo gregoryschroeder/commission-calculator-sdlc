@@ -16,6 +16,25 @@ internal static class ScenarioValidator
             .Select(message => new ValidationError(message, Requirement))
             .ToList();
 
+    private static IEnumerable<string> StartDateErrors(string repId, DateOnly startDate, decimal quota, QuarterPeriod quarter)
+    {
+        if (startDate > quarter.End)
+        {
+            yield return $"Rep '{repId}' starts after the quarter ends ({Date(quarter.End)}).";
+            yield break;
+        }
+
+        if (QuotaProration.For(quota, startDate, quarter).Amount == 0m)
+        {
+            yield return $"Rep '{repId}': the prorated quota rounds to $0.00.";
+        }
+    }
+
+    private static IEnumerable<string> BookedBeforeStartErrors(IReadOnlyList<DealInput> deals, Dictionary<string, DateOnly> startDates) =>
+        deals.SelectMany(deal => deal.Splits
+            .Where(split => startDates.TryGetValue(split.RepId, out var start) && deal.BookingDate < start)
+            .Select(split => $"Deal '{deal.DealId}' is booked before the start date of rep '{split.RepId}' ({Date(startDates[split.RepId])})."));
+
     private static IEnumerable<string> ScenarioErrors(ScenarioInput scenario)
     {
         if (scenario.Roster.Count == 0)
@@ -27,6 +46,8 @@ internal static class ScenarioValidator
                      .Concat(scenario.Roster.SelectMany(RepErrors))
                      .Concat(DuplicateRepIds(scenario.Roster.Select(rep => rep.RepId)))
                      .Concat(DealListErrors(scenario.Deals))
+                     .Concat(scenario.Roster.SelectMany(rep => StartDateErrors(rep.RepId, rep.StartDate, rep.Quota, scenario.Quarter)))
+                     .Concat(BookedBeforeStartErrors(scenario.Deals, EarliestStartDates(scenario.Roster.Select(rep => (rep.RepId, rep.StartDate)))))
                      .Concat(UnknownReps(scenario)))
         {
             yield return error;
@@ -36,7 +57,20 @@ internal static class ScenarioValidator
     private static IEnumerable<string> BookingQuarterErrors(BookingQuarterInput bookingQuarter) =>
         QuarterErrors(bookingQuarter.Quarter)
             .Concat(bookingQuarter.Reps.SelectMany(rep => QuotaErrors(rep.RepId, rep.Quota)))
+            .Concat(bookingQuarter.Reps.SelectMany(rep => StartDateErrors(rep.RepId, rep.StartDate, rep.Quota, bookingQuarter.Quarter)))
+            .Concat(BookedBeforeStartErrors(bookingQuarter.Deals, StartDates(bookingQuarter)))
             .Concat(DealListErrors(bookingQuarter.Deals));
+
+    // A split partner with no start date is skipped here; rejecting that is FR-004's own rule,
+    // added with the booking-quarter checks in Phase 8 (tasks T044, T056).
+    private static Dictionary<string, DateOnly> StartDates(BookingQuarterInput bookingQuarter) =>
+        EarliestStartDates(bookingQuarter.Reps.Select(rep => (rep.RepId, rep.StartDate))
+            .Concat(bookingQuarter.Partners.Select(partner => (partner.RepId, partner.StartDate))));
+
+    // Duplicate ids are themselves a rejection (FR-004), and the engine never throws on invalid
+    // data, so a repeated id keeps its earliest start date here rather than failing the lookup.
+    private static Dictionary<string, DateOnly> EarliestStartDates(IEnumerable<(string RepId, DateOnly StartDate)> entries) =>
+        entries.GroupBy(entry => entry.RepId).ToDictionary(group => group.Key, group => group.Min(entry => entry.StartDate));
 
     private static IEnumerable<string> QuarterErrors(QuarterPeriod quarter)
     {

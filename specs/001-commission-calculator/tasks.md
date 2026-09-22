@@ -395,12 +395,13 @@ reader that every story uses.
 **Goal**: mid-quarter starters are measured against a calendar-day-prorated quota.
 **Independent test**: `Features/US3_Proration.feature` passes.
 
-- [ ] T042 [P] [US3] Write `Features/US3_Proration.feature`: US3 AS1–AS4 exact, including the
+- [X] T042 [P] [US3] Write `Features/US3_Proration.feature`: US3 AS1–AS4 exact, including the
   prorated-quota summary values (`@FR-010 @FR-009 @FR-018`). Run; record failing — AS1–AS3
   expected red; AS4 (start on or before the first day: no proration, no prorated-quota line) is
   expected **green** at write time, because nothing prorates before T044. *Guard*: prorate
   unconditionally and confirm AS4 fails; record.
-- [ ] T043 [P] [US3] Write `QuotaProrationTests` (`FR-010`, `FR-004`, `FR-011`): 45/90 of
+  **Result**: Recorded 2026-09-22: US3 AS1–AS3 red, AS4 green at write time, as declared. Guard: prorating unconditionally failed AS4 (and the US1 scenarios).
+- [X] T043 [P] [US3] Write `QuotaProrationTests` (`FR-010`, `FR-004`, `FR-011`): 45/90 of
   90,000.00 = 45,000.00; 46/91 of 100,000.00 = 50,549.45; start on or before the first day → no
   proration (asserted on `QuotaProration`'s result, which is a stub until T044, so red); start on
   the last day → 1 day. Validator rules this phase introduces, each in every place it applies: a
@@ -410,10 +411,12 @@ reader that every story uses.
   naming deal and rep. *Guard*: remove each rejection check and confirm its tests fail; apply them
   only to the scenario's own data and confirm the booking-quarter cases fail; record. Run; record
   failing.
-- [ ] T044 [US3] Implement `Calculation/QuotaProration.cs` and the FR-011/FR-004 start-date rules
+  **Result**: Recorded: 5 `QuotaProrationTests` red from the stub; the 6 new validator cases red on the real assertion. Guards: removing the start-after-quarter-end check, the zero-prorated-quota check and the booked-before-start check each failed their 2 cases; applying the start-date rules to the scenario's own data only failed all 3 booking-quarter cases.
+- [X] T044 [US3] Implement `Calculation/QuotaProration.cs` and the FR-011/FR-004 start-date rules
   (a split partner with no start date is skipped by the FR-011 check until T058 adds its own
   rejection rule, so T056's test for that rule is red for the reason it states)
   until T042–T043 pass.
+  **Result**: Done; 124/124 green. The duplicate-repId test caught a real defect in the first implementation: building the start-date lookup with `ToDictionary` threw on a duplicate id, which the contract forbids (the engine never throws for invalid data). The lookup now keeps the earliest start date per id.
 - [ ] T045 [US3] Checkpoint: PR "Phase 5: US3", CI green, maintainer approves squash-merge.
 
 ---
