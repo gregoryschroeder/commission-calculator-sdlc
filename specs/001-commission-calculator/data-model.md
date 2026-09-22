@@ -55,7 +55,7 @@ Derived: `Days = end − start + 1`; `Months` = the three calendar months.
 ### BookingQuarter
 | Field | Type | Rules |
 |---|---|---|
-| `quarter` | Quarter | Three whole calendar months; ends before the scenario quarter starts (FR-004). |
+| `quarter` | Quarter | Three whole calendar months; must not overlap the scenario quarter (FR-004). |
 | `reps` | {repId, quota, startDate}[] | For roster reps credited on its deals. `startDate` must equal the roster's (FR-004). |
 | `partners` | {repId, startDate}[] | Split partners not on the roster; they get no statement (FR-016). |
 | `deals` | Deal[] | All deals booked in it for those reps (each `bookingDate` inside it), with every refund dated before the refund being sized (FR-004). |

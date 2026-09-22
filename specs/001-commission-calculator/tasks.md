@@ -68,7 +68,10 @@ analyze step can hold this list to them. Where anything above or below conflicts
 
 - [ ] T001 Create `global.json` (SDK 10.0.400, `rollForward: latestFeature`, test runner
   `Microsoft.Testing.Platform`), `Directory.Build.props` (net10.0, nullable, implicit usings,
-  `TreatWarningsAsErrors`, `AnalysisLevel` latest-recommended, `EnforceCodeStyleInBuild`),
+  `TreatWarningsAsErrors`, `AnalysisLevel` latest-recommended, `EnforceCodeStyleInBuild`; and,
+  for every project under `tests/`, package references to `Microsoft.Testing.Extensions.TrxReport`
+  and `Microsoft.Testing.Extensions.CodeCoverage`, because CI passes `--report-trx --coverage` to
+  every test project and a project without them exits 5, "unknown option"),
   `Directory.Packages.props` (central versions per plan.md), `.gitignore`, and
   `CommissionCalculator.slnx` — structural, no test.
 - [ ] T002 Create `src/CommissionCalculator.Engine/CommissionCalculator.Engine.csproj` (no package
@@ -77,8 +80,9 @@ analyze step can hold this list to them. Where anything above or below conflicts
   references Engine only) with a minimal `Program.cs` — an empty pipeline plus `public partial class
   Program` — so the project builds and T003 fails on its assertions (`/` returns 404), not on a
   missing entry point (CS5001) — structural, no test.
-- [ ] T003 Create `tests/CommissionCalculator.Specs/` (Reqnroll.xUnit.v3, Mvc.Testing, AngleSharp,
-  TrxReport, CodeCoverage) with a `WebApplicationFactory<Program>` hook, and write the first
+- [ ] T003 Create `tests/CommissionCalculator.Specs/` (xunit.v3 — Reqnroll.xUnit.v3 does not bring
+  the runner, and without it the project fails with CS5001 — plus Reqnroll.xUnit.v3, Mvc.Testing,
+  AngleSharp; TrxReport and CodeCoverage come from T001) with a `WebApplicationFactory<Program>` hook, and write the first
   scenario **before** the page exists: `Features/AppHost.feature` (`@FR-020`) — "the app serves its
   page": GET `/` returns 200 with `<html lang="en">` and one `<main>`. Run it; record it failing.
 - [ ] T004 Implement the minimal `Program.cs` and `Pages/Index.cshtml` (layout with `lang`, skip
@@ -410,8 +414,7 @@ reader that every story uses.
 - [ ] T056 [P] [US6] Write `ClawbackCalculatorTests` (`FR-016`, `FR-017`): full, partial and
   repeated refunds; refunds across deals ordered by date then deal then refund position; refund
   after quarter end ignored; negative clawback from a re-split; split refund re-split
-  (4,950.10 / 4,950.09). Add validator tests (`FR-004`): refunds totalling more than the deal;
-  missing/incomplete booking-quarter data; booking quarter overlapping or malformed; FR-004/FR-013's per-list rules applied
+  (4,950.10 / 4,950.09). Add validator tests (`FR-004`): missing/incomplete booking-quarter data; booking quarter overlapping or malformed; FR-004/FR-013's per-list rules applied
   to a booking-quarter deal list — duplicate dealId, same rep twice on a deal, split % out of
   range, split sum ≠ 100, sub-cent amount — each rejected (*Guard*: validate only the scenario's
   own deal list and confirm each of these fails; record); booking-quarter rep quota ≤ 0 or not
@@ -422,8 +425,7 @@ reader that every story uses.
   list" guard; rep start-date
   mismatch; a booking-quarter deal whose booking date is outside that quarter's dates → rejected;
   partner listed with start date accepted (expected **green** at write time; *Guard*: reject every
-  booking-quarter partner and confirm it fails); deal in both lists differing → rejected; a
-  refund of 0.00 or less → rejected; a booking-quarter deal booked before the start date of a
+  booking-quarter partner and confirm it fails); deal in both lists differing → rejected; a booking-quarter deal booked before the start date of a
   credited roster rep or partner → rejected naming the deal and the rep (FR-011). Add a statement test: a refund on a split deal adds a re-split
   line citing FR-017 before its clawback line; a refund on a single-rep deal adds none (expected
   **green** at write time — no re-split lines exist before T058; *Guard*: emit a re-split line for
@@ -485,10 +487,12 @@ reader that every story uses.
   (research R17 observed that this removes the files from output); record.
 - [ ] T061 Traceability generator, test first: add `TraceabilityTests` to Tools.Tests
   (`[Trait("Principle", "III")]`; fixture spec with FR-001..FR-003 and SC-001, fixture TRX, fixture
-  assembly metadata, plus one case that reflects over a real built assembly containing a Razor
-  Pages `PageModel` marked `[Implements]` and expects its FR to be found — *Guard*: remove the
-  framework reference from the tools project and confirm that case fails with
-  `ReflectionTypeLoadException`; record) — an ID with no test and an ID with no member both appear under "Gaps"; an ID
+  assembly metadata, plus one case that runs the built tools executable **as a separate process**
+  against a prebuilt fixture DLL containing a Razor Pages `PageModel` marked `[Implements]` (Tools.Tests
+  has no ProjectReference to the web project, so the framework reference cannot arrive through it)
+  and expects its FR in the output — *Guard*: remove the framework reference from the tools project
+  and confirm that case fails with `ReflectionTypeLoadException` in the child process's output;
+  record) — an ID with no test and an ID with no member both appear under "Gaps"; an ID
   declared in the explained-gaps table (below) still appears under "Gaps" — Principle III requires
   every FR/SC lacking a test or a member to be listed as a gap — but in an "Explained" subsection
   with its reason and category (scope, evidence-only, CI evidence, manual evidence), while any gap
