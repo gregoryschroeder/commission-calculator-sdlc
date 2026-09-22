@@ -497,12 +497,13 @@ reader that every story uses.
 **Goal**: clawbacks per refund, in the refund's quarter, sized by recomputing the booking quarter.
 **Independent test**: `Features/US6_Clawback.feature` passes.
 
-- [ ] T055 [P] [US6] Write `Features/US6_Clawback.feature`: US6 AS1–AS9 exact, including the
+- [X] T055 [P] [US6] Write `Features/US6_Clawback.feature`: US6 AS1–AS9 exact, including the
   re-split lines (FR-017) — AS7's $4,950.10 / $4,950.09 and AS9's $0.01 — (`@FR-016 @FR-017`), and
   the Q2 scenarios with booking-quarter data. Run; record failing — AS3 (refund dated after the
   quarter: the deal counts, no clawback) is expected **green** at write time, because no clawback
   exists before T058; its red evidence is T056 guard (b). All other scenarios expected red.
-- [ ] T056 [P] [US6] Write `ClawbackCalculatorTests` (`FR-016`, `FR-017`): full, partial and
+  **Result**: Recorded red 2026-09-22: 8 of 9 US6 scenarios failed; AS3 (refund dated after the quarter) green at write time, as declared, with T056 guard (b) as its red evidence.
+- [X] T056 [P] [US6] Write `ClawbackCalculatorTests` (`FR-016`, `FR-017`): full, partial and
   repeated refunds; refunds across deals ordered by date then deal then refund position; refund
   after quarter end ignored; negative clawback from a re-split; split refund re-split
   (4,950.10 / 4,950.09). Add validator tests (`FR-004`) for the rules only booking-quarter data
@@ -523,15 +524,18 @@ reader that every story uses.
   the refund-date filter and confirm AS3 and AS5 (Q1) fail; (c) floor clawbacks at zero and
   confirm AS9 fails; (d) remove each validation check listed above and confirm its test fails;
   record all. Run; record failing.
-- [ ] T057 [P] [US6] Write `Features/UI_NegativeAmounts.feature` in Specs, driven through the web
+  **Result**: Recorded red: 8 `ClawbackCalculatorTests`, 7 booking-quarter validator cases and the re-split statement test. "A partner listed with a start date is accepted" and "a refund on a single-rep deal adds no re-split line" green at write time, as declared. Guards: (a) sizing each refund against the untouched quarter failed AS6; (b) removing the refund-date filter failed AS3 and AS5; (c) flooring clawbacks at zero failed AS9; (d) emitting a re-split line for every refund failed the single-rep test, and rejecting every booking-quarter partner failed the accepted case and the valid-scenario baseline.
+- [X] T057 [P] [US6] Write `Features/UI_NegativeAmounts.feature` in Specs, driven through the web
   host (`@FR-021 @FR-015`): `?scenario=refunds-q2` renders Sage's earned commission as "−$1,600.00"
   with a minus sign in the text (not colour alone), against a scenario directory the scenario itself creates (a temp folder holding the Appendix A.10 inputs
   as JSON), never the shipped `Scenarios/` folder, which is only added in Phase 9 (T060a). Its
   first red is recorded with its actual cause (no clawback line yet, so earned is not negative);
   the formatting itself was test-driven in T030's `MoneyFormatTests`. *Guard*: format with `Math.Abs` and confirm the test fails; record.
   Run; record failing.
-- [ ] T058 [US6] Implement `Calculation/ClawbackCalculator.cs`, refund-aware `QuarterCredit`,
+  **Result**: Recorded red: the negative-amount page scenario failed — its first red was the missing clawback (earned was not negative yet), as the task states. The minus-sign formatting itself was test-driven in T030.
+- [X] T058 [US6] Implement `Calculation/ClawbackCalculator.cs`, refund-aware `QuarterCredit`,
   booking-quarter validation and clawback lines until T055–T057 pass.
+  **Result**: Done; 200/200 green, engine coverage 98.63%, every test passes alone. One message was reworded (not the test) when a date interpolated into the middle of the phrase a test matched on.
 - [ ] T059 [US6] Checkpoint: PR "Phase 8: US6", CI green, maintainer approves squash-merge.
 
 ---

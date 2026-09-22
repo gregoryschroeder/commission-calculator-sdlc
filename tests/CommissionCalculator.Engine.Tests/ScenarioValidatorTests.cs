@@ -51,6 +51,23 @@ public sealed class ScenarioValidatorTests
         new("own split percentages sum above 100", s => s.WithOwnDeal(d => d with { Splits = [new("sage", 100.001m)] }), "split percentages sum to 100.001%", "Q2-1", "FR-013"),
         new("booking-quarter split percentages sum below 100", s => s.WithBookingDeal(1, d => d with { Splits = [new("sage", 99.999m)] }), "split percentages sum to 99.999%", "R-12", "FR-013"),
         new("booking-quarter split percentages sum above 100", s => s.WithBookingDeal(5, d => d with { Splits = [new("zion", 60m), new("yves", 40.001m)] }), "split percentages sum to 100.001%", "D2", "FR-013"),
+        new("earlier-quarter deal refunded this quarter with no booking-quarter data",
+            s => s with { Deals = [.. s.Deals, ValidScenario.Deal("OLD", 10_000.00m, new(2025, 10, 4), new(2025, 10, 5), [new("sage", 100m)], [new(1_000.00m, new(2026, 5, 6))])] },
+            "has no booking-quarter data", "OLD"),
+        new("roster rep credited on a refunded earlier-quarter deal with no rep entry",
+            s => s.WithBookingQuarter(s.BookingQuarter() with { Reps = [.. s.BookingQuarter().Reps.Where(rep => rep.RepId != "sage")] }),
+            "has no entry in the booking quarter", "sage"),
+        new("split partner on a booking-quarter deal with no start date",
+            s => s.WithBookingQuarter(s.BookingQuarter() with { Partners = [] }), "is neither on the roster nor listed as a partner", "yves"),
+        new("booking quarter overlaps the scenario quarter",
+            s => s.WithBookingQuarter(s.BookingQuarter() with { Quarter = ValidScenario.Q2 }), "overlaps the scenario's quarter", "2026-04-01"),
+        new("booking-quarter deal booked outside that quarter",
+            s => s.WithBookingDeal(1, d => d with { BookingDate = new(2026, 5, 10) }), "is booked outside its booking quarter", "R-12"),
+        new("booking-quarter start date differs from the roster",
+            s => s.WithBookingQuarter(s.BookingQuarter() with { Reps = [s.BookingQuarter().Reps[0] with { StartDate = new(2025, 7, 1) }, .. s.BookingQuarter().Reps.Skip(1)] }),
+            "start date differs from the roster", "sage"),
+        new("a deal listed in both lists differs between them",
+            s => s with { Deals = [.. s.Deals, s.BookingQuarter().Deals[0] with { Amount = 59_000.00m }] }, "differs between the two lists", "R-11"),
         new("own refund dated before booking", s => s.WithOwnDeal(d => d with { Refunds = [new(1_000.00m, new(2026, 5, 1))] }), "is dated before its booking date", "Q2-1"),
         new("booking-quarter refund dated before booking", s => s.WithBookingDeal(1, d => d with { Refunds = [new(1_000.00m, new(2026, 2, 1))] }), "is dated before its booking date", "R-12"),
         new("own refunds total more than the deal", s => s.WithOwnDeal(d => d with { Refunds = [new(30_000.00m, May10), new(20_000.00m, May10)] }), "refunds total more than the deal amount", "Q2-1"),
@@ -78,6 +95,11 @@ public sealed class ScenarioValidatorTests
             && error.Message.Contains(rule.Phrase, StringComparison.Ordinal)
             && error.Message.Contains(rule.Subject, StringComparison.Ordinal));
     }
+
+    [Fact, Trait("Requirement", "FR-004")]
+    public void APartnerListedWithAStartDateIsAccepted() =>
+        Assert.DoesNotContain(ScenarioValidator.Validate(ValidScenario.Create()),
+            error => error.Message.Contains("yves", StringComparison.Ordinal));
 
     [Fact, Trait("Requirement", "FR-013")]
     public void SplitPercentagesSummingToExactlyOneHundredAreAccepted() =>
