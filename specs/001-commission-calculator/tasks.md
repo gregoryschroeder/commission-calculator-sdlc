@@ -346,11 +346,13 @@ reader that every story uses.
   because the external request succeeds — the positive control for the "no network" evidence;
   record both.
   **Result**: Done; offline-smoke job and CI-evidence records added. Local run 2026-09-22 (Docker 29.8.0): `NetworkMode: none`, GET / → 200, external request failed as required. Guards: GET /does-not-exist → "404, expected 200", exit 1; `bridge` network → "an external request succeeded", exit 1.
-- [ ] T036 [US1] Checkpoint: PR "Phase 3: US1", CI green, maintainer approves squash-merge. Record
+- [X] T036 [US1] Checkpoint: PR "Phase 3: US1", CI green, maintainer approves squash-merge. Record
   the offline job's first run in research R16 (Docker on the runner) and confirm the plan's
   Provenance gate; propose to the maintainer a PATCH amendment adding Docker (a CI-only dependency
   of the offline-smoke job) to constitution C7 and its pairwise note.
 
+  **Result**: CI green on PR #5 (run 35762826388: build-test, smoke, offline-smoke). R16 confirmed and the
+  plan's Provenance gate updated; the Docker PATCH amendment is proposed to the maintainer at this gate.
 ---
 
 ## Phase 4: User Story 2 — booking date decides the quarter (P1) — PR 4
