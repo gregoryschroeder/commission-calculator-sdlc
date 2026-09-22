@@ -131,7 +131,7 @@ correctness.
 - **Decision**: the web project is the only runnable project; run it with
   `dotnet run --project src/CommissionCalculator.Web` from the root, or plain `dotnet run` from
   `src/CommissionCalculator.Web`. Both are documented in the README; CI exercises the first (the
-  smoke step starts the app with `--project` and requests `/`). Putting the web `.csproj` at the root was rejected: its
+  smoke job starts the app with `--project` and requests `/`). Putting the web `.csproj` at the root was rejected: its
   default file globs would compile the engine, tests and tools into the web assembly.
 - **Maintainer approval**: this interpretation of constraint C2 was approved at the plan gate,
   2026-09-21 ("2: yes", plan.md decision 2).

@@ -122,8 +122,9 @@ analyze step can hold this list to them. Where anything above or below conflicts
   record. Record the step's CI duration in research R15 on the first run.
 - [ ] T009 *Guard (skip gate)*: on a local throwaway change add `[Fact(Skip="probe")]`, run the CI
   test command; confirm a non-zero exit ("Failed!"); remove it; record.
-- [ ] T010 CI smoke step: from the fresh checkout, start `dotnet run --project
-  src/CommissionCalculator.Web` in the background, poll `/` until HTTP 200 (fail after 60 s), stop
+- [ ] T010 CI **smoke job** (its own job, so nothing has been built before it): check out, set up
+  the SDK, print `git status --ignored` (evidence of a clean tree: no `bin/`/`obj/`) immediately
+  before the run, then start `dotnet run --project src/CommissionCalculator.Web` in the background, poll `/` until HTTP 200 (fail after 60 s), stop
   it. *Guard*: point the poll at a path that returns 404 and confirm the step fails; record.
 - [ ] T011 `README.md`: what it is, `dotnet run --project src/CommissionCalculator.Web` (or
   `dotnet run` inside that folder), test commands, where the spec lives, and the optional
@@ -293,7 +294,7 @@ reader that every story uses.
   (the runtime image has no HTTP client; research R16); as a negative control the same sidecar's
   request to an external host must fail (SC-004; evidence: `docker inspect` shows
   `NetworkMode: none`, printed immediately before the request). Both jobs write a CI-evidence record
-  (`ci-evidence/<job>.json`: job name, check, requirement IDs `SC-004` and — for the smoke step —
+  (`ci-evidence/<job>.json`: job name, check, requirement IDs `SC-004` and — for the smoke job —
   `FR-020`, result, commit SHA and run URL). These are CI gates, not tests; the trace lists them in
   their own "Verified by CI job" section and never counts them as tests (maintainer decision D1,
   2026-09-22). *Guard*: point the sidecar's request at a path
@@ -381,7 +382,9 @@ reader that every story uses.
   (standing rule 8): sums of 99.999 and 100.001 rejected
   (expected red); 100 accepted (expected **green** at write time — nothing rejects it yet;
   *Guard*: make the sum check reject every deal and confirm it fails). *Guard*: replace largest remainder with independent rounding and confirm the 10.01
-  case fails; remove the sum check and confirm the FR-013 tests fail; record. Run; record failing.
+  case fails; remove the sum check and confirm the FR-013 tests fail; apply the sum check only to
+  the scenario's own deal list and confirm the booking-quarter cases fail; record. Run; record
+  failing.
 - [ ] T048 [P] [US4] Write `Features/UI_RejectedScenario.feature` in Specs, driven through the web
   host (`@FR-004`), against a scenario directory the scenario itself creates (a temp folder holding the Appendix A.11 inputs
   as JSON), never the shipped `Scenarios/` folder, which is only added in Phase 9 (T060a): `?scenario=invalid` renders an element with `role="alert"` listing four errors,
@@ -435,8 +438,8 @@ reader that every story uses.
   has (every rule shared with the scenario's own data is already tested in T018, T038, T043 or
   T047): a deal booked in an earlier quarter and refunded in this one, with no booking-quarter data
   for that quarter → rejected; a roster rep credited on such a deal with no entry in that booking
-  quarter's `reps` → rejected; a split partner on such a deal who is neither on the roster nor in
-  `partners` with a start date → rejected (the detectable completeness rules, clarification
+  quarter's `reps` → rejected; a split partner on **any** booking-quarter deal who is neither on the
+  roster nor in `partners` with a start date → rejected (FR-011's start-date check needs that date) (the detectable completeness rules, clarification
   2026-09-22); booking quarter overlapping the scenario quarter → rejected; a booking-quarter deal
   whose booking date is outside that quarter's dates → rejected; a rep's start date in booking-
   quarter data differing from the roster's → rejected; a deal in both lists differing → rejected;
@@ -477,7 +480,8 @@ reader that every story uses.
   "Credited bookings" line, so a plain FR-008 match could not fail); rule 8 — every seeded file
   loads under the strict reader (no currency, tax or term fields exist to set) and every rendered
   amount is in dollars, `$` or `−$` (a second permanent scenario feeds the dollar check an amount
-  formatted without `$` and expects it to fail). Every breakdown line's FR exists in spec.md (SC-002).
+  formatted without `$` and expects it to fail — it loads no seed file, so it is expected **green**
+  at write time; *Guard*: make the dollar check accept any string and confirm it fails; record). Every breakdown line's FR exists in spec.md (SC-002).
   Each check is shown able to fail by a **permanent** scenario that runs it over the seed set
   with *every* scenario carrying that rule removed (carriers computed from Appendix A,
   2026-09-22) and expects that check — not file loading — to report failure: rule 2 without
@@ -493,7 +497,7 @@ reader that every story uses.
   booking-dates, proration, proration-q2, splits, split-rounding, draw, refunds, refund-splits,
   refunds-q2, invalid}.json`, transcribing Appendix A.1–A.11 inputs, until T060 passes. A mismatch
   is fixed in the seed file, never in Appendix A or the test.
-- [ ] T060b Extend the CI smoke step (T010) and the offline-smoke job (T035): request
+- [ ] T060b Extend the CI smoke job (T010) and the offline-smoke job (T035): request
   `/?scenario=tiers` and require a `<table>` containing "Avery" — proving the running app loaded the
   seed files from its output. *Guard*: on a throwaway branch add `<Content Update="Scenarios/*.json"
   CopyToOutputDirectory="Never" CopyToPublishDirectory="Never" />` and confirm both assertions fail
@@ -518,13 +522,13 @@ reader that every story uses.
   web assemblies; explained-gaps table — scope: FR-019, "USD only; tax, currency conversion and
   multi-year are out of scope, so no member implements them"; evidence-only (tests, no single
   member): SC-001 — seed files and Appendix A, SC-002 — every line cites an FR (T030, T060),
-  SC-003 — the seeded scenarios (T060); CI evidence (no test): SC-004 — the smoke step and
+  SC-003 — the seeded scenarios (T060); CI evidence (no test): SC-004 — the smoke job and
   offline-smoke job (T010, T035, T060b); manual evidence (no test the trace can see): SC-005 —
   T033/T064. The table has entries only for IDs that are gaps; FR-021 has tests and members and is
   not a gap. Its screen-reader clause is covered by T034's manual check, which the report lists as
   a note under SC-005's entry, not as a gap) writing
   `specs/001-commission-calculator/traceability.md`. Add a final CI job, `traceability`, that
-  depends on the build/test job (which contains the smoke step, T010) and the offline-smoke job
+  depends on the build/test job, the smoke job (T010) and the offline-smoke job
   (T035), downloads their artifacts with `actions/download-artifact@v8` (suite TRX files,
   `ci-evidence/*.json`, and the build/test job's uploaded Debug build output
   `src/CommissionCalculator.{Engine,Web}/bin/Debug/net10.0/`, the configuration `dotnet build` and
@@ -541,8 +545,8 @@ reader that every story uses.
   duplicate id), T030 (unknown id, skip-link
   target, second `h1`, section labelling, attainment format, money format), T031 (all four),
   T035 (404, no-network), T037 (AS3 exclude-all), T038 (close date, bounds, refund date, refund total, own-list-only), T042 (AS4), T043,
-  T047 (largest remainder, sum check, sum-100 accepted), T048, T052, T055 (AS3), T056 (incl. partner accepted, detectable completeness,
-  overlap, date range, start-date mismatch, differing duplicate, single-rep no re-split), T061 (framework reference), T057, T060 (every rule check), T060b, T061 — each still fails with its guarded
+  T047 (largest remainder, sum check, sum-100 accepted, own-list-only), T048, T052, T055 (AS3), T056 (incl. partner accepted, detectable completeness,
+  overlap, date range, start-date mismatch, differing duplicate, single-rep no re-split), T061 (framework reference), T057, T060 (every rule check, dollar check), T060b, T061 — each still fails with its guarded
   behaviour removed; record each result here.
 - [ ] T064 Quickstart validation (standing rule 3): step 1 from a fresh clone (evidence:
   `git status --ignored` shows no build output before running); re-run T033's keyboard check on the

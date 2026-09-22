@@ -463,8 +463,9 @@ the net result.
   scenario's own deal list (counted or not) is credited to a rep not on the roster; a deal
   refunded in the quarter was booked in an earlier quarter whose data is missing or incomplete
   (detectably incomplete means: the booking quarter is absent; a roster rep credited on the deal
-  has no entry in its `reps` (quota and start date); or a split partner not on the roster has no
-  start date in its `partners`), is not three whole calendar months, overlaps the scenario's quarter, or
+  has no entry in its `reps` (quota and start date); or a split partner not on the roster, on any
+  deal in the booking quarter, has no start date in its `partners` — needed because FR-011's
+  start-date check covers every booking-quarter deal), is not three whole calendar months, overlaps the scenario's quarter, or
   contains a deal booked outside its own dates; or a rep's start date in booking-quarter data
   differs from the roster's; or an earlier-quarter deal listed both in the scenario's own deal
   list and in booking-quarter data differs between the two. **Precondition (not detectable by the
