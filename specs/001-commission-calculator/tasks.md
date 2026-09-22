@@ -203,7 +203,10 @@ reader that every story uses.
   (`@FR-001 @FR-002 @FR-003 @FR-021 @SC-002`): picker form structure per contracts/ui.md; exactly one
   `h1`; a skip link whose `href` targets the `<main>` element's id; each rep `section`'s
   `aria-labelledby` names its `h2`'s id (*Guard*: drop the skip link's target id, and separately
-  the section's `aria-labelledby`, and confirm each scenario fails; record);
+  the section's `aria-labelledby`, and confirm each scenario fails; record). The `h1` and
+  skip-link scenarios are expected **green** at write time, because T004 built the layout in
+  Phase 1; their red evidence is the skip-link guard above and, for the `h1`, a guard that adds a
+  second `h1` and confirms failure — record both;
   `?scenario=tiers` shows one section per rep with `h2`, caption, `th scope=col` Item/Amount/Rule;
   every Rule cell is an FR ID that exists in spec.md (read from the committed spec file); each rep's
   page has a `<title>` naming the selected scenario (WCAG 2.4.2); these scenarios run against a scenario directory the scenario itself creates (a temp folder holding the Appendix A.1 inputs
@@ -232,7 +235,10 @@ reader that every story uses.
   1.4.12 text spacing — no fixed `height` and no `overflow: hidden` on text containers.
   *Guard*: separately (a) set the text token to a light grey, (b) set the button's min-height to
   16px, (c) add a `position: sticky` rule, (d) add a fixed `height` to the table caption; confirm
-  each makes its test fail; record all four. Run; record failing.
+  each makes its test fail; record all four. Run: the 1.4.3, 1.4.11 and 2.5.8 checks are expected
+  red (Phase 1's stylesheet defines no colour tokens or target sizes); the 2.4.11 and 1.4.12
+  absence checks are expected **green** at write time, with guards (c) and (d) as their red
+  evidence. Record which were red and which green.
 - [ ] T032 [US1] Implement the page (picker, the empty state "No scenarios are installed",
   statements, summary `dl`, breakdown tables, `$#,##0.00` with a minus sign, `site.css` colour
   tokens and visible focus styles) until T030–T031 pass.
@@ -277,10 +283,13 @@ reader that every story uses.
 
 - [ ] T037 [P] [US2] Write `Features/US2_BookingDate.feature`: US2 AS1–AS4 with exact dates and
   amounts (`@FR-008`), including the excluded-deal line citing FR-008. Run; record failing —
-  expected red: AS1 and AS3 (Phase 3's T029 credits every deal of the rep, so the excluded deals
-  are still counted). AS2 and AS4 (deals booked inside the quarter) are expected **green** at
-  write time, because Phase 3 already credits them; their red evidence is T038's guard, where
-  close-date crediting makes AS2 (B-2) fail. Record which were red and which green.
+  expected red: AS1 (booked 2026-04-02, after the quarter) and AS4 (both dates outside), because
+  Phase 3's T029 credits every deal of the rep, so they are still counted. AS2 (closed 2025-12-29,
+  booked 2026-01-05) and AS3 (both dates inside) are expected **green** at write time, because
+  Phase 3 already credits them. Their red evidence: AS2 — T038's close-date guard makes it fail;
+  AS3 — *Guard*: make crediting exclude every deal and confirm AS3 fails; record. Record which
+  scenarios were red and which green at write time (labels checked against spec.md US2 AS1–AS4,
+  2026-09-22).
 - [ ] T038 [P] [US2] Write `QuarterCreditTests` (`FR-008`): booked the day before/after the quarter
   is excluded (expected red: Phase 3 credits every deal); booked on the first and last day counts,
   and close date never changes the result (expected green at write time — Phase 3 already credits
@@ -451,8 +460,10 @@ reader that every story uses.
   multi-year are out of scope, so no member implements them"; evidence-only (tests, no single
   member): SC-001 — seed files and Appendix A, SC-002 — every line cites an FR (T030, T060),
   SC-003 — the seeded scenarios (T060); CI evidence (no test): SC-004 — the smoke step and
-  offline-smoke job (T010, T035, T060b); manual evidence (no test the trace can see): SC-005 and
-  FR-021's screen-reader clause — T033/T034) writing
+  offline-smoke job (T010, T035, T060b); manual evidence (no test the trace can see): SC-005 —
+  T033/T064. The table has entries only for IDs that are gaps; FR-021 has tests and members and is
+  not a gap. Its screen-reader clause is covered by T034's manual check, which the report lists as
+  a note under SC-005's entry, not as a gap) writing
   `specs/001-commission-calculator/traceability.md`. Add a final CI job, `traceability`, that
   depends on the build/test job (which contains the smoke step, T010) and the offline-smoke job
   (T035), downloads their artifacts with `actions/download-artifact@v8` (suite TRX files,
@@ -467,6 +478,7 @@ reader that every story uses.
   record passing and the manual-evidence items carrying the PR links recorded in
   T033/T034/T064.
 - [ ] T063 Re-verify every failure-path guard added in T007, T008, T009, T010, T018, T020, T022, T023,
+  T031 (all four), T037 (AS3 exclude-all), T038 (close date, bounds),
   T030 (unknown id, skip-link target, section labelling, attainment format, money format), T060, T060b, T031, T035 (404 and no-network), T023 (missing directory), T038, T043, T047, T048, T052, T056, T057, T061 still fails with its guarded
   behaviour removed; record each result here.
 - [ ] T064 Quickstart validation (standing rule 3): step 1 from a fresh clone (evidence:
