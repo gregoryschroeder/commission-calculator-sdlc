@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <InternalsVisibleTo Include="CommissionCalculator.Engine.Tests" />
+  </ItemGroup>
+</Project>

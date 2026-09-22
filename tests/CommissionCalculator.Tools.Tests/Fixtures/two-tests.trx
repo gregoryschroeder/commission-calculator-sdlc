@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TestRun xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <TestDefinitions>
+    <UnitTest name="CommissionCalculator.Engine.Tests.MoneyTests.RoundsHalfAwayFromZero" id="1">
+      <TestMethod className="CommissionCalculator.Engine.Tests.MoneyTests" name="RoundsHalfAwayFromZero" />
+    </UnitTest>
+    <UnitTest name="The app serves its page" id="2">
+      <TestMethod className="CommissionCalculator.Specs.Features.AppHostFeature" name="TheAppServesItsPage" />
+    </UnitTest>
+  </TestDefinitions>
+</TestRun>
