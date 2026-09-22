@@ -3,7 +3,8 @@
 Every decision records how it was established (Principle IV): **spiked** (built and run in a
 throwaway project outside this repository), **measured**, **vendor-doc/registry** (with the date
 consulted), **assumed** (flagged), or **copied** (with its source). Checks were made on
-2026-09-21 and 2026-09-22 on macOS arm64 with .NET SDK 10.0.400; each entry carries its own date. No assumed or copied claim is load-bearing for
+2026-09-21 on macOS arm64 with .NET SDK 10.0.400 unless an entry states another date
+(2026-09-22 where noted). No assumed or copied claim is load-bearing for
 correctness.
 
 ## R1. Runtime and SDK

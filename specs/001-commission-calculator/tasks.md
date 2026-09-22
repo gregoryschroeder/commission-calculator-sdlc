@@ -51,6 +51,10 @@ analyze step can hold this list to them. Where anything above or below conflicts
    (attainment, credited bookings, total draw, re-split shares). A test is never edited to make it
    pass; a test that looks wrong is a spec question for the maintainer.
 
+7. **Red or green at write time is declared, never assumed.** "Run; record failing" means the
+   whole task's tests are expected red. Where a test already passes when written, because an
+   earlier phase built what it checks, the task says so by name and names a guard that can make
+   it fail; the recorded result says which tests were red and which green.
 ---
 
 ## Phase 1: Setup (shared infrastructure) — PR 1
@@ -72,7 +76,7 @@ analyze step can hold this list to them. Where anything above or below conflicts
   scenario **before** the page exists: `Features/AppHost.feature` (`@FR-020`) — "the app serves its
   page": GET `/` returns 200 with `<html lang="en">` and one `<main>`. Run it; record it failing.
 - [ ] T004 Implement the minimal `Program.cs` and `Pages/Index.cshtml` (layout with `lang`, skip
-  link, `<main>`, local `wwwroot/css/site.css`) until T003 passes. (`Web.Tests` is created in T022
+  link, one `<h1>`, `<main>`, local `wwwroot/css/site.css`) until T003 passes. (`Web.Tests` is created in T022
   together with its first tests: a test project with no tests makes `dotnet test` exit non-zero.)
 - [ ] T005 Create `tests/CommissionCalculator.Tools.Tests/` and write tests for the CI helper
   commands **before** they exist (`[Trait("Principle", "II")]`) (fixture files under `tests/CommissionCalculator.Tools.Tests/
@@ -204,7 +208,8 @@ reader that every story uses.
   `h1`; a skip link whose `href` targets the `<main>` element's id; each rep `section`'s
   `aria-labelledby` names its `h2`'s id (*Guard*: drop the skip link's target id, and separately
   the section's `aria-labelledby`, and confirm each scenario fails; record). The `h1` and
-  skip-link scenarios are expected **green** at write time, because T004 built the layout in
+  skip-link scenarios are expected **green** at write time, because T004 built the layout (with its
+  `h1`) in
   Phase 1; their red evidence is the skip-link guard above and, for the `h1`, a guard that adds a
   second `h1` and confirms failure — record both;
   `?scenario=tiers` shows one section per rep with `h2`, caption, `th scope=col` Item/Amount/Rule;
@@ -311,7 +316,10 @@ reader that every story uses.
 **Independent test**: `Features/US3_Proration.feature` passes.
 
 - [ ] T042 [P] [US3] Write `Features/US3_Proration.feature`: US3 AS1–AS4 exact, including the
-  prorated-quota summary values (`@FR-010 @FR-009 @FR-018`). Run; record failing.
+  prorated-quota summary values (`@FR-010 @FR-009 @FR-018`). Run; record failing — AS1–AS3
+  expected red; AS4 (start on or before the first day: no proration, no prorated-quota line) is
+  expected **green** at write time, because nothing prorates before T044. *Guard*: prorate
+  unconditionally and confirm AS4 fails; record.
 - [ ] T043 [P] [US3] Write `QuotaProrationTests` (`FR-010`, `FR-004`, `FR-011`): 45/90 of
   90,000.00 = 45,000.00; 46/91 of 100,000.00 = 50,549.45; start on or before the first day → no
   proration and no prorated-quota line; start on the last day → 1 day; prorated quota rounding to
@@ -335,8 +343,9 @@ reader that every story uses.
 - [ ] T047 [P] [US4] Write `SplitAllocationTests` (`FR-012`): 60/40 of 50,000.00; 50/50 of 10.01 →
   5.01/5.00; 33.335/33.335/33.33 of 100.00 → 33.34/33.33/33.33; 45/45/10 of 0.06 → 0.03/0.03/0.00;
   45/45/10 of 0.05 → 0.02/0.02/0.01 (US6 AS9's re-split); shares always sum to the amount over a
-  fixed table of cases. Add validator tests (`FR-013`): sums of 99.999 and 100.001 rejected; 100
-  accepted. *Guard*: replace largest remainder with independent rounding and confirm the 10.01
+  fixed table of cases. Add validator tests (`FR-013`): sums of 99.999 and 100.001 rejected
+  (expected red); 100 accepted (expected **green** at write time — nothing rejects it yet;
+  *Guard*: make the sum check reject every deal and confirm it fails). *Guard*: replace largest remainder with independent rounding and confirm the 10.01
   case fails; remove the sum check and confirm the FR-013 tests fail; record. Run; record failing.
 - [ ] T048 [P] [US4] Write `Features/UI_RejectedScenario.feature` in Specs, driven through the web
   host (`@FR-004`), against a scenario directory the scenario itself creates (a temp folder holding the Appendix A.11 inputs
@@ -381,14 +390,20 @@ reader that every story uses.
 
 - [ ] T055 [P] [US6] Write `Features/US6_Clawback.feature`: US6 AS1–AS9 exact, including the
   re-split lines (FR-017) — AS7's $4,950.10 / $4,950.09 and AS9's $0.01 — (`@FR-016 @FR-017`), and
-  the Q2 scenarios with booking-quarter data. Run; record failing.
+  the Q2 scenarios with booking-quarter data. Run; record failing — AS3 (refund dated after the
+  quarter: the deal counts, no clawback) is expected **green** at write time, because no clawback
+  exists before T058; its red evidence is T056 guard (b). All other scenarios expected red.
 - [ ] T056 [P] [US6] Write `ClawbackCalculatorTests` (`FR-016`, `FR-017`): full, partial and
   repeated refunds; refunds across deals ordered by date then deal then refund position; refund
   after quarter end ignored; negative clawback from a re-split; split refund re-split
   (4,950.10 / 4,950.09). Add validator tests (`FR-004`): refunds totalling more than the deal;
-  missing/incomplete booking-quarter data; booking quarter overlapping or malformed; rep start-date
+  missing/incomplete booking-quarter data; booking quarter overlapping or malformed; FR-004/FR-013's per-list rules applied
+  to a booking-quarter deal list — duplicate dealId, same rep twice on a deal, split % out of
+  range, split sum ≠ 100, sub-cent amount — each rejected (*Guard*: validate only the scenario's
+  own deal list and confirm each of these fails; record); rep start-date
   mismatch; a booking-quarter deal whose booking date is outside that quarter's dates → rejected;
-  partner listed with start date accepted; deal in both lists differing → rejected; a
+  partner listed with start date accepted (expected **green** at write time; *Guard*: reject every
+  booking-quarter partner and confirm it fails); deal in both lists differing → rejected; a
   refund of 0.00 or less → rejected; a booking-quarter deal booked before the start date of a
   credited roster rep or partner → rejected naming the deal and the rep (FR-011). Add a statement test: a refund on a split deal adds a re-split
   line citing FR-017 before its clawback line; a refund on a single-rep deal adds none.
@@ -432,7 +447,8 @@ reader that every story uses.
   {splits, split-rounding, refund-splits}; rule 5 without {draw} (the only non-zero payable,
   Parker); rule 6 without {refunds, refund-splits, refunds-q2}; rule 7 without {booking-dates};
   rule 1 with the `proration` quotas replaced by $100,000.00 in memory; rule 8 with a
-  `"currency": "EUR"` property added to one seed's JSON in memory. The feature
+  `"currency": "EUR"` property added to one seed's JSON in memory — for rule 8 the check *is* the
+  strict reader, so its expected failure is that load error. The feature
   lists the eleven expected files by name, so before T060a it fails on every one ("scenario file
   not found"); run it and record that red. Any later failure is a spec question, not a test edit.
 - [ ] T060a Add the eleven seed files `src/CommissionCalculator.Web/Scenarios/{tiers,
@@ -480,8 +496,9 @@ reader that every story uses.
 - [ ] T063 Re-verify every failure-path guard added in T007 (warnings, coverage), T008, T009,
   T010, T018, T020, T022, T023 (first-failure, missing directory), T030 (unknown id, skip-link
   target, second `h1`, section labelling, attainment format, money format), T031 (all four),
-  T035 (404, no-network), T037 (AS3 exclude-all), T038 (close date, bounds, refund date), T043,
-  T047, T048, T052, T056, T057, T060 (every rule check), T060b, T061 — each still fails with its guarded
+  T035 (404, no-network), T037 (AS3 exclude-all), T038 (close date, bounds, refund date), T042 (AS4), T043,
+  T047 (sum-100 accepted), T048, T052, T055 (AS3), T056 (incl. partner accepted and booking-quarter
+  list rules), T057, T060 (every rule check), T060b, T061 — each still fails with its guarded
   behaviour removed; record each result here.
 - [ ] T064 Quickstart validation (standing rule 3): step 1 from a fresh clone (evidence:
   `git status --ignored` shows no build output before running); re-run T033's keyboard check on the
