@@ -94,8 +94,9 @@ analyze step can hold this list to them. Where anything above or below conflicts
   report lacks the engine package and another covers it partly; `TrxTestListTests` — lists fully qualified `className.name` for xUnit and
   Reqnroll tests from a fixture TRX (the Reqnroll display-name case from research R15). Run; record
   failing.
-- [ ] T006 Create `tools/CommissionCalculator.Tools/` (console app; commands `coverage-gate` and
-  `list-tests`) until T005 passes. (Replaces research R8's single-file program: a project can be
+- [ ] T006 Create `tools/CommissionCalculator.Tools/` (console app with
+  `<FrameworkReference Include="Microsoft.AspNetCore.App" />`, so `trace` can reflect over the web
+  assembly — research R8; commands `coverage-gate` and `list-tests`) until T005 passes. (Replaces research R8's single-file program: a project can be
   unit-tested; see research R8 correction.)
 - [ ] T007 Write `.github/workflows/ci.yml`: checkout@v7, setup-dotnet@v6 from `global.json`,
   `dotnet build -warnaserror`, `dotnet test --fail-skips on --report-trx --coverage
@@ -409,7 +410,9 @@ reader that every story uses.
   missing/incomplete booking-quarter data; booking quarter overlapping or malformed; FR-004/FR-013's per-list rules applied
   to a booking-quarter deal list — duplicate dealId, same rep twice on a deal, split % out of
   range, split sum ≠ 100, sub-cent amount — each rejected (*Guard*: validate only the scenario's
-  own deal list and confirm each of these fails; record); rep start-date
+  own deal list and confirm each of these fails; record); booking-quarter rep quota ≤ 0 or not
+  whole cents, booking-quarter deal amount ≤ 0, and a booking-quarter prorated quota that rounds to
+  $0.00 (requirement) — each rejected (FR-004); rep start-date
   mismatch; a booking-quarter deal whose booking date is outside that quarter's dates → rejected;
   partner listed with start date accepted (expected **green** at write time; *Guard*: reject every
   booking-quarter partner and confirm it fails); deal in both lists differing → rejected; a
@@ -419,7 +422,8 @@ reader that every story uses.
   *Guard*: (a) size each refund against the untouched quarter and confirm AS6 fails; (b) remove
   the refund-date filter and confirm AS3 and AS5 (Q1) fail; (c) floor clawbacks at zero and
   confirm AS9 fails; (d) remove each new validation check (including refund ≤ 0 and the
-  booking-quarter start-date check) and confirm its test fails; record all.
+  booking-quarter start-date check and the three booking-quarter quota/amount checks) and confirm
+  its test fails; record all.
   Run; record failing.
 - [ ] T057 [P] [US6] Write `Features/UI_NegativeAmounts.feature` in Specs, driven through the web
   host (`@FR-021 @FR-015`): `?scenario=refunds-q2` renders Sage's earned commission as "−$1,600.00"
@@ -472,7 +476,10 @@ reader that every story uses.
   (research R17 observed that this removes the files from output); record.
 - [ ] T061 Traceability generator, test first: add `TraceabilityTests` to Tools.Tests
   (`[Trait("Principle", "III")]`; fixture spec with FR-001..FR-003 and SC-001, fixture TRX, fixture
-  assembly metadata) — an ID with no test and an ID with no member both appear under "Gaps"; an ID
+  assembly metadata, plus one case that reflects over a real built assembly containing a Razor
+  Pages `PageModel` marked `[Implements]` and expects its FR to be found — *Guard*: remove the
+  framework reference from the tools project and confirm that case fails with
+  `ReflectionTypeLoadException`; record) — an ID with no test and an ID with no member both appear under "Gaps"; an ID
   declared in the explained-gaps table (below) still appears under "Gaps" — Principle III requires
   every FR/SC lacking a test or a member to be listed as a gap — but in an "Explained" subsection
   with its reason and category (scope, evidence-only, CI evidence, manual evidence), while any gap
@@ -508,8 +515,8 @@ reader that every story uses.
   duplicate id), T030 (unknown id, skip-link
   target, second `h1`, section labelling, attainment format, money format), T031 (all four),
   T035 (404, no-network), T037 (AS3 exclude-all), T038 (close date, bounds, refund date), T042 (AS4), T043,
-  T047 (largest remainder, sum check, sum-100 accepted), T048, T052, T055 (AS3), T056 (incl. partner accepted and booking-quarter
-  list rules), T057, T060 (every rule check), T060b, T061 — each still fails with its guarded
+  T047 (largest remainder, sum check, sum-100 accepted), T048, T052, T055 (AS3), T056 (incl. partner accepted, booking-quarter
+  list rules and booking-quarter quota/amount rules), T061 (framework reference), T057, T060 (every rule check), T060b, T061 — each still fails with its guarded
   behaviour removed; record each result here.
 - [ ] T064 Quickstart validation (standing rule 3): step 1 from a fresh clone (evidence:
   `git status --ignored` shows no build output before running); re-run T033's keyboard check on the

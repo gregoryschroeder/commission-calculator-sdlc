@@ -98,6 +98,11 @@ correctness.
   generator and gates contain real branching logic that the test-first principle requires tests
   for, so it became a project. The spike that `dotnet run file.cs` works on SDK 10.0.400 still
   stands; it is no longer relied on.
+- **Reflecting over the web assembly — spiked 2026-09-22** (found by analyze, re-run independently):
+  a plain console app calling `Assembly.LoadFrom` + `GetTypes()` on a `dotnet new webapp` DLL threw
+  `ReflectionTypeLoadException` ("Could not load … Microsoft.AspNetCore.Mvc.RazorPages"); with
+  `<FrameworkReference Include="Microsoft.AspNetCore.App" />` in the console project the same call
+  returned all 35 types. The tools project therefore carries that framework reference.
 
 ## R9. Integration test host for the UI
 
