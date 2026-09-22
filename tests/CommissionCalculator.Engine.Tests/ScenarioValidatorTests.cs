@@ -1,0 +1,82 @@
+using CommissionCalculator.Engine.Validation;
+using Xunit;
+
+namespace CommissionCalculator.Engine.Tests;
+
+// FR-004's shared rules, each tested in every place it applies (tasks standing rule 8). Each test
+// asserts that its own error is among those listed, not an exact error set, because later phases
+// add rules that some of these inputs also break.
+public sealed class ScenarioValidatorTests
+{
+    public sealed record RuleCase(string Name, Func<ScenarioInput, ScenarioInput> Break, string Phrase, string Subject)
+    {
+        public override string ToString() => Name;
+    }
+
+    private static readonly DateOnly May10 = new(2026, 5, 10);
+
+    private static readonly RuleCase[] Cases =
+    [
+        new("roster quota zero", s => s with { Roster = [s.Roster[0] with { Quota = 0m }, .. s.Roster.Skip(1)] }, "quota must be greater than zero", "sage"),
+        new("roster quota negative", s => s with { Roster = [s.Roster[0] with { Quota = -1m }, .. s.Roster.Skip(1)] }, "quota must be greater than zero", "sage"),
+        new("booking-quarter quota zero", s => s.WithBookingQuarter(s.BookingQuarter() with { Reps = [s.BookingQuarter().Reps[0] with { Quota = 0m }, .. s.BookingQuarter().Reps.Skip(1)] }), "quota must be greater than zero", "sage"),
+        new("own deal amount zero", s => s.WithOwnDeal(d => d with { Amount = 0m }), "amount must be greater than zero", "Q2-1"),
+        new("booking-quarter deal amount negative", s => s.WithBookingDeal(1, d => d with { Amount = -5m }), "amount must be greater than zero", "R-12"),
+        new("own refund amount zero", s => s.WithOwnDeal(d => d with { Refunds = [new(0m, May10)] }), "refund amount must be greater than zero", "Q2-1"),
+        new("booking-quarter refund amount zero", s => s.WithBookingDeal(1, d => d with { Refunds = [new(0m, new(2026, 2, 20))] }), "refund amount must be greater than zero", "R-12"),
+        new("roster quota sub-cent", s => s with { Roster = [s.Roster[0] with { Quota = 100_000.005m }, .. s.Roster.Skip(1)] }, "is not a whole number of cents", "sage"),
+        new("booking-quarter quota sub-cent", s => s.WithBookingQuarter(s.BookingQuarter() with { Reps = [s.BookingQuarter().Reps[0] with { Quota = 100_000.005m }, .. s.BookingQuarter().Reps.Skip(1)] }), "is not a whole number of cents", "sage"),
+        new("own deal amount sub-cent", s => s.WithOwnDeal(d => d with { Amount = 10.005m }), "is not a whole number of cents", "Q2-1"),
+        new("booking-quarter deal amount sub-cent", s => s.WithBookingDeal(1, d => d with { Amount = 10.005m }), "is not a whole number of cents", "R-12"),
+        new("own refund amount sub-cent", s => s.WithOwnDeal(d => d with { Refunds = [new(1.005m, May10)] }), "is not a whole number of cents", "Q2-1"),
+        new("booking-quarter refund amount sub-cent", s => s.WithBookingDeal(1, d => d with { Refunds = [new(1.005m, new(2026, 2, 20))] }), "is not a whole number of cents", "R-12"),
+        new("opening balance sub-cent", s => s with { Roster = [s.Roster[0] with { OpeningRecoverableBalance = 0.001m }, .. s.Roster.Skip(1)] }, "is not a whole number of cents", "sage"),
+        new("opening balance negative", s => s with { Roster = [s.Roster[0] with { OpeningRecoverableBalance = -1_000.00m }, .. s.Roster.Skip(1)] }, "opening recoverable balance must not be negative", "sage"),
+        new("empty roster", s => s with { Roster = [], Deals = [], BookingQuarters = [] }, "roster is empty", "refunds-q2"),
+        new("scenario quarter not three whole months", s => s with { Quarter = new(new(2026, 4, 2), new(2026, 6, 30)) }, "is not three whole calendar months", "2026-04-02"),
+        new("booking quarter not three whole months", s => s.WithBookingQuarter(s.BookingQuarter() with { Quarter = new(new(2026, 1, 1), new(2026, 2, 28)) }), "is not three whole calendar months", "2026-01-01"),
+        new("own deal credited to a rep not on the roster", s => s.WithOwnDeal(d => d with { Splits = [new("nobody", 100m)] }), "is not on the roster", "nobody"),
+        new("same rep twice on an own deal", s => s.WithOwnDeal(d => d with { Splits = [new("sage", 50m), new("sage", 50m)] }), "appears more than once on deal", "Q2-1"),
+        new("same rep twice on a booking-quarter deal", s => s.WithBookingDeal(5, d => d with { Splits = [new("zion", 50m), new("zion", 50m)] }), "appears more than once on deal", "D2"),
+        new("duplicate repId on the roster", s => s with { Roster = [.. s.Roster, s.Roster[0] with { Name = "Sage again" }] }, "appears more than once on the roster", "sage"),
+        new("duplicate dealId in the own deal list", s => s with { Deals = [s.Deals[0], s.Deals[0]] }, "appears more than once in the deal list", "Q2-1"),
+        new("duplicate dealId in a booking-quarter deal list", s => s.WithBookingDeal(1, d => d with { DealId = "R-11" }), "appears more than once in the deal list", "R-11"),
+        new("own split percentage zero", s => s.WithOwnDeal(d => d with { Splits = [new("sage", 0m), new("val", 100m)] }), "split percentage must be greater than 0% and at most 100%", "Q2-1"),
+        new("own split percentage over 100", s => s.WithOwnDeal(d => d with { Splits = [new("sage", 100.5m)] }), "split percentage must be greater than 0% and at most 100%", "Q2-1"),
+        new("booking-quarter split percentage zero", s => s.WithBookingDeal(5, d => d with { Splits = [new("zion", 0m), new("yves", 100m)] }), "split percentage must be greater than 0% and at most 100%", "D2"),
+        new("booking-quarter split percentage over 100", s => s.WithBookingDeal(1, d => d with { Splits = [new("sage", 101m)] }), "split percentage must be greater than 0% and at most 100%", "R-12"),
+    ];
+
+    public static TheoryData<RuleCase> Rules => [.. Cases];
+
+    [Fact, Trait("Requirement", "FR-004")]
+    public void TheValidScenarioHasNoErrors() => Assert.Empty(ScenarioValidator.Validate(ValidScenario.Create()));
+
+    [Theory, Trait("Requirement", "FR-004"), MemberData(nameof(Rules))]
+    public void EachSharedRuleRejectsItsViolation(RuleCase rule)
+    {
+        var errors = ScenarioValidator.Validate(rule.Break(ValidScenario.Create()));
+
+        Assert.Contains(errors, error =>
+            error.RequirementId == "FR-004"
+            && error.Message.Contains(rule.Phrase, StringComparison.Ordinal)
+            && error.Message.Contains(rule.Subject, StringComparison.Ordinal));
+    }
+
+    [Fact, Trait("Requirement", "FR-004")]
+    public void EveryViolationIsListedNotOnlyTheFirst()
+    {
+        var scenario = ValidScenario.Create();
+        scenario = scenario with
+        {
+            Roster = [scenario.Roster[0] with { Quota = 0m }, scenario.Roster[1] with { OpeningRecoverableBalance = -1m }, scenario.Roster[2]],
+        };
+        scenario = scenario.WithOwnDeal(d => d with { Amount = 40_000.005m });
+
+        var messages = ScenarioValidator.Validate(scenario).Select(error => error.Message).ToList();
+
+        Assert.Contains(messages, m => m.Contains("quota must be greater than zero", StringComparison.Ordinal));
+        Assert.Contains(messages, m => m.Contains("opening recoverable balance must not be negative", StringComparison.Ordinal));
+        Assert.Contains(messages, m => m.Contains("is not a whole number of cents", StringComparison.Ordinal));
+    }
+}

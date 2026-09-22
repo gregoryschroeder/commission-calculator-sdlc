@@ -158,17 +158,22 @@ analyze step can hold this list to them. Where anything above or below conflicts
 **Purpose**: engine contract types, money rules, the engine entry point and the scenario-file
 reader that every story uses.
 
-- [ ] T013 Create the engine's public input/result records and `ImplementsAttribute` exactly as in
+- [X] T013 Create the engine's public input/result records and `ImplementsAttribute` exactly as in
   contracts/engine-api.md (`Inputs/`, `Results/`) — structural, no test.
-- [ ] T014 Create `tests/CommissionCalculator.Engine.Tests/` and write `MoneyTests`
+  **Result**: Done 2026-09-22; contract types as in contracts/engine-api.md.
+- [X] T014 Create `tests/CommissionCalculator.Engine.Tests/` and write `MoneyTests`
   (`FR-018`, `FR-004`): half away from zero (0.505→0.51, −0.505→−0.51, 1548.387…→1548.39,
   50549.4505…→50549.45); whole-cent check true for 10.10, false for 10.005. Run; record failing.
-- [ ] T015 Implement `Calculation/Money.cs` until T014 passes.
-- [ ] T016 Write `QuarterTests` (`FR-004`, `FR-014`): 2026-01-01..03-31 has 90 days and months
+  **Result**: Recorded red 2026-09-22: 6/6 failed with `NotImplementedException` (stubs).
+- [X] T015 Implement `Calculation/Money.cs` until T014 passes.
+  **Result**: Done; MoneyTests green.
+- [X] T016 Write `QuarterTests` (`FR-004`, `FR-014`): 2026-01-01..03-31 has 90 days and months
   Jan/Feb/Mar; 2026-04-01..06-30 has 91; a quarter not starting on the 1st or not spanning three
   whole months is invalid. Run; record failing.
-- [ ] T017 Implement quarter day/month helpers (internal, in `Calculation/`) until T016 passes.
-- [ ] T018 Write `ScenarioValidatorTests` for the shared rules (`FR-004`), each tested in **every
+  **Result**: Recorded red: 7/7 failed with `NotImplementedException`.
+- [X] T017 Implement quarter day/month helpers (internal, in `Calculation/`) until T016 passes.
+  **Result**: Done; QuarterTests green.
+- [X] T018 Write `ScenarioValidatorTests` for the shared rules (`FR-004`), each tested in **every
   place it applies** — the scenario's roster and deal list, booking-quarter reps, partners and
   deals, and refunds (validation scope rule, below): quota ≤ 0; deal amount ≤ 0; refund amount ≤ 0;
   any monetary input (quota, deal amount, refund amount, opening balance) not a whole number of
@@ -182,15 +187,19 @@ reader that every story uses.
   comment out that rule's check and confirm its tests fail; separately, validate only the
   scenario's own roster and deal list and confirm every booking-quarter case fails; record. Run;
   record failing.
-- [ ] T019 Implement `Validation/ScenarioValidator.cs` (shared rules) until T018 passes.
-- [ ] T020 Write `CommissionEngineTests` (`FR-003`, `FR-004`, `FR-005`): an invalid scenario returns
+  **Result**: Recorded red: 30/30 failed with `NotImplementedException`. The theory's data holds delegates, and each case still reports by name. Guards recorded 2026-09-22: disabling each of the 16 checks failed exactly its own cases (e.g. split range → 4 cases, duplicate dealId → 2, quota > 0 → 3 plus the multi-error test); restricting validation to the scenario's own data failed all 11 booking-quarter cases. A guard written as `if (false)` does not compile under warnings-as-errors (CS0162), so checks were disabled with a non-constant false condition.
+- [X] T019 Implement `Validation/ScenarioValidator.cs` (shared rules) until T018 passes.
+  **Result**: Done; ScenarioValidatorTests green.
+- [X] T020 Write `CommissionEngineTests` (`FR-003`, `FR-004`, `FR-005`): an invalid scenario returns
   `RejectedScenario` and no statements; a valid one returns one `RepStatement` per roster rep in
   roster order whose first line is "Quarterly quota" citing FR-005; every line's RequirementId
   matches `FR-\d{3}`. *Guard*: skip the validation call and confirm the rejected-scenario test
   fails; record. Run; record failing.
-- [ ] T021 Implement `CommissionEngine.Calculate` and `Calculation/StatementBuilder.cs` (validation
+  **Result**: Recorded red: 4/4 failed with `NotImplementedException`. Guard: skipping validation failed `AnInvalidScenarioIsRejectedWithNoStatements`.
+- [X] T021 Implement `CommissionEngine.Calculate` and `Calculation/StatementBuilder.cs` (validation
   first, then statement assembly) until T020 passes.
-- [ ] T022 Create `tests/CommissionCalculator.Web.Tests/` (xunit.v3 unit tests of single web
+  **Result**: Done; engine 47/47 green.
+- [X] T022 Create `tests/CommissionCalculator.Web.Tests/` (xunit.v3 unit tests of single web
   classes) and write `ScenarioFileReaderTests` (`FR-001`, `FR-004`): a file matching
   contracts/scenario-file.md maps to the expected `ScenarioInput`; `10.005` is read exactly;
   unknown property, malformed JSON and a missing required field each produce a load error naming
@@ -198,7 +207,8 @@ reader that every story uses.
   confirm the malformed-JSON test fails with an escaped exception; allow unmapped JSON members and
   confirm the unknown-property test fails; drop the required-field check and confirm the
   missing-field test fails; record all three. Run; record failing.
-- [ ] T023 Write `ScenarioCatalogTests` in Web.Tests (`FR-001`): files are listed ordered by file
+  **Result**: Recorded red: 5/5 failed with `NotImplementedException`. Guards: catching the wrong exception type failed all three unreadable-file cases (and the catalog's does-not-hide test); allowing unmapped members failed the unknown-property case; dropping the required-parameter check failed the missing-field case.
+- [X] T023 Write `ScenarioCatalogTests` in Web.Tests (`FR-001`): files are listed ordered by file
   name; a file that fails to load is listed as a load error and does not hide the others; two
   files declaring the same scenario id are both reported as a load error naming the id (FR-004); a
   scenario directory that does not exist yields an empty catalog, not an exception (the shipped app
@@ -207,17 +217,20 @@ reader that every story uses.
   test fails; record.
   *Guard*: make the catalog stop at the first failing file and confirm the "does not hide the
   others" test fails; record. Run; record failing.
-- [ ] T024 Implement `Catalog/ScenarioFileReader.cs` and `Catalog/ScenarioCatalog.cs` (folder
+  **Result**: Recorded red: 4/4 failed with `NotImplementedException`. Guards: removing the existence check failed the missing-directory test; skipping the duplicate-id check failed the duplicate test; stopping at the first failing file failed the does-not-hide test.
+- [X] T024 Implement `Catalog/ScenarioFileReader.cs` and `Catalog/ScenarioCatalog.cs` (folder
   `Catalog`, not `ScenarioCatalog`, so the folder-derived namespace does not collide with the class
   name — CS0118) (loads every
   `Scenarios/*.json` from a directory set by an options value that defaults to
   `Path.Combine(AppContext.BaseDirectory, "Scenarios")` — the build/publish output, not the content
   root, so a file missing from output is missing at run time; the value `Scenarios:Directory` can
   override it, and tests point it at a directory they create) until T022–T023 pass.
-- [ ] T025 Confirm in the real solution that `Scenarios/*.json` reaches build and publish output
+  **Result**: Done; Web.Tests 9/9 green. `Scenarios:Directory` is bound through `IOptions<ScenarioOptions>`; the host-level test of that binding comes with T030.
+- [X] T025 Confirm in the real solution that `Scenarios/*.json` reaches build and publish output
   through the Web SDK's default content items, with **no** project-file entry (research R17: an
   explicit `<Content Include>` fails the build with NETSDK1022) — structural; proven by T060b's smoke
   assertion and guard.
+  **Result**: Confirmed 2026-09-22: a probe `Scenarios/probe.json` reached `bin/Debug/net10.0/Scenarios/` with no project-file entry (the csproj mentions `Scenarios` nowhere).
 - [ ] T026 Checkpoint: PR "Phase 2: Foundational", CI green, maintainer approves squash-merge.
 
 ---
