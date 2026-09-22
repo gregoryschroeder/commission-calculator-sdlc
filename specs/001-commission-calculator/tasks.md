@@ -60,6 +60,10 @@ analyze step can hold this list to them. Where anything above or below conflicts
    only, bodies `throw new NotImplementedException()`); the implementation task replaces them. This
    applies in particular to T030 (formatters), T047 (`SplitAllocation`) and T056
    (`ClawbackCalculator`), whose projects also hold that task's declared-green tests.
+8. **Validation scope.** Each validation rule is tested once, in the task that introduces it, in
+   every place it applies (scenario roster and deal list, booking-quarter reps, partners and deals,
+   refunds), with a guard that restricts it to the scenario's own data and sees the other cases
+   fail. Later tasks do not re-test it.
 ---
 
 ## Phase 1: Setup (shared infrastructure) — PR 1
@@ -148,15 +152,20 @@ reader that every story uses.
   Jan/Feb/Mar; 2026-04-01..06-30 has 91; a quarter not starting on the 1st or not spanning three
   whole months is invalid. Run; record failing.
 - [ ] T017 Implement quarter day/month helpers (internal, in `Calculation/`) until T016 passes.
-- [ ] T018 Write `ScenarioValidatorTests` for the shared rules (`FR-004`): quota ≤ 0, deal amount
-  ≤ 0, sub-cent money, negative opening balance, empty roster, bad quarter shape, deal credited to
-  a rep not on the roster, same rep twice on a deal, two roster reps with one repId, two deals in
-  one list with one dealId, split % ≤ 0 or > 100 — each test asserts
+- [ ] T018 Write `ScenarioValidatorTests` for the shared rules (`FR-004`), each tested in **every
+  place it applies** — the scenario's roster and deal list, booking-quarter reps, partners and
+  deals, and refunds (validation scope rule, below): quota ≤ 0; deal amount ≤ 0; refund amount ≤ 0;
+  any monetary input (quota, deal amount, refund amount, opening balance) not a whole number of
+  cents; negative opening balance; empty roster; bad quarter shape (scenario and booking quarter);
+  a scenario deal credited to a rep not on the roster; same rep twice on a deal; two roster reps
+  with one repId; two deals in one list with one dealId; split % ≤ 0 or > 100. Each test asserts
   that its own error is among those listed and the scenario is rejected (not an exact error set:
   later phases add rules such as FR-013 that a > 100% split also trips, and a test is never edited
   to pass); one further test with three mutually independent violations (quota ≤ 0, sub-cent deal
-  amount, negative opening balance) asserts that all three are listed. *Guard*: for each rule, comment out that
-  rule's check and confirm its test fails; record. Run; record failing.
+  amount, negative opening balance) asserts that all three are listed. *Guard*: for each rule,
+  comment out that rule's check and confirm its tests fail; separately, validate only the
+  scenario's own roster and deal list and confirm every booking-quarter case fails; record. Run;
+  record failing.
 - [ ] T019 Implement `Validation/ScenarioValidator.cs` (shared rules) until T018 passes.
 - [ ] T020 Write `CommissionEngineTests` (`FR-003`, `FR-004`, `FR-005`): an invalid scenario returns
   `RejectedScenario` and no statements; a valid one returns one `RepStatement` per roster rep in
@@ -182,7 +191,9 @@ reader that every story uses.
   test fails; record.
   *Guard*: make the catalog stop at the first failing file and confirm the "does not hide the
   others" test fails; record. Run; record failing.
-- [ ] T024 Implement `ScenarioCatalog/ScenarioFileReader.cs` and `ScenarioCatalog.cs` (loads every
+- [ ] T024 Implement `Catalog/ScenarioFileReader.cs` and `Catalog/ScenarioCatalog.cs` (folder
+  `Catalog`, not `ScenarioCatalog`, so the folder-derived namespace does not collide with the class
+  name — CS0118) (loads every
   `Scenarios/*.json` from a directory set by an options value that defaults to
   `Path.Combine(AppContext.BaseDirectory, "Scenarios")` — the build/publish output, not the content
   root, so a file missing from output is missing at run time; the value `Scenarios:Directory` can
@@ -315,12 +326,13 @@ reader that every story uses.
   is excluded (expected red: Phase 3 credits every deal); booked on the first and last day counts,
   and close date never changes the result (expected green at write time — Phase 3 already credits
   them; red evidence is the guards below plus an inclusive-bounds guard: make the bounds exclusive
-  and confirm the first/last-day tests fail). Add
-  `ScenarioValidatorTests` (`FR-004`) on the scenario's own deal list: refund dated before booking
-  date, refund ≤ 0, sub-cent refund amount, and refunds totalling more than the deal — each
-  rejected (*Guard* for each: remove that check and confirm its test fails). *Guard*:
-  switch crediting to close date and confirm AS1 (B-1) and AS2 (B-2) fail; remove the refund-date
-  check and confirm its test fails; record. Run; record failing.
+  and confirm the first/last-day tests fail). Add `ScenarioValidatorTests` (`FR-004`) for the two
+  refund rules this phase introduces, each in both the scenario's deal list and a booking-quarter
+  deal list: refund dated before the deal's booking date, and refunds totalling more than the deal
+  — each rejected. (Refund ≤ 0 and sub-cent refunds are T018's shared rules.) *Guard*: switch
+  crediting to close date and confirm AS1 (B-1) and AS2 (B-2) fail; remove each refund check and
+  confirm its tests fail; validate refunds only on the scenario's own list and confirm the
+  booking-quarter cases fail; record. Run; record failing.
 - [ ] T039 (Moved into T030 by analyze, 2026-09-22: US1 AS5 asserts only which reps a scenario shows,
   which Phase 3 already renders, so it could not be seen failing here.)
 - [ ] T040 [US2] Implement booking-date crediting and excluded-deal lines until T037–T038 pass.
@@ -340,10 +352,14 @@ reader that every story uses.
   unconditionally and confirm AS4 fails; record.
 - [ ] T043 [P] [US3] Write `QuotaProrationTests` (`FR-010`, `FR-004`, `FR-011`): 45/90 of
   90,000.00 = 45,000.00; 46/91 of 100,000.00 = 50,549.45; start on or before the first day → no
-  proration (asserted on `QuotaProration`'s result, which is a stub until T044, so red); start on the last day → 1 day; prorated quota rounding to
-  0.00 → rejected; start after quarter end → rejected naming the rep; any deal (counted or not)
-  booked before a credited rep's start → rejected naming deal and rep. *Guard*: remove each
-  rejection check and confirm its test fails; record. Run; record failing.
+  proration (asserted on `QuotaProration`'s result, which is a stub until T044, so red); start on
+  the last day → 1 day. Validator rules this phase introduces, each in every place it applies: a
+  prorated quota rounding to 0.00 → rejected (scenario roster and booking-quarter reps); start
+  after quarter end → rejected naming the rep; any deal (counted or not, in the scenario's list or
+  a booking quarter's) booked before the start date of a credited rep or partner → rejected
+  naming deal and rep. *Guard*: remove each rejection check and confirm its tests fail; apply them
+  only to the scenario's own data and confirm the booking-quarter cases fail; record. Run; record
+  failing.
 - [ ] T044 [US3] Implement `Calculation/QuotaProration.cs` and the FR-011/FR-004 start-date rules
   until T042–T043 pass.
 - [ ] T045 [US3] Checkpoint: PR "Phase 5: US3", CI green, maintainer approves squash-merge.
@@ -361,7 +377,8 @@ reader that every story uses.
 - [ ] T047 [P] [US4] Write `SplitAllocationTests` (`FR-012`): 60/40 of 50,000.00; 50/50 of 10.01 →
   5.01/5.00; 33.335/33.335/33.33 of 100.00 → 33.34/33.33/33.33; 45/45/10 of 0.06 → 0.03/0.03/0.00;
   45/45/10 of 0.05 → 0.02/0.02/0.01 (US6 AS9's re-split); shares always sum to the amount over a
-  fixed table of cases. Add validator tests (`FR-013`): sums of 99.999 and 100.001 rejected
+  fixed table of cases. Add validator tests (`FR-013`), each in the scenario's deal list and a booking-quarter deal list
+  (standing rule 8): sums of 99.999 and 100.001 rejected
   (expected red); 100 accepted (expected **green** at write time — nothing rejects it yet;
   *Guard*: make the sum check reject every deal and confirm it fails). *Guard*: replace largest remainder with independent rounding and confirm the 10.01
   case fails; remove the sum check and confirm the FR-013 tests fail; record. Run; record failing.
@@ -414,28 +431,24 @@ reader that every story uses.
 - [ ] T056 [P] [US6] Write `ClawbackCalculatorTests` (`FR-016`, `FR-017`): full, partial and
   repeated refunds; refunds across deals ordered by date then deal then refund position; refund
   after quarter end ignored; negative clawback from a re-split; split refund re-split
-  (4,950.10 / 4,950.09). Add validator tests (`FR-004`): missing/incomplete booking-quarter data; booking quarter overlapping or malformed; FR-004/FR-013's per-list rules applied
-  to a booking-quarter deal list — duplicate dealId, same rep twice on a deal, split % out of
-  range, split sum ≠ 100, sub-cent amount — each rejected (*Guard*: validate only the scenario's
-  own deal list and confirm each of these fails; record); booking-quarter rep quota ≤ 0 or not
-  whole cents, booking-quarter deal amount ≤ 0, and a booking-quarter prorated quota that rounds to
-  $0.00 (requirement) — each rejected (FR-004); the four refund rules of T038 (refund dated before
-  booking, refund ≤ 0, sub-cent refund, refunds totalling more than the deal) applied to a
-  booking-quarter deal — each rejected, guarded by the same "validate only the scenario's own deal
-  list" guard; rep start-date
-  mismatch; a booking-quarter deal whose booking date is outside that quarter's dates → rejected;
-  partner listed with start date accepted (expected **green** at write time; *Guard*: reject every
-  booking-quarter partner and confirm it fails); deal in both lists differing → rejected; a booking-quarter deal booked before the start date of a
-  credited roster rep or partner → rejected naming the deal and the rep (FR-011). Add a statement test: a refund on a split deal adds a re-split
-  line citing FR-017 before its clawback line; a refund on a single-rep deal adds none (expected
-  **green** at write time — no re-split lines exist before T058; *Guard*: emit a re-split line for
-  every refund and confirm it fails; record).
+  (4,950.10 / 4,950.09). Add validator tests (`FR-004`) for the rules only booking-quarter data
+  has (every rule shared with the scenario's own data is already tested in T018, T038, T043 or
+  T047): a deal booked in an earlier quarter and refunded in this one, with no booking-quarter data
+  for that quarter → rejected; a roster rep credited on such a deal with no entry in that booking
+  quarter's `reps` → rejected; a split partner on such a deal who is neither on the roster nor in
+  `partners` with a start date → rejected (the detectable completeness rules, clarification
+  2026-09-22); booking quarter overlapping the scenario quarter → rejected; a booking-quarter deal
+  whose booking date is outside that quarter's dates → rejected; a rep's start date in booking-
+  quarter data differing from the roster's → rejected; a deal in both lists differing → rejected;
+  a partner listed with a start date → accepted (expected **green** at write time; *Guard*: reject
+  every booking-quarter partner and confirm it fails). Add a statement test: a refund on a split
+  deal adds a re-split line citing FR-017 before its clawback line; a refund on a single-rep deal
+  adds none (expected **green** at write time — no re-split lines exist before T058; *Guard*: emit
+  a re-split line for every refund and confirm it fails; record).
   *Guard*: (a) size each refund against the untouched quarter and confirm AS6 fails; (b) remove
   the refund-date filter and confirm AS3 and AS5 (Q1) fail; (c) floor clawbacks at zero and
-  confirm AS9 fails; (d) remove each new validation check (including refund ≤ 0 and the
-  booking-quarter start-date check and the three booking-quarter quota/amount checks) and confirm
-  its test fails; record all.
-  Run; record failing.
+  confirm AS9 fails; (d) remove each validation check listed above and confirm its test fails;
+  record all. Run; record failing.
 - [ ] T057 [P] [US6] Write `Features/UI_NegativeAmounts.feature` in Specs, driven through the web
   host (`@FR-021 @FR-015`): `?scenario=refunds-q2` renders Sage's earned commission as "−$1,600.00"
   with a minus sign in the text (not colour alone), against a scenario directory the scenario itself creates (a temp folder holding the Appendix A.10 inputs
@@ -527,9 +540,9 @@ reader that every story uses.
   T010, T018, T020, T022 (error capture, unknown property, required field), T023 (first-failure, missing directory,
   duplicate id), T030 (unknown id, skip-link
   target, second `h1`, section labelling, attainment format, money format), T031 (all four),
-  T035 (404, no-network), T037 (AS3 exclude-all), T038 (close date, bounds, the four refund rules), T042 (AS4), T043,
-  T047 (largest remainder, sum check, sum-100 accepted), T048, T052, T055 (AS3), T056 (incl. partner accepted, booking-quarter
-  list rules, booking-quarter quota/amount and refund rules, single-rep no re-split), T061 (framework reference), T057, T060 (every rule check), T060b, T061 — each still fails with its guarded
+  T035 (404, no-network), T037 (AS3 exclude-all), T038 (close date, bounds, refund date, refund total, own-list-only), T042 (AS4), T043,
+  T047 (largest remainder, sum check, sum-100 accepted), T048, T052, T055 (AS3), T056 (incl. partner accepted, detectable completeness,
+  overlap, date range, start-date mismatch, differing duplicate, single-rep no re-split), T061 (framework reference), T057, T060 (every rule check), T060b, T061 — each still fails with its guarded
   behaviour removed; record each result here.
 - [ ] T064 Quickstart validation (standing rule 3): step 1 from a fresh clone (evidence:
   `git status --ignored` shows no build output before running); re-run T033's keyboard check on the

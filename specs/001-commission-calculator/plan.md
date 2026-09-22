@@ -113,7 +113,7 @@ src/
     ├── Program.cs
     ├── Pages/Index.cshtml(.cs)
     ├── Scenarios/*.json                  # seeded scenarios (contracts/scenario-file.md)
-    ├── ScenarioCatalog/                  # JSON → ScenarioInput; load errors (boundary validation)
+    ├── Catalog/                          # ScenarioFileReader, ScenarioCatalog: JSON → ScenarioInput, load errors
     └── wwwroot/css/site.css
 
 tests/

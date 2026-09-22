@@ -60,9 +60,12 @@ Derived: `Days = end − start + 1`; `Months` = the three calendar months.
 | `partners` | {repId, startDate}[] | Split partners not on the roster; they get no statement (FR-016). |
 | `deals` | Deal[] | All deals booked in it for those reps (each `bookingDate` inside it), with every refund dated before the refund being sized (FR-004). |
 
-Completeness is checked for every deal that has a refund dated in the scenario quarter and a
-booking date before it: its booking quarter must be present and satisfy the rules above,
-otherwise the scenario is rejected (FR-004). Such a deal is sized from the booking quarter's copy;
+Completeness is checked, as far as the engine can detect it, for every deal that has a refund dated
+in the scenario quarter and a booking date before it: its booking quarter must be present, each
+credited roster rep must have a `reps` entry and each non-roster partner a `partners` entry,
+otherwise the scenario is rejected (FR-004). That the booking quarter lists *all* of those reps'
+deals and every earlier refund is a precondition on the data, not a check (FR-004, clarification
+2026-09-22). Such a deal is sized from the booking quarter's copy;
 if the scenario's own deal list also lists it (as an excluded deal), the two entries must be
 identical, otherwise the data is inconsistent and the scenario is rejected (FR-004).
 

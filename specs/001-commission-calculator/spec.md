@@ -168,6 +168,14 @@ Answers are the maintainer's, recorded verbatim; the option each answer selected
   (FR-004) → A: "Reject the scenario (Recommended)" — a duplicate repId on the roster or a
   duplicate dealId within one quarter's deal list rejects the scenario, and two scenario files with
   the same id are a load error, each naming the duplicate.
+- Q: FR-004 rejects booking-quarter data that is "incomplete" — including a missing deal or a
+  missing earlier refund. The engine can't know a deal was left out, and an omitted deal changes
+  the clawback. How should completeness be defined? (FR-004, FR-016) → A: "Detectable +
+  precondition (Recommended)" — the engine rejects what it can detect: a refunded earlier-quarter
+  deal with no booking-quarter data, a credited roster rep with no rep entry, a partner with no
+  start date. "All deals / all earlier refunds are included" becomes a stated precondition on
+  scenario data, enforced for the shipped seeds by the seeded-scenario check (seeds must equal
+  Appendix A).
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -454,13 +462,15 @@ the net result.
   one quarter's deal list share a dealId; a rep appears more than once on one deal; a prorated quota rounds to $0.00 (requirement); any deal in the
   scenario's own deal list (counted or not) is credited to a rep not on the roster; a deal
   refunded in the quarter was booked in an earlier quarter whose data is missing or incomplete
-  (complete means: for each roster rep credited on the deal, that quarter's dates, their quota,
-  start date, all their deals booked in it, and every refund on those deals dated before the
-  refund being sized, whatever quarter that earlier refund falls in; for a split partner not on the
-  roster, their start date), is not three whole calendar months, overlaps the scenario's quarter, or
+  (detectably incomplete means: the booking quarter is absent; a roster rep credited on the deal
+  has no entry in its `reps` (quota and start date); or a split partner not on the roster has no
+  start date in its `partners`), is not three whole calendar months, overlaps the scenario's quarter, or
   contains a deal booked outside its own dates; or a rep's start date in booking-quarter data
   differs from the roster's; or an earlier-quarter deal listed both in the scenario's own deal
-  list and in booking-quarter data differs between the two.
+  list and in booking-quarter data differs between the two. **Precondition (not detectable by the
+  engine):** booking-quarter data includes every deal each credited roster rep booked in that
+  quarter and every refund on those deals dated before the refund being sized, whatever quarter it
+  falls in; the shipped seed files meet it because they must equal Appendix A.
 
 **Quota and rates**
 
