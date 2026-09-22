@@ -104,7 +104,8 @@ analyze step can hold this list to them. Where anything above or below conflicts
   src/CommissionCalculator.Web` in the background, poll `/` until HTTP 200 (fail after 60 s), stop
   it. *Guard*: point the poll at a path that returns 404 and confirm the step fails; record.
 - [ ] T011 `README.md`: what it is, `dotnet run --project src/CommissionCalculator.Web` (or
-  `dotnet run` inside that folder), test commands, where the spec lives.
+  `dotnet run` inside that folder), test commands, where the spec lives, and the optional
+  `Scenarios:Directory` setting (e.g. `--Scenarios:Directory=/path` on the command line).
 - [ ] T012 Checkpoint: open PR "Phase 1: Setup", CI green, maintainer approves squash-merge. Record
   the first CI run's outcome in research R14 (SDK resolution) and R15 (isolation-step time), and
   propose to the maintainer the PATCH amendment that marks constitution C7 as confirmed and, in its
