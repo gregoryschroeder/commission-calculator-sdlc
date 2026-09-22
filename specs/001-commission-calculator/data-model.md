@@ -8,10 +8,10 @@ calendar dates with no time or time zone. Percentages are exact decimals (e.g. `
 ### Scenario
 | Field | Type | Rules |
 |---|---|---|
-| `id` | string | Unique across seeded scenarios; used in the page URL. |
+| `id` | string | Unique across seeded scenarios, else a load error naming it (FR-004); used in the page URL. |
 | `name`, `description` | string | Shown in the picker and page heading. |
 | `quarter` | Quarter | Must be three whole calendar months starting on the 1st (Edge Cases). |
-| `roster` | Rep[] | Reps who receive a statement. At least one. Unique `repId`. |
+| `roster` | Rep[] | Reps who receive a statement. At least one; unique `repId` (FR-004). |
 | `deals` | Deal[] | The scenario's own deal list, in listed order (FR-008 lists excluded ones). |
 | `bookingQuarters` | BookingQuarter[] | Earlier quarters needed to size clawbacks (FR-016). May be empty. |
 
@@ -33,7 +33,7 @@ Derived: `Days = end − start + 1`; `Months` = the three calendar months.
 ### Deal
 | Field | Type | Rules |
 |---|---|---|
-| `dealId` | string | Unique within its quarter's deal list. |
+| `dealId` | string | Unique within its quarter's deal list (FR-004). |
 | `amount` | money | > 0, whole cents. |
 | `closeDate` | date | Informational only (FR-008). |
 | `bookingDate` | date | Decides the quarter (FR-008). |

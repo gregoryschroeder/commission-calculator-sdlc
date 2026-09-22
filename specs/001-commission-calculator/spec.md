@@ -161,6 +161,14 @@ Answers are the maintainer's, recorded verbatim; the option each answer selected
   (Recommended)" — after each refund on a split deal, the rep's statement shows a line with their
   re-split share citing FR-017; Appendix A.9 gains those lines (no payout changes).
 
+### Session 2026-09-22 (analyze)
+
+- Q: The data model requires unique scenario ids, unique repIds on the roster and unique dealIds,
+  but FR-004 doesn't say so. A duplicate repId could change who is credited. What should happen?
+  (FR-004) → A: "Reject the scenario (Recommended)" — a duplicate repId on the roster or a
+  duplicate dealId within one quarter's deal list rejects the scenario, and two scenario files with
+  the same id are a load error, each naming the duplicate.
+
 ## User Scenarios & Testing *(mandatory)*
 
 The user is anyone checking a quarterly commission statement: a sales-operations analyst, a
@@ -440,7 +448,8 @@ the net result.
   number of cents; deal amounts, quotas and refunds MUST be greater than zero; an opening
   recoverable balance MUST be zero or more; every split percentage MUST be greater than 0%
   (requirement) and at most 100% (requirement). A scenario MUST also be rejected, naming the rep,
-  deal or quarter involved, when: its roster is empty; a rep appears more than once on one deal; a prorated quota rounds to $0.00 (requirement); any deal in the
+  deal or quarter involved, when: its roster is empty; two roster reps share a repId; two deals in
+  one quarter's deal list share a dealId; a rep appears more than once on one deal; a prorated quota rounds to $0.00 (requirement); any deal in the
   scenario's own deal list (counted or not) is credited to a rep not on the roster; a deal
   refunded in the quarter was booked in an earlier quarter whose data is missing or incomplete
   (complete means: for each roster rep credited on the deal, that quarter's dates, their quota,

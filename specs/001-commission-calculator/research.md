@@ -192,4 +192,4 @@ correctness.
   `bin/Debug/net10.0/Scenarios/` and in `dotnet publish` output with no project-file entry; adding
   `<Content Include="Scenarios/*.json" …>` failed the build with NETSDK1022 (duplicate Content
   items); `<Content Update="Scenarios/*.json" CopyToOutputDirectory="Never" …>` removed the file
-  from build output — the positive control that makes the smoke guard (tasks T035) able to fail.
+  from build output — the positive control that makes the smoke guard (tasks T060b) able to fail.

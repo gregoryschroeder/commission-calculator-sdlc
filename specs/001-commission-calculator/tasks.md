@@ -124,7 +124,8 @@ reader that every story uses.
 - [ ] T017 Implement quarter day/month helpers (internal, in `Calculation/`) until T016 passes.
 - [ ] T018 Write `ScenarioValidatorTests` for the shared rules (`FR-004`): quota ≤ 0, deal amount
   ≤ 0, sub-cent money, negative opening balance, empty roster, bad quarter shape, deal credited to
-  a rep not on the roster, same rep twice on a deal, split % ≤ 0 or > 100 — each test asserts
+  a rep not on the roster, same rep twice on a deal, two roster reps with one repId, two deals in
+  one list with one dealId, split % ≤ 0 or > 100 — each test asserts
   that its own error is among those listed and the scenario is rejected (not an exact error set:
   later phases add rules such as FR-013 that a > 100% split also trips, and a test is never edited
   to pass); one further test with three mutually independent violations (quota ≤ 0, sub-cent deal
@@ -145,7 +146,8 @@ reader that every story uses.
   the file, never an exception out of the reader. *Guard*: remove the reader's error capture and
   confirm the malformed-JSON test fails with an escaped exception; record. Run; record failing.
 - [ ] T023 Write `ScenarioCatalogTests` in Web.Tests (`FR-001`): files are listed ordered by file
-  name; a file that fails to load is listed as a load error and does not hide the others.
+  name; a file that fails to load is listed as a load error and does not hide the others; two
+  files declaring the same scenario id are both reported as a load error naming the id (FR-004).
   *Guard*: make the catalog stop at the first failing file and confirm the "does not hide the
   others" test fails; record. Run; record failing.
 - [ ] T024 Implement `ScenarioCatalog/ScenarioFileReader.cs` and `ScenarioCatalog.cs` (loads every
@@ -155,7 +157,7 @@ reader that every story uses.
   they create) until T022–T023 pass.
 - [ ] T025 Confirm in the real solution that `Scenarios/*.json` reaches build and publish output
   through the Web SDK's default content items, with **no** project-file entry (research R17: an
-  explicit `<Content Include>` fails the build with NETSDK1022) — structural; proven by T035's smoke
+  explicit `<Content Include>` fails the build with NETSDK1022) — structural; proven by T060b's smoke
   assertion and guard.
 - [ ] T026 Checkpoint: PR "Phase 2: Foundational", CI green, maintainer approves squash-merge.
 
@@ -187,7 +189,10 @@ reader that every story uses.
   every Rule cell is an FR ID that exists in spec.md (read from the committed spec file); each rep's
   page has a `<title>` naming the selected scenario (WCAG 2.4.2); these scenarios run against a scenario directory the scenario itself creates (a temp folder holding the Appendix A.1 inputs
   as JSON), never the shipped `Scenarios/` folder, which is only added in Phase 9 (T060a); summary `dl` shows quota, prorated quota, credited bookings, attainment (Avery: "80.00%"),
-  earned, draws paid, payable and closing balance; unknown id → 404 with the picker; a load error
+  earned, draws paid, payable and closing balance; US1 AS5 — with the A.1 and A.2 inputs both in the
+  folder, selecting `booking-dates` shows only Emery and selecting `tiers` only Avery–Devon; `GET /`
+  with no `scenario` shows the first scenario by file name; an empty scenario folder shows "No
+  scenarios are installed" and the picker with no options; unknown id → 404 with the picker; a load error
   is shown — for this one scenario the host's scenario directory is a temp directory the scenario
   creates (one valid file, one malformed), never the shared build output. *Guard*: return 200 for an unknown id and confirm that scenario fails; record. Run;
   record failing. Add `AttainmentFormatTests` in Web.Tests (`FR-002`): 0.8 → "80.00%", 0.12345 →
@@ -225,9 +230,11 @@ reader that every story uses.
   200 with the picker; the seed-table assertion joins it in T060b) from a `curlimages/curl` container started with `--network container:<app>`
   (the runtime image has no HTTP client; research R16); as a negative control the same sidecar's
   request to an external host must fail (SC-004; evidence: `docker inspect` shows
-  `NetworkMode: none`, printed immediately before the request). Both jobs write a TRX-shaped result
-  (`ci-evidence/*.trx`) naming their check with category `SC-004` (and `FR-020` for the smoke step),
-  pass or fail, so the trace sees them as tests. *Guard*: point the sidecar's request at a path
+  `NetworkMode: none`, printed immediately before the request). Both jobs write a CI-evidence record
+  (`ci-evidence/<job>.json`: job name, check, requirement IDs `SC-004` and — for the smoke step —
+  `FR-020`, result, commit SHA and run URL). These are CI gates, not tests; the trace lists them in
+  their own "Verified by CI job" section and never counts them as tests (maintainer decision D1,
+  2026-09-22). *Guard*: point the sidecar's request at a path
   that returns 404 and confirm the job fails; record.
 - [ ] T036 [US1] Checkpoint: PR "Phase 3: US1", CI green, maintainer approves squash-merge. Record
   the offline job's first run in research R16 (Docker on the runner) and confirm the plan's
@@ -248,12 +255,9 @@ reader that every story uses.
   `ScenarioValidatorTests` (`FR-004`): refund dated before booking date is rejected. *Guard*:
   switch crediting to close date and confirm AS1 (B-1) and AS2 (B-2) fail; remove the refund-date
   check and confirm its test fails; record. Run; record failing.
-- [ ] T039 [P] [US2] Write `Features/US1_ScenarioSwitch.feature` in Specs, driven through the web
-  host (`@FR-001`, US1 AS5 — placed here because it needs the second scenario's rules): with
-  a scenario directory the scenario itself creates (a temp folder holding the Appendix A.1 and A.2 inputs
-  as JSON), never the shipped `Scenarios/` folder, which is only added in Phase 9 (T060a) — both present, selecting `booking-dates` shows only Emery, and selecting `tiers`
-  shows only Avery–Devon. Run; record failing.
-- [ ] T040 [US2] Implement booking-date crediting and excluded-deal lines until T037–T039 pass.
+- [ ] T039 (Moved into T030 by analyze, 2026-09-22: US1 AS5 asserts only which reps a scenario shows,
+  which Phase 3 already renders, so it could not be seen failing here.)
+- [ ] T040 [US2] Implement booking-date crediting and excluded-deal lines until T037–T038 pass.
 - [ ] T041 [US2] Checkpoint: PR "Phase 4: US2", CI green, maintainer approves squash-merge.
 
 ---
@@ -391,26 +395,28 @@ reader that every story uses.
   Gaps; an SC in the evidence-only list with tests and no member is not a gap, and with no tests it
   is; an ID in the manual-evidence list appears under "Manual evidence" with its task reference and
   not under Gaps; tests carrying a `Principle` trait appear under "Tooling tests" and not against any FR; a
-  CI evidence TRX (`ci-evidence/*.trx`) contributes its categories like any other TRX.
+  CI-evidence record (`ci-evidence/*.json`) appears under "Verified by CI job" with its job, result
+  and run URL, is never counted as a test, and a failed record is listed as a gap.
   *Guard*: disable gap detection and confirm the gaps test fails; record. Run; record failing. Then add the
   `trace` command to `tools/CommissionCalculator.Tools` (FR/SC IDs from spec.md; test → IDs from
   TRX categories/traits; member → IDs from `[Implements]` via reflection over the built engine and
   web assemblies; scope-only list: FR-019 — "USD only; tax, currency conversion and
   multi-year are out of scope, so no member implements them"; evidence-only list: SC-001 — seed
-  files and Appendix A, SC-003 — the seeded scenarios, SC-004 — the smoke jobs, each verified by
-  tests but implemented by no single member, and SC-002 — every line cites an FR, verified by T030 and T060; manual-evidence list:
+  files and Appendix A, SC-003 — the seeded scenarios, each verified by tests but implemented by no
+  single member, and SC-002 — every line cites an FR, verified by T030 and T060; CI-evidence list:
+  SC-004 — verified by the smoke and offline-smoke jobs (T010, T035, T060b); manual-evidence list:
   SC-005 and FR-021's
   screen-reader clause — T033/T034, not visible to the trace) writing
   `specs/001-commission-calculator/traceability.md`. Add a final CI job, `traceability`, that
-  depends on the build/test, smoke and offline-smoke jobs, downloads all their TRX artifacts (suite
-  and `ci-evidence/*.trx`), runs `trace` over them and uploads the result.
+  depends on the build/test, smoke and offline-smoke jobs, downloads their artifacts (suite TRX files
+  and `ci-evidence/*.json`), runs `trace` over them and uploads the result.
 - [ ] T062 Add `[Implements]` to every engine and web member that implements an FR; run `trace`
   over every TRX (as the CI job does); every FR has at least one member and one test except the
-  scope-only FR-019; every SC except the manual-evidence SC-005 has at least one test; the
+  scope-only FR-019; every SC has at least one test except SC-004 (a passing CI-evidence record)
+  and SC-005 (manual evidence); the
   manual-evidence items are listed with the PR links recorded in T033/T034/T064.
 - [ ] T063 Re-verify every failure-path guard added in T007, T008, T009, T010, T018, T020, T022, T023,
-  T030 (attainment and money format), T060, T060b,
-  T030, T031, T035, T038, T043, T047, T048, T052, T056, T057, T061 still fails with its guarded
+  T030 (unknown id, attainment format, money format), T060, T060b, T031, T035, T038, T043, T047, T048, T052, T056, T057, T061 still fails with its guarded
   behaviour removed; record each result here.
 - [ ] T064 Quickstart validation (standing rule 3): step 1 from a fresh clone (evidence:
   `git status --ignored` shows no build output before running); re-run T033's keyboard check on the
