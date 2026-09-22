@@ -64,7 +64,9 @@ analyze step can hold this list to them. Where anything above or below conflicts
   `CommissionCalculator.slnx` — structural, no test.
 - [ ] T002 Create `src/CommissionCalculator.Engine/CommissionCalculator.Engine.csproj` (no package
   references) and `src/CommissionCalculator.Web/CommissionCalculator.Web.csproj` (Razor Pages,
-  references Engine only; `public partial class Program` for tests) — structural, no test.
+  references Engine only) with a minimal `Program.cs` — an empty pipeline plus `public partial class
+  Program` — so the project builds and T003 fails on its assertions (`/` returns 404), not on a
+  missing entry point (CS5001) — structural, no test.
 - [ ] T003 Create `tests/CommissionCalculator.Specs/` (Reqnroll.xUnit.v3, Mvc.Testing, AngleSharp,
   TrxReport, CodeCoverage) with a `WebApplicationFactory<Program>` hook, and write the first
   scenario **before** the page exists: `Features/AppHost.feature` (`@FR-020`) — "the app serves its
@@ -110,7 +112,8 @@ analyze step can hold this list to them. Where anything above or below conflicts
   the first CI run's outcome in research R14 (SDK resolution) and R15 (isolation-step time), and
   propose to the maintainer the PATCH amendment that marks constitution C7 as confirmed and, in its
   pairwise note, qualifies "CI installs the pinned SDK" as confirmed by this run (until then it is
-  assumed, as research R14 says).
+  assumed, as research R14 says), and records in C2 and Principle VII the approved reading of "runs
+  with `dotnet run`" (`dotnet run --project src/CommissionCalculator.Web`, plan decision 2).
 
 ---
 
@@ -182,8 +185,8 @@ reader that every story uses.
 - [ ] T027 [P] [US1] In `tests/CommissionCalculator.Specs/`, add step definitions that build
   `ScenarioInput` from Gherkin tables and assert, to the cent, both
   statement lines (description, amount, FR) and statement summary fields (`Attainment`,
-  `CreditedBookings`, `ProratedQuota`, `DrawPaid`, `EarnedCommission`, `Payable`,
-  `ClosingRecoverableBalance`). Write `Features/US1_TieredCommission.feature` with US1 AS1–AS4
+  `CreditedBookings`, `ProratedQuota`, `Clawbacks`, `DrawPaid`, `Recovered`, `EarnedCommission`,
+  `Payable`, `ClosingRecoverableBalance`). Write `Features/US1_TieredCommission.feature` with US1 AS1–AS4
   exact, including AS1's attainment of 80% (`@FR-006 @FR-007 @FR-009 @FR-018`). Run; record
   failing.
 - [ ] T028 [P] [US1] Write `TierScheduleTests` (`FR-006`, `FR-007`): credit 80,000/100,000 → one 5%
@@ -199,7 +202,9 @@ reader that every story uses.
   every Rule cell is an FR ID that exists in spec.md (read from the committed spec file); each rep's
   page has a `<title>` naming the selected scenario (WCAG 2.4.2); these scenarios run against a scenario directory the scenario itself creates (a temp folder holding the Appendix A.1 inputs
   as JSON), never the shipped `Scenarios/` folder, which is only added in Phase 9 (T060a); summary `dl` shows quota, prorated quota, credited bookings, attainment (Avery: "80.00%"),
-  earned, clawbacks, draws paid, draw recovered, payable and closing balance; each rep's table has
+  earned, clawbacks, draws paid, draw recovered, payable and closing balance — for every A.1 rep,
+  each `dl` value equals the matching `RepStatement` field from `CommissionEngine.Calculate` on the
+  same input, formatted; each rep's table has
   exactly one row per engine `BreakdownLine`, in order, with the line's description, formatted
   amount and FR (compared with `CommissionEngine.Calculate` on the same A.1 input); US1 AS5 — with the A.1 and A.2 inputs both in the
   folder, selecting `booking-dates` shows only Emery and selecting `tiers` only Avery–Devon; `GET /`
@@ -219,8 +224,9 @@ reader that every story uses.
   adjacent colours; 2.5.8 target size — `select`, `button` and the skip link have a minimum height
   and width of at least 24px; 2.4.11 focus not obscured — no `position: fixed` or `sticky` rules;
   1.4.12 text spacing — no fixed `height` and no `overflow: hidden` on text containers.
-  *Guard*: set the text token to a light grey, and separately set the button's min-height to 16px;
-  confirm each makes its test fail; record. Run; record failing.
+  *Guard*: separately (a) set the text token to a light grey, (b) set the button's min-height to
+  16px, (c) add a `position: sticky` rule, (d) add a fixed `height` to the table caption; confirm
+  each makes its test fail; record all four. Run; record failing.
 - [ ] T032 [US1] Implement the page (picker, the empty state "No scenarios are installed",
   statements, summary `dl`, breakdown tables, `$#,##0.00` with a minus sign, `site.css` colour
   tokens and visible focus styles) until T030–T031 pass.
@@ -239,7 +245,7 @@ reader that every story uses.
   result on the PR.
 - [ ] T035 [US1] Add a second CI job, **offline smoke**: `dotnet publish` the web app, run it in
   `mcr.microsoft.com/dotnet/aspnet:10.0.12` with `docker run --network none`, and request `/` (HTTP
-  200 with the picker; the seed-table assertion joins it in T060b) from a `curlimages/curl` container started with `--network container:<app>`
+  200 with the picker; the seed-table assertion joins it in T060b) from a `curlimages/curl:8.22.0` container started with `--network container:<app>`
   (the runtime image has no HTTP client; research R16); as a negative control the same sidecar's
   request to an external host must fail (SC-004; evidence: `docker inspect` shows
   `NetworkMode: none`, printed immediately before the request). Both jobs write a CI-evidence record
@@ -384,16 +390,24 @@ reader that every story uses.
 
 ## Phase 9: Polish & cross-cutting — PR 9
 
-- [ ] T060 [P] Write `Features/SeededScenarios.feature` (`@SC-001 @SC-003`): for every file in
+- [ ] T060 [P] Write `Features/SeededScenarios.feature` (`@SC-001 @SC-002 @SC-003`): for every file in
   `Scenarios/`, load it through the real reader and assert every rep's statement equals Appendix A
   line for line (description, amount to the cent, FR), and `invalid.json` lists exactly the four
   Appendix A.11 errors. SC-003 check: the brief's rules map to FRs as rule 1 → FR-005, rule 2 →
   FR-006, rule 3 → FR-010, rule 4 → FR-012, rule 5 → FR-014/FR-015, rule 6 → FR-016, rule 7 →
-  FR-008 (an excluded-by-booking-date line), rule 8 → FR-019 (satisfied by scope, as in T061); assert
-  that for rules 1–6 at least one seeded statement contains a line citing the mapped FR, and for
-  rule 7 at least one line with section `Excluded` citing FR-008 (every statement has an FR-008
-  "Credited bookings" line, so a plain FR-008 match could not fail). *Guard*:
-  remove `booking-dates.json` from the check's input and confirm rule 7 fails; record. The feature
+  FR-008, rule 8 → FR-019. Each rule's check is chosen so that removing the scenario that
+  exercises it makes the check fail: rule 1 — at least one scenario whose reps have different
+  quotas (`proration` has $90,000.00 against others' $100,000.00); rule 2 — a line at each rate,
+  5%, 8% and 12% (`tiers`); rule 3 — a "Prorated quota" line (FR-010); rule 4 — a share line
+  (FR-012); rule 5 — a non-zero "Draw recovered" and a non-zero "Commission payable" (`draw`,
+  Parker); rule 6 — a non-zero clawback line (FR-016); rule 7 — a line with section `Excluded`
+  citing FR-008 (every statement has an FR-008 "Credited bookings" line, so a plain FR-008 match
+  could not fail); rule 8 — every seeded file loads under the strict reader (no currency, tax or
+  term fields exist to set) and every rendered amount is in dollars, `$` or `−$`. Every breakdown
+  line's FR exists in spec.md (SC-002). *Guard*: for each of rules 2–7, remove the one scenario
+  named and confirm that rule's check fails; for rule 1 replace `proration`'s quota with
+  $100,000.00 and confirm it fails; for rule 8 add a `"currency": "EUR"` property to one seed and
+  confirm it fails; record all. The feature
   lists the eleven expected files by name, so before T060a it fails on every one ("scenario file
   not found"); run it and record that red. Any later failure is a spec question, not a test edit.
 - [ ] T060a Add the eleven seed files `src/CommissionCalculator.Web/Scenarios/{tiers,
@@ -425,7 +439,7 @@ reader that every story uses.
   SC-005 and FR-021's
   screen-reader clause — T033/T034, not visible to the trace) writing
   `specs/001-commission-calculator/traceability.md`. Add a final CI job, `traceability`, that
-  depends on the build/test, smoke and offline-smoke jobs, downloads their artifacts (suite TRX files
+  depends on the build/test, smoke and offline-smoke jobs, downloads their artifacts with `actions/download-artifact@v8` (suite TRX files
   and `ci-evidence/*.json`), runs `trace` over them and uploads the result.
 - [ ] T062 Add `[Implements]` to every engine and web member that implements an FR; run `trace`
   over every TRX (as the CI job does); every FR has at least one member and one test except the

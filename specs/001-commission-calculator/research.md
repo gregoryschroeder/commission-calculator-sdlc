@@ -143,11 +143,15 @@ correctness.
 ## R14. CI
 
 - **Decision**: GitHub Actions on `ubuntu-latest`, `actions/checkout@v7`,
-  `actions/setup-dotnet@v6` (reads `global.json`), `actions/upload-artifact@v7`.
+  `actions/setup-dotnet@v6` (reads `global.json`), `actions/upload-artifact@v7`,
+  `actions/download-artifact@v8`; offline check uses `curlimages/curl:8.22.0`.
 - **Established**: source host, 2026-09-21 — latest releases: checkout v7.0.1 (2026-07-20),
   setup-dotnet v6.0.0 (2026-07-16, documents installing the `global.json` SDK when no version is
   given), upload-artifact v7.0.1 (2026-04-10). **Assumed until the first CI run**: that the
   runner resolves SDK 10.0.4xx via setup-dotnet (constitution C7 records the same assumption).
+  Consulted 2026-09-22: download-artifact latest v8.0.1 (2026-03-11); Docker Hub `curlimages/curl`
+  latest tag 8.22.0 (2026-09-02). **Assumed until the traceability job first runs**: that
+  download-artifact v8 reads artifacts written by upload-artifact v7 (not checked).
 - **Not in CI**: the kit's `install.sh --check` — the library is private and the public
   repository's CI cannot fetch it. Run locally after any SpecKit upgrade (docs/PROVISIONING.md).
 
@@ -172,7 +176,8 @@ correctness.
 ## R16. Offline smoke run (SC-004)
 
 - **Decision**: a CI job runs the published web app in `mcr.microsoft.com/dotnet/aspnet:10.0.12`
-  with `docker run --network none` and requests a scenario page from inside the container, so the
+  with `docker run --network none` and requests a scenario page from a sidecar container that
+  shares its network namespace (see the request-method spike below), so the
   "no network service at run time" claim is shown under the condition, not reasoned.
 - **Established**: registry — `mcr.microsoft.com/v2/dotnet/aspnet/tags/list`, 2026-09-21, lists
   `10.0.12`, `10.0` and `10.0-noble`. **Assumed until the first run of that job**: Docker is
