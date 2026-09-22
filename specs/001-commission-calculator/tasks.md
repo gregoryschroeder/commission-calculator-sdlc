@@ -131,7 +131,7 @@ analyze step can hold this list to them. Where anything above or below conflicts
   fail if any fails. *Guard*: on a local throwaway branch add two Tools tests where one passes only
   when the other ran first (static flag); confirm the suite passes and this step fails; delete it;
   record. Record the step's CI duration in research R15 on the first run.
-  **Result**: Guard recorded 2026-09-22: with an order-dependent probe pair the suite passed ("Test run summary: Passed!") and this step failed the reader test run alone, exit 1. CI duration to be recorded at T012.
+  **Result**: Guard recorded 2026-09-22: with an order-dependent probe pair the suite passed ("Test run summary: Passed!") and this step failed the reader test run alone, exit 1. First CI run: 12 s for 7 tests (research R15).
 - [X] T009 *Guard (skip gate)*: on a local throwaway change add `[Fact(Skip="probe")]`, run the CI
   test command; confirm a non-zero exit ("Failed!"); remove it; record.
   **Result**: Guard recorded 2026-09-22: `[Fact(Skip="probe")]` → "Test run summary: Failed!", failed 1, exit code 2.

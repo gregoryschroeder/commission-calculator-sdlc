@@ -158,6 +158,11 @@ correctness.
   Consulted 2026-09-22: download-artifact latest v8.0.1 (2026-03-11); Docker Hub `curlimages/curl`
   latest tag 8.22.0 (2026-09-02). **Assumed until the traceability job first runs**: that
   download-artifact v8 reads artifacts written by upload-artifact v7 (not checked).
+- **Confirmed by the first CI run (2026-09-22, run 35758821698, PR #2)**: `setup-dotnet@v6` read
+  `global.json` and installed SDK **10.0.401** on `ubuntu-latest` (log: `dotnet-sdk-10.0.401-linux-x64`),
+  within the pinned 10.0.4xx feature band. The run carried a GitHub annotation that the
+  `ubuntu-latest` label migrates to Ubuntu 26 from 2026-10-19. **Revisit when**: that migration
+  happens — re-check the first CI run after 2026-10-19.
 - **Not in CI**: the kit's `install.sh --check` — the library is private and the public
   repository's CI cannot fetch it. Run locally after any SpecKit upgrade (docs/PROVISIONING.md).
 
@@ -177,7 +182,9 @@ correctness.
   Reqnroll scenarios by display name ("rounding") rather than method name, which is why the loop
   takes names from the TRX `<TestMethod className=… name=…>` (e.g. `Bdd.Features.AddFeature` /
   `Rounding`) instead. **Assumed**: the per-test loop adds under two minutes to CI — to be
-  measured on the first run.
+  measured on the first run. **Measured 2026-09-22 (run 35758821698)**: the "Each test alone" step
+  took 12 s for 7 tests; it grows with the test count and is re-measured if it passes a few
+  minutes.
 
 ## R16. Offline smoke run (SC-004)
 
