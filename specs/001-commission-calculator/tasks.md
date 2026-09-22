@@ -651,7 +651,10 @@ reader that every story uses.
   carries both `Requirement` traits. Second run: **0 unexplained gaps**, `--strict` exit 0, and the
   Explained table is exactly T061's six entries (FR-019 scope; SC-001..SC-003 evidence-only;
   SC-004 CI evidence, record passing; SC-005 manual evidence with the T033/T034 PR links) plus the
-  SC-005 note on FR-021's screen-reader clause. 232/232 tests green. The committed report is
+  SC-005 note on FR-021's screen-reader clause. 232/232 tests green. The report is generated, so it
+  must not churn: a further test (`TestsAreListedInOrderAndRepeatedNamesCarryTheirCount`, written red
+  first) fixed the listing in name order with a count for a name several cases share, and two
+  successive runs now produce byte-identical output. The committed report is
   regenerated from the CI artifacts at T065, so its CI-evidence rows carry the real run URL.
 - [X] T063 Re-verify every failure-path guard added in T007 (warnings, coverage), T008, T009,
   T010, T018, T020, T022 (error capture, unknown property, required field), T023 (first-failure, missing directory,

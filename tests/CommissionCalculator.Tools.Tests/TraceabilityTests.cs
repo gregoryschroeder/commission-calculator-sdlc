@@ -48,6 +48,29 @@ public sealed class TraceabilityTests
         Assert.Equal(["CommissionCalculator.Tools.Tests.TracedFixture.TracedMethod"], members["FR-002"]);
     }
 
+    // The report is committed, so the same inputs must give the same bytes: tests are listed in
+    // name order, and a name that several cases share is listed once with its count.
+    [Fact]
+    public void TestsAreListedInOrderAndRepeatedNamesCarryTheirCount()
+    {
+        var (tests, tooling) = Traceability.ParseTrx(Fixture("trace.trx"));
+        tests["FR-001"].Insert(0, "Fixture.ZzzTests.RunsLast");
+        tests["FR-001"].Add("Fixture.EngineTests.CreditsTheDeal");
+
+        var report = Traceability.Report(new TraceInput(
+            Traceability.ParseRequirements(Fixture("trace-spec.md")),
+            Traceability.ReadMembers(typeof(TraceabilityTests).Assembly.Location),
+            tests,
+            tooling,
+            [],
+            []));
+
+        Assert.Contains(
+            "| `Fixture.EngineTests.CreditsTheDeal` (x2), `Fixture.Features.SomeFeature.FR003IsCoveredByAScenario`, `Fixture.ZzzTests.RunsLast` |",
+            report,
+            StringComparison.Ordinal);
+    }
+
     [Fact]
     public void ARequirementWithBothAMemberAndATestIsNotAGap()
     {

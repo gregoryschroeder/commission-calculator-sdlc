@@ -223,8 +223,14 @@ internal static partial class Traceability
     private static List<string> Lookup(IReadOnlyDictionary<string, List<string>> source, string requirement) =>
         source.TryGetValue(requirement, out var found) ? found : [];
 
+    // Name order, and one entry per name: a theory's cases share a method name, so the count says
+    // how many of them cover the requirement. The report is committed, so it must not reorder.
     private static string Code(List<string> names) =>
-        names.Count == 0 ? "—" : string.Join(", ", names.Select(name => $"`{name}`"));
+        names.Count == 0
+            ? "—"
+            : string.Join(", ", names.GroupBy(name => name, StringComparer.Ordinal)
+                .OrderBy(group => group.Key, StringComparer.Ordinal)
+                .Select(group => group.Count() == 1 ? $"`{group.Key}`" : $"`{group.Key}` (x{group.Count()})"));
 
     [GeneratedRegex(@"\*\*((?:FR|SC)-\d{3})\*\*")]
     private static partial Regex RequirementId();
