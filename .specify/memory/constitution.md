@@ -1,7 +1,20 @@
 <!--
 AMENDMENT LOG (newest first; earlier entries are kept, marked superseded, never deleted)
 
-## v1.1.1 — 2026-09-22 — C7 confirmed; the approved reading of `dotnet run`
+## v1.1.2 — 2026-09-22 — Docker in C7 as a CI-only dependency
+- Version change: 1.1.1 → 1.1.2 (PATCH: a CI-only dependency already in use is recorded with its
+  evidence; nothing a principle or constraint permits changes).
+- Modified: C7 (adds Docker and the two container images used by the offline-smoke job); the
+  pairwise note on II × C7.
+- Rationale: the offline-smoke job (tasks T035), which shows SC-004's "no network service at run
+  time" under the condition, runs the published app in Docker. Its first run (2026-09-22, run
+  35762826388, PR #5) confirmed Docker on `ubuntu-latest`. The constitution's C7 and its pairwise
+  note named only `dotnet`-restored tools, so the dependency is now stated where C7 makes the
+  claim. Docker is not a runtime dependency of the application and no test depends on it; the job
+  is a CI gate whose result is a CI-evidence record (maintainer decision 2026-09-22).
+- Deferred: none.
+
+## v1.1.1 — 2026-09-22 — C7 confirmed; the approved reading of `dotnet run` (superseded by v1.1.2)
 - Version change: 1.1.0 → 1.1.1 (PATCH: an assumption confirmed by evidence and an approved
   interpretation written down; no principle or constraint changes what it permits).
 - Modified: C7 (assumed → confirmed, with a new revisit trigger); C2 and Principle VII (record the
@@ -187,7 +200,7 @@ Each external fact carries how it was established, when, and what would make it 
 | C4 | The repository is public (`gregoryschroeder/commission-calculator-sdlc`); the account in use has WRITE, not admin, permission, so branch protection and auto-delete-on-merge cannot be configured from here. | Measured: `gh repo view --json visibility,viewerPermission`, 2026-09-21 (PUBLIC, WRITE, empty). | Permission or visibility changes; re-check before relying on either. |
 | C5 | The private practice library is cited by document number only. Its documents are never copied into this repository or quoted at length. The only library-derived text committed is what its installer generates under `.specify/` and `.claude/`. | Maintainer's requirement (project brief, 2026-09-21). | Library visibility changes. |
 | C6 | Pipeline tooling is SpecKit 1.0.9 with the library's kit installed (commit recorded in `docs/PROVISIONING.md`). | Measured: `specify version`, `install.sh --check` exit 0, 2026-09-21. | SpecKit upgrade — re-run the installer and `--check`. |
-| C7 | CI runs on GitHub Actions for this repository. Test-only dependencies (test framework, BDD tool, coverage tool) are pinned package references restored by `dotnet`; none is a runtime dependency. | Measured: the first CI run (2026-09-22, run 35758821698, PR #2) installed SDK 10.0.401 from `global.json` via `setup-dotnet@v6` on `ubuntu-latest` and passed every gate. Package choices and their maintenance status are established in `research.md`. | The `ubuntu-latest` label moves to Ubuntu 26 from 2026-10-19 (GitHub annotation on that run) — re-check the first CI run after that date; any package's maintenance status changes. |
+| C7 | CI runs on GitHub Actions for this repository. Test-only dependencies (test framework, BDD tool, coverage tool) are pinned package references restored by `dotnet`; none is a runtime dependency. The offline-smoke CI job also uses Docker with the pinned images `mcr.microsoft.com/dotnet/aspnet:10.0.12` and `curlimages/curl:8.22.0`; that is a CI-only dependency of a gate, not of any test or of the application. | Measured: the first CI run (2026-09-22, run 35758821698, PR #2) installed SDK 10.0.401 from `global.json` via `setup-dotnet@v6` on `ubuntu-latest` and passed every gate. Docker on the runner: measured by the offline-smoke job's first run (2026-09-22, run 35762826388, PR #5). Package and image choices are established in `research.md` (R14, R16). | The `ubuntu-latest` label moves to Ubuntu 26 from 2026-10-19 (GitHub annotation on that run) — re-check the first CI run after that date; any package's maintenance status changes; either pinned container image is withdrawn or superseded. |
 
 **Library documents 07 and 08 (background).** 07 applies as a scope decision: requirements live
 in the repository (spec per feature, tasks, traceability) because this is a solo project with no
@@ -219,7 +232,8 @@ whether both can hold at once. Pairs that needed an answer:
   example is a requirement by definition.
 - Principle II (no skips; CI fails on a skip) × C7 (test tools restored by `dotnet`): compatible —
   no test depends on a tool the runner lacks; CI installs the pinned SDK (confirmed by the first CI
-  run, 2026-09-22, SDK 10.0.401).
+  run, 2026-09-22, SDK 10.0.401). Docker, used only by the offline-smoke CI job, is not needed by
+  any test (confirmed on the runner, 2026-09-22, run 35762826388).
 - Principle V (engine has no clock) × dates in the rules (close/booking/start dates, quarters):
   compatible — dates are inputs, never read from the system clock.
 - Principle VI (accessibility) × C2 (no external services): compatible — no CDN assets are
@@ -277,4 +291,4 @@ Compliance review: every plan's Constitution Check, and every analyze pass, read
 a subject as well as an authority — untagged external claims, expired revisit triggers and
 conflicting constraints are findings.
 
-**Version**: 1.1.1 | **Ratified**: 2026-09-21 | **Last Amended**: 2026-09-22
+**Version**: 1.1.2 | **Ratified**: 2026-09-21 | **Last Amended**: 2026-09-22
