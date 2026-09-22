@@ -1,0 +1,19 @@
+<Project>
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <AnalysisLevel>latest-recommended</AnalysisLevel>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <IsUnderTests>$([System.String]::Copy('$(MSBuildProjectDirectory)').Replace('\', '/').Contains('/tests/'))</IsUnderTests>
+  </PropertyGroup>
+
+  <!-- CI runs every test project with the TRX report and coverage options; a test project without
+       these extensions rejects them and exits 5 ("unknown option"), so every project under tests/
+       gets both. -->
+  <ItemGroup Condition="'$(IsUnderTests)' == 'true'">
+    <PackageReference Include="Microsoft.Testing.Extensions.TrxReport" />
+    <PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" />
+  </ItemGroup>
+</Project>

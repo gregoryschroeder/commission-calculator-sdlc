@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+      - name: Build (warnings are errors)
+        run: dotnet build CommissionCalculator.slnx -warnaserror
+      - name: Test (skips fail the run)
+        run: dotnet test --solution CommissionCalculator.slnx --no-build --fail-skips on --report-trx --coverage --coverage-output-format cobertura
+      - name: Engine coverage floor
+        run: tools/ci/coverage-gate.sh 80 | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Each test alone
+        run: tools/ci/isolated-tests.sh
+      - name: Upload test results and coverage
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-results
+          path: TestResults/
+
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+      - name: Evidence of a clean tree (no bin/ or obj/)
+        run: git status --ignored --short
+      - name: Start with one command and serve the page
+        run: tools/ci/smoke.sh /

@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- trace reflects over the web assembly, whose types need the ASP.NET Core shared framework
+         to load (research R8, spiked 2026-09-22). -->
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <InternalsVisibleTo Include="CommissionCalculator.Tools.Tests" />
+  </ItemGroup>
+</Project>

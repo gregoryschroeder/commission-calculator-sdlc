@@ -1,0 +1,11 @@
+bin/
+obj/
+TestResults/
+ci-evidence/
+*.user
+*.suo
+.vs/
+.vscode/
+.idea/
+.DS_Store
+*.feature.cs

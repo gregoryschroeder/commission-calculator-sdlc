@@ -74,7 +74,7 @@ analyze step can hold this list to them. Where anything above or below conflicts
 
 **Purpose**: solution skeleton, build rules, CI helper tools and the CI review gate.
 
-- [ ] T001 Create `global.json` (SDK 10.0.400, `rollForward: latestFeature`, test runner
+- [X] T001 Create `global.json` (SDK 10.0.400, `rollForward: latestFeature`, test runner
   `Microsoft.Testing.Platform`), `Directory.Build.props` (net10.0, nullable, implicit usings,
   `TreatWarningsAsErrors`, `AnalysisLevel` latest-recommended, `EnforceCodeStyleInBuild`; and,
   for every project under `tests/`, package references to `Microsoft.Testing.Extensions.TrxReport`
@@ -82,21 +82,25 @@ analyze step can hold this list to them. Where anything above or below conflicts
   every test project and a project without them exits 5, "unknown option"),
   `Directory.Packages.props` (central versions per plan.md), `.gitignore`, and
   `CommissionCalculator.slnx` — structural, no test.
-- [ ] T002 Create `src/CommissionCalculator.Engine/CommissionCalculator.Engine.csproj` (no package
+  **Result**: Done 2026-09-22.
+- [X] T002 Create `src/CommissionCalculator.Engine/CommissionCalculator.Engine.csproj` (no package
   references; `<InternalsVisibleTo Include="CommissionCalculator.Engine.Tests" />` so unit tests can
   reach internal calculation types — otherwise Engine.Tests fails with CS0122) and `src/CommissionCalculator.Web/CommissionCalculator.Web.csproj` (Razor Pages,
   references Engine only) with a minimal `Program.cs` — an empty pipeline plus `public partial class
   Program` — so the project builds and T003 fails on its assertions (`/` returns 404), not on a
   missing entry point (CS5001) — structural, no test.
-- [ ] T003 Create `tests/CommissionCalculator.Specs/` (xunit.v3 — Reqnroll.xUnit.v3 does not bring
+  **Result**: Done 2026-09-22; solution builds clean with warnings as errors.
+- [X] T003 Create `tests/CommissionCalculator.Specs/` (xunit.v3 — Reqnroll.xUnit.v3 does not bring
   the runner, and without it the project fails with CS5001 — plus Reqnroll.xUnit.v3, Mvc.Testing,
   AngleSharp; TrxReport and CodeCoverage come from T001) with a `WebApplicationFactory<Program>` hook, and write the first
   scenario **before** the page exists: `Features/AppHost.feature` (`@FR-020`) — "the app serves its
   page": GET `/` returns 200 with `<html lang="en">` and one `<main>`. Run it; record it failing.
-- [ ] T004 Implement the minimal `Program.cs` and `Pages/Index.cshtml` (layout with `lang`, skip
+  **Result**: Recorded red 2026-09-22: `Assert.Equal() Failure — Expected: OK, Actual: NotFound` (empty pipeline, 404).
+- [X] T004 Implement the minimal `Program.cs` and `Pages/Index.cshtml` (layout with `lang`, skip
   link, one `<h1>`, `<main>`, local `wwwroot/css/site.css`) until T003 passes. (`Web.Tests` is created in T022
   together with its first tests: a test project with no tests makes `dotnet test` exit non-zero.)
-- [ ] T005 Create `tests/CommissionCalculator.Tools.Tests/` and `tools/CommissionCalculator.Tools/`
+  **Result**: Done; T003 green.
+- [X] T005 Create `tests/CommissionCalculator.Tools.Tests/` and `tools/CommissionCalculator.Tools/`
   with compile-only stubs of the `coverage-gate` and `list-tests` commands (standing rule 7), and
   write tests for those commands **before** their logic exists (`[Trait("Principle", "II")]`) (fixture files under `tests/CommissionCalculator.Tools.Tests/
   Fixtures/`): `CoverageGateTests` — engine line rate 0.85 passes, 0.79 fails, report with no
@@ -107,11 +111,13 @@ analyze step can hold this list to them. Where anything above or below conflicts
   report lacks the engine package and another covers it partly; `TrxTestListTests` — lists fully qualified `className.name` for xUnit and
   Reqnroll tests from a fixture TRX (the Reqnroll display-name case from research R15). Run; record
   failing.
-- [ ] T006 Implement `tools/CommissionCalculator.Tools/` (console app with
+  **Result**: Recorded red 2026-09-22: all 6 tests failed with `NotImplementedException` from the stubs (no compile errors). Test names are PascalCase because the analyzers reject underscores (CA1707).
+- [X] T006 Implement `tools/CommissionCalculator.Tools/` (console app with
   `<FrameworkReference Include="Microsoft.AspNetCore.App" />`, so `trace` can reflect over the web
   assembly — research R8; commands `coverage-gate` and `list-tests`) until T005 passes. (Replaces research R8's single-file program: a project can be
   unit-tested; see research R8 correction.)
-- [ ] T007 Write `.github/workflows/ci.yml`: checkout@v7, setup-dotnet@v6 from `global.json`,
+  **Result**: Done; 6/6 green. `Program.cs` is a thin argument switch with no unit test of its own; it is exercised end to end by the CI steps and the T007/T008 guards.
+- [X] T007 Write `.github/workflows/ci.yml`: checkout@v7, setup-dotnet@v6 from `global.json`,
   `dotnet build -warnaserror`, `dotnet test --fail-skips on --report-trx --coverage
   --coverage-output-format cobertura`, `coverage-gate` over **all** cobertura files from the
   run, merged per T005 (floor 80% on the engine, rate written to the job summary), upload TRX and coverage as artifacts.
@@ -119,20 +125,25 @@ analyze step can hold this list to them. Where anything above or below conflicts
   build fails; revert; record. *Guard (coverage)*: run `coverage-gate` with floor 101% against the
   Tools.Tests fixture report that contains an engine package (the real report has no engine lines
   until Phase 2); confirm non-zero exit; record. Repeat against the real report in T063.
-- [ ] T008 CI per-test isolation step: for **every** test in all test projects (list from the suite
+  **Result**: Guards recorded 2026-09-22: unused variable in Engine → `error CS0219`, build exit 1; `coverage-gate 101` on the fixture with an engine package → "85.00% (floor 101%) — FAIL", exit 1. Real run: "no engine lines yet", exit 0.
+- [X] T008 CI per-test isolation step: for **every** test in all test projects (list from the suite
   TRX via `list-tests`), run `dotnet test --project <proj> --filter-method <className.name>` alone;
   fail if any fails. *Guard*: on a local throwaway branch add two Tools tests where one passes only
   when the other ran first (static flag); confirm the suite passes and this step fails; delete it;
   record. Record the step's CI duration in research R15 on the first run.
-- [ ] T009 *Guard (skip gate)*: on a local throwaway change add `[Fact(Skip="probe")]`, run the CI
+  **Result**: Guard recorded 2026-09-22: with an order-dependent probe pair the suite passed ("Test run summary: Passed!") and this step failed the reader test run alone, exit 1. CI duration to be recorded at T012.
+- [X] T009 *Guard (skip gate)*: on a local throwaway change add `[Fact(Skip="probe")]`, run the CI
   test command; confirm a non-zero exit ("Failed!"); remove it; record.
-- [ ] T010 CI **smoke job** (its own job, so nothing has been built before it): check out, set up
+  **Result**: Guard recorded 2026-09-22: `[Fact(Skip="probe")]` → "Test run summary: Failed!", failed 1, exit code 2.
+- [X] T010 CI **smoke job** (its own job, so nothing has been built before it): check out, set up
   the SDK, print `git status --ignored` (evidence of a clean tree: no `bin/`/`obj/`) immediately
   before the run, then start `dotnet run --project src/CommissionCalculator.Web` in the background, poll `/` until HTTP 200 (fail after 60 s), stop
   it. *Guard*: point the poll at a path that returns 404 and confirm the step fails; record.
-- [ ] T011 `README.md`: what it is, `dotnet run --project src/CommissionCalculator.Web` (or
+  **Result**: Guard recorded 2026-09-22: `smoke.sh /` → 200, exit 0; `smoke.sh /does-not-exist` → "did not return 200 within 60 s (last status: 404)", exit 1.
+- [X] T011 `README.md`: what it is, `dotnet run --project src/CommissionCalculator.Web` (or
   `dotnet run` inside that folder), test commands, where the spec lives, and the optional
   `Scenarios:Directory` setting (e.g. `--Scenarios:Directory=/path` on the command line).
+  **Result**: Done; plain `dotnet run` inside `src/CommissionCalculator.Web` verified to serve HTTP 200. The `Scenarios:Directory` setting is marked as arriving in Phase 2.
 - [ ] T012 Checkpoint: open PR "Phase 1: Setup", CI green, maintainer approves squash-merge. Record
   the first CI run's outcome in research R14 (SDK resolution) and R15 (isolation-step time), and
   propose to the maintainer the PATCH amendment that marks constitution C7 as confirmed and, in its
