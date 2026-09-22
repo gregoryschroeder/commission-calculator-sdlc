@@ -60,7 +60,7 @@ No number is stated, so none is invented.
 
 | Gate | Status | Notes |
 |---|---|---|
-| Provenance | PASS | Principle IV. Every research.md decision says how it was established and when. Three claims remain **assumed**, none load-bearing for correctness: R14 (the CI runner resolves SDK 10.0.4xx via setup-dotnet), R15 (the per-test isolation loop's CI time) and R16 (Docker is available on `ubuntu-latest`); the first CI runs prove or disprove each (tasks T012 for R14–R15, T036 for R16). |
+| Provenance | PASS | Principle IV. Every research.md decision says how it was established and when. Four claims remain **assumed**, none load-bearing for correctness: R14 (the CI runner resolves SDK 10.0.4xx via setup-dotnet), R14 (download-artifact v8 reads upload-artifact v7 artifacts), R15 (the per-test isolation loop's CI time) and R16 (Docker is available on `ubuntu-latest`); the first CI runs prove or disprove each (tasks T012 for R14's SDK claim and R15, T036 for R16, the first `traceability` job run in T061 for the artifact claim). |
 | Degraded window | N/A | Principle VII. Nothing is deployed or scaled; the app runs on the developer's machine for as long as they run it. No cold start, pause or reclaim is accepted. |
 
 ## Project Structure

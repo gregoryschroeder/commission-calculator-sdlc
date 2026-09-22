@@ -476,7 +476,11 @@ reader that every story uses.
 
 - [ ] T060 [P] Write `Features/SeededScenarios.feature` (`@SC-001 @SC-002 @SC-003`): for every file in
   `Scenarios/`, load it through the real reader and assert every rep's statement equals Appendix A
-  line for line (description, amount to the cent, FR), and `invalid.json` lists exactly the four
+  line for line (description, amount to the cent, FR), and that each `RepStatement` summary field
+  equals its Appendix A line (Quarterly quota → `Quota`; Prorated quota, or the quota when there is
+  none → `ProratedQuota`; Credited bookings; Commission before refunds; Clawbacks; Earned
+  commission; Draws paid → `DrawPaid`; Draw recovered → `Recovered`; Commission payable →
+  `Payable`; Closing recoverable balance), and `invalid.json` lists exactly the four
   Appendix A.11 errors. SC-003 check: the brief's rules map to FRs as rule 1 → FR-005, rule 2 →
   FR-006, rule 3 → FR-010, rule 4 → FR-012, rule 5 → FR-014/FR-015, rule 6 → FR-016, rule 7 →
   FR-008, rule 8 → FR-019. Each rule is a check function over a set of loaded statements:
