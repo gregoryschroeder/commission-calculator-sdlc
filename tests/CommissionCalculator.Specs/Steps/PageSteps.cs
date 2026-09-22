@@ -171,6 +171,22 @@ public sealed partial class PageSteps(AppHost host)
         }
     }
 
+    [Then("the page reports that the scenario was rejected with {int} errors")]
+    public void ThenTheScenarioIsRejectedWith(int count)
+    {
+        var alert = Assert.Single(Document.QuerySelectorAll("[role='alert']"));
+        Assert.Equal(count, alert.QuerySelectorAll("li").Length);
+    }
+
+    [Then("the rejection cites the requirements {string}")]
+    public void ThenTheRejectionCitesTheRequirements(string requirements)
+    {
+        var alert = Assert.Single(Document.QuerySelectorAll("[role='alert']"));
+        var cited = alert.QuerySelectorAll("li").Select(item => item.QuerySelector(".requirement")!.TextContent.Trim()).Order(StringComparer.Ordinal);
+
+        Assert.Equal(List(requirements).Order(StringComparer.Ordinal), cited);
+    }
+
     [Then("the page shows the reps {string}")]
     public void ThenThePageShowsTheReps(string names) =>
         Assert.Equal(List(names), RepSections.Select(section => section.QuerySelector("h2")!.TextContent.Trim()));

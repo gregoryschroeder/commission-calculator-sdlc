@@ -42,6 +42,12 @@ analyze step can hold this list to them. Where anything above or below conflicts
    optional configuration value, `Scenarios:Directory` (default: `Scenarios` under the app's output
    directory), bound through standard ASP.NET Core configuration and documented in the README
    (T011, T024); no environment variables are required, and no secrets or services.
+**Correction at the Phase 6 gate (2026-09-22, maintainer approved).** A Phase 5 test asserted
+`RequirementId == "FR-004"` for every validation rule, including the start-date rules that FR-011
+owns and Appendix A.11 cites as FR-011. The spec was right and the test was wrong, so the test now
+carries the expected requirement per rule (FR-011 for the start-date rules, FR-013 for the split
+sum, FR-004 for the rest) and the validator cites them. No payout changed.
+
 6. **Every test names what it verifies**: `[Trait("Requirement", "FR-0xx")]` on unit tests,
    `@FR-0xx` / `@SC-00x` tags on Gherkin scenarios; tests of project tooling carry
    `[Trait("Principle", "II")]` / `("III")` for the principle they enforce (constitution v1.1.0).
@@ -426,10 +432,11 @@ reader that every story uses.
 **Goal**: split shares by largest remainder, credited toward attainment and commission.
 **Independent test**: `Features/US4_Splits.feature` passes.
 
-- [ ] T046 [P] [US4] Write `Features/US4_Splits.feature`: US4 AS1–AS5 exact, including AS2's
+- [X] T046 [P] [US4] Write `Features/US4_Splits.feature`: US4 AS1–AS5 exact, including AS2's
   credited bookings of $110,000.00 and attainment of 110% (`@FR-012 @FR-013 @FR-009`). Run; record
   failing.
-- [ ] T047 [P] [US4] Write `SplitAllocationTests` (`FR-012`): 60/40 of 50,000.00; 50/50 of 10.01 →
+  **Result**: Recorded red 2026-09-22: US4 AS1–AS5 all failed (no split crediting, no FR-013 rule). Green after T049.
+- [X] T047 [P] [US4] Write `SplitAllocationTests` (`FR-012`): 60/40 of 50,000.00; 50/50 of 10.01 →
   5.01/5.00; 33.335/33.335/33.33 of 100.00 → 33.34/33.33/33.33; 45/45/10 of 0.06 → 0.03/0.03/0.00;
   45/45/10 of 0.05 → 0.02/0.02/0.01 (US6 AS9's re-split); shares always sum to the amount over a
   fixed table of cases. Add validator tests (`FR-013`), each in the scenario's deal list and a booking-quarter deal list
@@ -439,15 +446,18 @@ reader that every story uses.
   case fails; remove the sum check and confirm the FR-013 tests fail; apply the sum check only to
   the scenario's own deal list and confirm the booking-quarter cases fail; record. Run; record
   failing.
-- [ ] T048 [P] [US4] Write `Features/UI_RejectedScenario.feature` in Specs, driven through the web
+  **Result**: Recorded red: 6 `SplitAllocationTests` (stub) and the 4 FR-013 cases; "sum exactly 100 accepted" green at write time, as declared. Guards: independent rounding failed 5 allocation cases including the 10.01 split; removing the sum check failed its 4 cases; making the sum check reject every deal failed the accepted case (its red evidence); applying the sum check to the scenario's own deal list only failed all booking-quarter split cases. A theory's `InlineData` ints did not bind to `params double[]` ("arguments did not match the parameters") and were written as doubles.
+- [X] T048 [P] [US4] Write `Features/UI_RejectedScenario.feature` in Specs, driven through the web
   host (`@FR-004`), against a scenario directory the scenario itself creates (a temp folder holding the Appendix A.11 inputs
   as JSON), never the shipped `Scenarios/` folder, which is only added in Phase 9 (T060a): `?scenario=invalid` renders an element with `role="alert"` listing four errors,
   each with its FR ID, and no rep table. *Guard*: stop rendering the alert's error list and confirm
   the scenario fails; record. ("No rep table" needs no separate guard: `RejectedScenario` carries
   no statements, and T020 guards the engine side.) Run;
   record failing.
-- [ ] T049 [US4] Implement `Calculation/SplitAllocation.cs`, split crediting in `QuarterCredit`
+  **Result**: Recorded red: the rejected-scenario page scenario failed (no alert). Guard: not rendering the alert's error list failed it. The A.11 fixture was regenerated after a JSON generator bug wrote `100000.0.00`, which the reader correctly rejected as a load error.
+- [X] T049 [US4] Implement `Calculation/SplitAllocation.cs`, split crediting in `QuarterCredit`
   (share lines cite FR-012), the FR-013 rule and the rejected-scenario view until T046–T048 pass.
+  **Result**: Done; 146/146 green. Per-rule requirement ids added so each error cites its own FR, as Appendix A.11 states them.
 - [ ] T050 [US4] Checkpoint: PR "Phase 6: US4", CI green, maintainer approves squash-merge.
 
 ---

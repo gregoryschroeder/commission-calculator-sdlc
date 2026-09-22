@@ -43,9 +43,16 @@ internal static class StatementBuilder
     private static BreakdownLine CreditLineFor(DealCredit credit)
     {
         var booked = $"{credit.Deal.DealId} booked {Date(credit.Deal.BookingDate)} (closed {Date(credit.Deal.CloseDate)})";
-        return credit.Counted
+        if (!credit.Counted)
+        {
+            return new BreakdownLine(LineSection.Excluded, $"{booked}: excluded, booked outside the quarter", 0m, "FR-008");
+        }
+
+        return credit.Split is null
             ? new BreakdownLine(LineSection.Credit, booked, credit.Share, "FR-008")
-            : new BreakdownLine(LineSection.Excluded, $"{booked}: excluded, booked outside the quarter", 0m, "FR-008");
+            : new BreakdownLine(LineSection.Credit,
+                $"{booked}: {credit.Split.Percent.ToString("0.###", Invariant)}% share of {Dollars(credit.Deal.Amount)}",
+                credit.Share, "FR-012");
     }
 
     private static BreakdownLine TierLineFor(TierLine tier) =>

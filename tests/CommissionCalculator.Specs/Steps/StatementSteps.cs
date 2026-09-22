@@ -15,6 +15,7 @@ public sealed class StatementSteps
     private List<RepInput> _roster = [];
     private List<DealInput> _deals = [];
     private CalculatedScenario? _result;
+    private RejectedScenario? _rejected;
 
     [Given("the quarter {word} to {word}")]
     public void GivenTheQuarter(string start, string end) => _quarter = new(Date(start), Date(end));
@@ -36,6 +37,23 @@ public sealed class StatementSteps
         var result = CommissionEngine.Calculate(new ScenarioInput("feature", "Feature scenario", quarter, _roster, _deals, []));
         _result = Assert.IsType<CalculatedScenario>(result);
     }
+
+    [When("the scenario is calculated it is rejected")]
+    public void WhenTheScenarioIsRejected()
+    {
+        var quarter = _quarter ?? throw new InvalidOperationException("No quarter was given.");
+        var result = CommissionEngine.Calculate(new ScenarioInput("feature", "Feature scenario", quarter, _roster, _deals, []));
+        _rejected = Assert.IsType<RejectedScenario>(result);
+    }
+
+    [Then("the rejection names deal {string} and cites {string}")]
+    public void ThenTheRejectionNamesDeal(string dealId, string requirement) =>
+        Assert.Contains(Rejected.Errors, error =>
+            error.RequirementId == requirement && error.Message.Contains(dealId, StringComparison.Ordinal));
+
+    [Then("the rejection says {string}")]
+    public void ThenTheRejectionSays(string phrase) =>
+        Assert.Contains(Rejected.Errors, error => error.Message.Contains(phrase, StringComparison.Ordinal));
 
     [Then("the statement for {string} includes, in order:")]
     public void ThenTheStatementIncludesInOrder(string repId, DataTable table)
@@ -71,6 +89,8 @@ public sealed class StatementSteps
             Assert.Equal(Amount(row["value"]), (decimal)property.GetValue(statement)!);
         }
     }
+
+    private RejectedScenario Rejected => _rejected ?? throw new InvalidOperationException("The scenario was not rejected.");
 
     private RepStatement Statement(string repId) =>
         (_result ?? throw new InvalidOperationException("The scenario was not calculated."))

@@ -8,7 +8,9 @@ namespace CommissionCalculator.Engine.Tests;
 // add rules that some of these inputs also break.
 public sealed class ScenarioValidatorTests
 {
-    public sealed record RuleCase(string Name, Func<ScenarioInput, ScenarioInput> Break, string Phrase, string Subject)
+    // Requirement defaults to FR-004; rules that belong to another requirement say so, as
+    // Appendix A.11 states them (corrected at the Phase 6 gate, 2026-09-22).
+    public sealed record RuleCase(string Name, Func<ScenarioInput, ScenarioInput> Break, string Phrase, string Subject, string Requirement = "FR-004")
     {
         public override string ToString() => Name;
     }
@@ -45,15 +47,19 @@ public sealed class ScenarioValidatorTests
         new("own split percentage over 100", s => s.WithOwnDeal(d => d with { Splits = [new("sage", 100.5m)] }), "split percentage must be greater than 0% and at most 100%", "Q2-1"),
         new("booking-quarter split percentage zero", s => s.WithBookingDeal(5, d => d with { Splits = [new("zion", 0m), new("yves", 100m)] }), "split percentage must be greater than 0% and at most 100%", "D2"),
         new("booking-quarter split percentage over 100", s => s.WithBookingDeal(1, d => d with { Splits = [new("sage", 101m)] }), "split percentage must be greater than 0% and at most 100%", "R-12"),
+        new("own split percentages sum below 100", s => s.WithOwnDeal(d => d with { Splits = [new("sage", 99.999m)] }), "split percentages sum to 99.999%", "Q2-1", "FR-013"),
+        new("own split percentages sum above 100", s => s.WithOwnDeal(d => d with { Splits = [new("sage", 100.001m)] }), "split percentages sum to 100.001%", "Q2-1", "FR-013"),
+        new("booking-quarter split percentages sum below 100", s => s.WithBookingDeal(1, d => d with { Splits = [new("sage", 99.999m)] }), "split percentages sum to 99.999%", "R-12", "FR-013"),
+        new("booking-quarter split percentages sum above 100", s => s.WithBookingDeal(5, d => d with { Splits = [new("zion", 60m), new("yves", 40.001m)] }), "split percentages sum to 100.001%", "D2", "FR-013"),
         new("own refund dated before booking", s => s.WithOwnDeal(d => d with { Refunds = [new(1_000.00m, new(2026, 5, 1))] }), "is dated before its booking date", "Q2-1"),
         new("booking-quarter refund dated before booking", s => s.WithBookingDeal(1, d => d with { Refunds = [new(1_000.00m, new(2026, 2, 1))] }), "is dated before its booking date", "R-12"),
         new("own refunds total more than the deal", s => s.WithOwnDeal(d => d with { Refunds = [new(30_000.00m, May10), new(20_000.00m, May10)] }), "refunds total more than the deal amount", "Q2-1"),
         new("prorated quota rounds to zero", s => s with { Roster = [s.Roster[0] with { Quota = 0.01m, StartDate = new(2026, 6, 30) }, .. s.Roster.Skip(1)] }, "prorated quota rounds to $0.00", "sage"),
         new("booking-quarter prorated quota rounds to zero", s => s.WithBookingQuarter(s.BookingQuarter() with { Reps = [s.BookingQuarter().Reps[0] with { Quota = 0.01m, StartDate = new(2026, 3, 31) }, .. s.BookingQuarter().Reps.Skip(1)] }), "prorated quota rounds to $0.00", "sage"),
-        new("rep starts after the quarter ends", s => s with { Roster = [s.Roster[0] with { StartDate = new(2026, 7, 1) }, .. s.Roster.Skip(1)] }, "starts after the quarter ends", "sage"),
-        new("booking-quarter rep starts after that quarter ends", s => s.WithBookingQuarter(s.BookingQuarter() with { Reps = [s.BookingQuarter().Reps[0] with { StartDate = new(2026, 4, 1) }, .. s.BookingQuarter().Reps.Skip(1)] }), "starts after the quarter ends", "sage"),
-        new("own deal booked before its rep's start date", s => s with { Roster = [s.Roster[0] with { StartDate = new(2026, 5, 10) }, .. s.Roster.Skip(1)] }, "is booked before the start date of rep", "Q2-1"),
-        new("booking-quarter deal booked before a partner's start date", s => s.WithBookingQuarter(s.BookingQuarter() with { Partners = [new("yves", new(2026, 3, 1))] }), "is booked before the start date of rep", "D2"),
+        new("rep starts after the quarter ends", s => s with { Roster = [s.Roster[0] with { StartDate = new(2026, 7, 1) }, .. s.Roster.Skip(1)] }, "starts after the quarter ends", "sage", "FR-011"),
+        new("booking-quarter rep starts after that quarter ends", s => s.WithBookingQuarter(s.BookingQuarter() with { Reps = [s.BookingQuarter().Reps[0] with { StartDate = new(2026, 4, 1) }, .. s.BookingQuarter().Reps.Skip(1)] }), "starts after the quarter ends", "sage", "FR-011"),
+        new("own deal booked before its rep's start date", s => s with { Roster = [s.Roster[0] with { StartDate = new(2026, 5, 10) }, .. s.Roster.Skip(1)] }, "is booked before the start date of rep", "Q2-1", "FR-011"),
+        new("booking-quarter deal booked before a partner's start date", s => s.WithBookingQuarter(s.BookingQuarter() with { Partners = [new("yves", new(2026, 3, 1))] }), "is booked before the start date of rep", "D2", "FR-011"),
         new("booking-quarter refunds total more than the deal", s => s.WithBookingDeal(5, d => d with { Refunds = [new(25_000.00m, new(2026, 3, 1)), new(20_000.00m, new(2026, 3, 2))] }), "refunds total more than the deal amount", "D2"),
     ];
 
@@ -68,10 +74,15 @@ public sealed class ScenarioValidatorTests
         var errors = ScenarioValidator.Validate(rule.Break(ValidScenario.Create()));
 
         Assert.Contains(errors, error =>
-            error.RequirementId == "FR-004"
+            error.RequirementId == rule.Requirement
             && error.Message.Contains(rule.Phrase, StringComparison.Ordinal)
             && error.Message.Contains(rule.Subject, StringComparison.Ordinal));
     }
+
+    [Fact, Trait("Requirement", "FR-013")]
+    public void SplitPercentagesSummingToExactlyOneHundredAreAccepted() =>
+        Assert.DoesNotContain(ScenarioValidator.Validate(ValidScenario.Create()),
+            error => error.Message.Contains("split percentages sum", StringComparison.Ordinal));
 
     [Fact, Trait("Requirement", "FR-004")]
     public void EveryViolationIsListedNotOnlyTheFirst()
