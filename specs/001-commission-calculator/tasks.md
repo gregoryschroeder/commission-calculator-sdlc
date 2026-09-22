@@ -330,8 +330,8 @@ reader that every story uses.
   reflow; evidence: the viewport width reported by the browser just before the screenshot) and
   confirm no horizontal page scroll other than inside the breakdown tables. Record the log excerpt
   and screenshot in the PR.
-  **Result**: Done 2026-09-22 in the in-app browser, key presses only (no pointer actions in the log). Verified: Tab reaches the skip link, then the scenario select, then Show, each with a visible focus outline; Enter on Show submits. **Not verified**: changing the select's value by keyboard. ArrowDown, Down, typing "T" and Alt+ArrowDown all left the value unchanged while the select held focus, which points to the embedded browser's synthesized keys not driving the native select widget; this is handed to the maintainer with T034. Reflow (1.4.10) at a 320px viewport (`clientWidth` 320): first run found the summary amounts clipped at the right edge; after the T032 fix, no summary element extends past 320px (widest right edge 304px) and the page does not scroll horizontally.
-- [ ] T034 [US1] Screen-reader check (FR-021; standing rule 3) — **maintainer step**: with
+  **Result**: Done 2026-09-22 in the in-app browser, key presses only (no pointer actions in the log). Verified: Tab reaches the skip link, then the scenario select, then Show, each with a visible focus outline; Enter on Show submits. **Not verified by the agent; confirmed by the maintainer in T034 (2026-09-22)**: changing the select's value by keyboard. ArrowDown, Down, typing "T" and Alt+ArrowDown all left the value unchanged while the select held focus, which points to the embedded browser's synthesized keys not driving the native select widget; this is handed to the maintainer with T034. Reflow (1.4.10) at a 320px viewport (`clientWidth` 320): first run found the summary amounts clipped at the right edge; after the T032 fix, no summary element extends past 320px (widest right edge 304px) and the page does not scroll horizontally.
+- [X] T034 [US1] Screen-reader check (FR-021; standing rule 3) — **maintainer step**: with
   VoiceOver on (evidence: VoiceOver caption panel visible in a screenshot), navigate by headings
   and tables on `?scenario=tiers` (app run as in T033); confirm each rep's `h2`, the table caption and column headers are
   announced. The agent does not change system accessibility settings; the maintainer records the
@@ -392,6 +392,10 @@ reader that every story uses.
   which Phase 3 already renders, so it could not be seen failing here.)
 - [X] T040 [US2] Implement booking-date crediting and excluded-deal lines until T037–T038 pass.
   **Result**: Done; 115/115 green locally, engine coverage 98.09%, every test passes alone. Excluded deals appear in deal-list order with Appendix A.2's wording.
+  **Result**: Maintainer confirmed 2026-09-22 (at the Phase 7 gate): "T034 is complete and working
+  as intended" — the VoiceOver pass over `?scenario=tiers`, and with it the keyboard behaviour of
+  the scenario select that T033 could not drive through the in-app browser. T033's unverified item
+  is therefore closed by this check, not by the agent.
 - [ ] T041 [US2] Checkpoint: PR "Phase 4: US2", CI green, maintainer approves squash-merge.
 
 ---
@@ -467,9 +471,10 @@ reader that every story uses.
 **Goal**: draws per month (start month prorated), recovery, payable, carried balance.
 **Independent test**: `Features/US5_Draw.feature` passes.
 
-- [ ] T051 [P] [US5] Write `Features/US5_Draw.feature`: US5 AS1–AS6 exact, including AS6's total
+- [X] T051 [P] [US5] Write `Features/US5_Draw.feature`: US5 AS1–AS6 exact, including AS6's total
   draw of $9,548.39 (`@FR-014 @FR-015`). Run; record failing.
-- [ ] T052 [P] [US5] Write `DrawScheduleTests` (`FR-014`): full quarter = 3 × 4,000.00; start
+  **Result**: Recorded red 2026-09-22: US5 AS1–AS6 (5 scenarios) all failed — no draw or recovery lines existed. Green after T053.
+- [X] T052 [P] [US5] Write `DrawScheduleTests` (`FR-014`): full quarter = 3 × 4,000.00; start
   2026-02-15 → 0.00 / 2,000.00 / 4,000.00; start 2026-01-20 → 1,548.39; start on the 1st of the
   second month → 0.00 / 4,000.00 / 4,000.00. Write `DrawRecoveryTests` (`FR-015`): earned ≥
   recoverable total; earned < total; earned = 0; earned negative (recovered 0.00, payable 0.00,
@@ -479,8 +484,10 @@ reader that every story uses.
   is `earned − min(earned, total)` ≥ 0 when earned ≥ 0); `PayableIsNeverNegative` is therefore a
   property check, not a failure-path guard — recorded here per standing rule 2. Run; record
   failing.
-- [ ] T053 [US5] Implement `Calculation/DrawSchedule.cs` and `Calculation/DrawRecovery.cs` and
+  **Result**: Recorded red: 4 `DrawScheduleTests` and 11 `DrawRecoveryTests` cases failed with `NotImplementedException`. Guards: removing the negative-earned branch failed `NegativeEarningsAreAddedToTheBalanceAndRecoverNothing` (recovered became −1,600.00, as predicted); prorating every month, not only the start month, failed all 4 draw-schedule tests. `PayableIsNeverNegative` is a property check with no guard, as the task records.
+- [X] T053 [US5] Implement `Calculation/DrawSchedule.cs` and `Calculation/DrawRecovery.cs` and
   their statement lines until T051–T052 pass.
+  **Result**: Done; 172/172 green, engine coverage 98.16%, every test passes alone. The "Earned commission" line (FR-015) is added here; the "Clawbacks" line above it is Phase 8's.
 - [ ] T054 [US5] Checkpoint: PR "Phase 7: US5", CI green, maintainer approves squash-merge.
 
 ---

@@ -28,11 +28,26 @@ internal static class StatementBuilder
         lines.AddRange(tiers.Select(TierLineFor));
         lines.Add(new BreakdownLine(LineSection.Subtotal, "Commission before refunds", commissionBeforeRefunds, "FR-006"));
 
+        var earnedCommission = commissionBeforeRefunds;
+        lines.Add(new BreakdownLine(LineSection.Subtotal, "Earned commission", earnedCommission, "FR-015"));
+
+        var draws = DrawSchedule.For(rep.StartDate, quarter);
+        lines.AddRange(draws.Select(draw => new BreakdownLine(LineSection.Draw, $"Draw, {draw.Label}", draw.Amount, "FR-014")));
+        var drawPaid = draws.Sum(draw => draw.Amount);
+        lines.Add(new BreakdownLine(LineSection.Draw, "Draws paid", drawPaid, "FR-014"));
+
+        var recovery = DrawRecovery.For(earnedCommission, rep.OpeningRecoverableBalance, drawPaid);
+        lines.Add(new BreakdownLine(LineSection.Recovery, "Opening recoverable balance", rep.OpeningRecoverableBalance, "FR-015"));
+        lines.Add(new BreakdownLine(LineSection.Recovery, "Draw recovered", recovery.Recovered, "FR-015"));
+        lines.Add(new BreakdownLine(LineSection.Recovery, "Commission payable", recovery.Payable, "FR-015"));
+        lines.Add(new BreakdownLine(LineSection.Recovery, "Closing recoverable balance", recovery.ClosingBalance, "FR-015"));
+
         return new RepStatement(rep.RepId, rep.Name,
             Quota: rep.Quota, ProratedQuota: proratedQuota, CreditedBookings: creditedBookings,
             Attainment: Attainment(creditedBookings, proratedQuota),
-            CommissionBeforeRefunds: commissionBeforeRefunds, Clawbacks: 0m, EarnedCommission: commissionBeforeRefunds,
-            DrawPaid: 0m, Recovered: 0m, Payable: 0m, ClosingRecoverableBalance: 0m,
+            CommissionBeforeRefunds: commissionBeforeRefunds, Clawbacks: 0m, EarnedCommission: earnedCommission,
+            DrawPaid: drawPaid, Recovered: recovery.Recovered, Payable: recovery.Payable,
+            ClosingRecoverableBalance: recovery.ClosingBalance,
             lines);
     }
 
