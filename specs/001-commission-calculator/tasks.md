@@ -144,13 +144,15 @@ analyze step can hold this list to them. Where anything above or below conflicts
   `dotnet run` inside that folder), test commands, where the spec lives, and the optional
   `Scenarios:Directory` setting (e.g. `--Scenarios:Directory=/path` on the command line).
   **Result**: Done; plain `dotnet run` inside `src/CommissionCalculator.Web` verified to serve HTTP 200. The `Scenarios:Directory` setting is marked as arriving in Phase 2.
-- [ ] T012 Checkpoint: open PR "Phase 1: Setup", CI green, maintainer approves squash-merge. Record
+- [X] T012 Checkpoint: open PR "Phase 1: Setup", CI green, maintainer approves squash-merge. Record
   the first CI run's outcome in research R14 (SDK resolution) and R15 (isolation-step time), and
   propose to the maintainer the PATCH amendment that marks constitution C7 as confirmed and, in its
   pairwise note, qualifies "CI installs the pinned SDK" as confirmed by this run (until then it is
   assumed, as research R14 says), and records in C2 and Principle VII the approved reading of "runs
   with `dotnet run`" (`dotnet run --project src/CommissionCalculator.Web`, plan decision 2).
 
+  **Result**: PR #2 CI green (runs 35758821698, 35759089614); squash-merged 2026-09-22 with the
+  maintainer's approval. R14/R15 recorded; constitution PATCH v1.1.1 approved and made in its own PR.
 ---
 
 ## Phase 2: Foundational (blocking prerequisites) — PR 2
