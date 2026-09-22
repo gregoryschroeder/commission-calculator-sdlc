@@ -723,6 +723,13 @@ reader that every story uses.
   gate. Reflow at 320px: `clientWidth` 320, widest right edge 304px, no horizontal scroll.
 - [ ] T065 Checkpoint: PR "Phase 9: Polish", CI green, maintainer approves squash-merge.
 
+  **Status**: PR #12 open, CI green on run 35776592291 (build-test, smoke, offline-smoke,
+  traceability). Leak check before the push: 0 non-installer hits over 15 library phrases, 3
+  expected hits in `.specify/templates/overrides/` (installer output). The CI-generated report and
+  the committed one are byte-identical apart from the CI-evidence run URL, which necessarily names
+  the run before the commit. Waiting on the maintainer: the VoiceOver re-check (T064) and approval
+  to squash-merge.
+
 ---
 
 ## Dependencies & execution order
