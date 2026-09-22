@@ -84,8 +84,9 @@ analyze step can hold this list to them. Where anything above or below conflicts
 - [ ] T004 Implement the minimal `Program.cs` and `Pages/Index.cshtml` (layout with `lang`, skip
   link, one `<h1>`, `<main>`, local `wwwroot/css/site.css`) until T003 passes. (`Web.Tests` is created in T022
   together with its first tests: a test project with no tests makes `dotnet test` exit non-zero.)
-- [ ] T005 Create `tests/CommissionCalculator.Tools.Tests/` and write tests for the CI helper
-  commands **before** they exist (`[Trait("Principle", "II")]`) (fixture files under `tests/CommissionCalculator.Tools.Tests/
+- [ ] T005 Create `tests/CommissionCalculator.Tools.Tests/` and `tools/CommissionCalculator.Tools/`
+  with compile-only stubs of the `coverage-gate` and `list-tests` commands (standing rule 7), and
+  write tests for those commands **before** their logic exists (`[Trait("Principle", "II")]`) (fixture files under `tests/CommissionCalculator.Tools.Tests/
   Fixtures/`): `CoverageGateTests` — engine line rate 0.85 passes, 0.79 fails, report with no
   engine package fails *unless* the engine assembly contains no types (then passes with the message
   "no engine lines yet"), using a fixture report that *has* an engine package so the floor can
@@ -94,7 +95,7 @@ analyze step can hold this list to them. Where anything above or below conflicts
   report lacks the engine package and another covers it partly; `TrxTestListTests` — lists fully qualified `className.name` for xUnit and
   Reqnroll tests from a fixture TRX (the Reqnroll display-name case from research R15). Run; record
   failing.
-- [ ] T006 Create `tools/CommissionCalculator.Tools/` (console app with
+- [ ] T006 Implement `tools/CommissionCalculator.Tools/` (console app with
   `<FrameworkReference Include="Microsoft.AspNetCore.App" />`, so `trace` can reflect over the web
   assembly — research R8; commands `coverage-gate` and `list-tests`) until T005 passes. (Replaces research R8's single-file program: a project can be
   unit-tested; see research R8 correction.)
@@ -223,7 +224,8 @@ reader that every story uses.
   Phase 1; their red evidence is the skip-link guard above and, for the `h1`, a guard that adds a
   second `h1` and confirms failure — record both;
   `?scenario=tiers` shows one section per rep with `h2`, caption, `th scope=col` Item/Amount/Rule;
-  every Rule cell is an FR ID that exists in spec.md (read from the committed spec file); each rep's
+  the page has at least one Rule cell and every Rule cell is an FR ID that exists in spec.md (read
+  from the committed spec file) — so the check cannot pass on an empty page; each rep's
   page has a `<title>` naming the selected scenario (WCAG 2.4.2); these scenarios run against a scenario directory the scenario itself creates (a temp folder holding the Appendix A.1 inputs
   as JSON), never the shipped `Scenarios/` folder, which is only added in Phase 9 (T060a); summary `dl` shows quota, prorated quota, credited bookings, attainment (Avery: "80.00%"),
   earned, clawbacks, draws paid, draw recovered, payable and closing balance — for every A.1 rep,
@@ -310,7 +312,9 @@ reader that every story uses.
   and close date never changes the result (expected green at write time — Phase 3 already credits
   them; red evidence is the guards below plus an inclusive-bounds guard: make the bounds exclusive
   and confirm the first/last-day tests fail). Add
-  `ScenarioValidatorTests` (`FR-004`): refund dated before booking date is rejected. *Guard*:
+  `ScenarioValidatorTests` (`FR-004`) on the scenario's own deal list: refund dated before booking
+  date, refund ≤ 0, sub-cent refund amount, and refunds totalling more than the deal — each
+  rejected (*Guard* for each: remove that check and confirm its test fails). *Guard*:
   switch crediting to close date and confirm AS1 (B-1) and AS2 (B-2) fail; remove the refund-date
   check and confirm its test fails; record. Run; record failing.
 - [ ] T039 (Moved into T030 by analyze, 2026-09-22: US1 AS5 asserts only which reps a scenario shows,
@@ -412,13 +416,18 @@ reader that every story uses.
   range, split sum ≠ 100, sub-cent amount — each rejected (*Guard*: validate only the scenario's
   own deal list and confirm each of these fails; record); booking-quarter rep quota ≤ 0 or not
   whole cents, booking-quarter deal amount ≤ 0, and a booking-quarter prorated quota that rounds to
-  $0.00 (requirement) — each rejected (FR-004); rep start-date
+  $0.00 (requirement) — each rejected (FR-004); the four refund rules of T038 (refund dated before
+  booking, refund ≤ 0, sub-cent refund, refunds totalling more than the deal) applied to a
+  booking-quarter deal — each rejected, guarded by the same "validate only the scenario's own deal
+  list" guard; rep start-date
   mismatch; a booking-quarter deal whose booking date is outside that quarter's dates → rejected;
   partner listed with start date accepted (expected **green** at write time; *Guard*: reject every
   booking-quarter partner and confirm it fails); deal in both lists differing → rejected; a
   refund of 0.00 or less → rejected; a booking-quarter deal booked before the start date of a
   credited roster rep or partner → rejected naming the deal and the rep (FR-011). Add a statement test: a refund on a split deal adds a re-split
-  line citing FR-017 before its clawback line; a refund on a single-rep deal adds none.
+  line citing FR-017 before its clawback line; a refund on a single-rep deal adds none (expected
+  **green** at write time — no re-split lines exist before T058; *Guard*: emit a re-split line for
+  every refund and confirm it fails; record).
   *Guard*: (a) size each refund against the untouched quarter and confirm AS6 fails; (b) remove
   the refund-date filter and confirm AS3 and AS5 (Q1) fail; (c) floor clawbacks at zero and
   confirm AS9 fails; (d) remove each new validation check (including refund ≤ 0 and the
@@ -508,15 +517,15 @@ reader that every story uses.
 - [ ] T062 Add `[Implements]` to every engine and web member that implements an FR; run `trace`
   with the same assemblies and result files the CI job uses; the report's "Unexplained" gaps are
   empty, and its "Explained" gaps are exactly the explained-gaps table of T061, with SC-004's CI
-  record passing and the manual-evidence items carrying the PR links recorded in
-  T033/T034/T064.
+  record passing and the manual-evidence items carrying the PR links recorded in T033/T034 (the
+  T064 re-check links are added to the report when T065's PR is opened).
 - [ ] T063 Re-verify every failure-path guard added in T007 (warnings, coverage), T008, T009,
   T010, T018, T020, T022 (error capture, unknown property, required field), T023 (first-failure, missing directory,
   duplicate id), T030 (unknown id, skip-link
   target, second `h1`, section labelling, attainment format, money format), T031 (all four),
-  T035 (404, no-network), T037 (AS3 exclude-all), T038 (close date, bounds, refund date), T042 (AS4), T043,
+  T035 (404, no-network), T037 (AS3 exclude-all), T038 (close date, bounds, the four refund rules), T042 (AS4), T043,
   T047 (largest remainder, sum check, sum-100 accepted), T048, T052, T055 (AS3), T056 (incl. partner accepted, booking-quarter
-  list rules and booking-quarter quota/amount rules), T061 (framework reference), T057, T060 (every rule check), T060b, T061 — each still fails with its guarded
+  list rules, booking-quarter quota/amount and refund rules, single-rep no re-split), T061 (framework reference), T057, T060 (every rule check), T060b, T061 — each still fails with its guarded
   behaviour removed; record each result here.
 - [ ] T064 Quickstart validation (standing rule 3): step 1 from a fresh clone (evidence:
   `git status --ignored` shows no build output before running); re-run T033's keyboard check on the
