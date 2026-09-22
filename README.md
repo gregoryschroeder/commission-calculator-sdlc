@@ -36,8 +36,32 @@ tools/ci/isolated-tests.sh
 ```
 
 Skipped tests fail the run, the engine's line coverage must be at least 80%, and every test must
-also pass when run on its own. CI (`.github/workflows/ci.yml`) runs the same steps, plus a smoke
-job that starts the app from a clean checkout.
+also pass when run on its own.
+
+## Traceability
+
+Every requirement is traced to the member that implements it and the tests that cover it:
+
+```bash
+dotnet run --project tools/CommissionCalculator.Tools -- trace \
+  --assemblies src/CommissionCalculator.Engine/bin/Debug/net10.0/CommissionCalculator.Engine.dll \
+               src/CommissionCalculator.Web/bin/Debug/net10.0/CommissionCalculator.Web.dll \
+  --results TestResults/*.trx
+```
+
+The committed output is
+[`specs/001-commission-calculator/traceability.md`](specs/001-commission-calculator/traceability.md).
+Any FR or SC with no test or no member is listed as a gap; a gap is "Explained" only where the
+report gives its reason (scope, evidence-only, CI evidence, manual evidence), and `--strict` fails
+on any other.
+
+## CI
+
+`.github/workflows/ci.yml` runs the steps above and three more jobs: **smoke**, which starts the
+app from a clean checkout and requests a seeded scenario; **offline-smoke**, which serves the
+published app in a container with `--network none` and proves the same page renders with no
+network; and **traceability**, which re-runs the trace over the other jobs' artifacts with
+`--strict`.
 
 ## Layout
 
@@ -45,4 +69,4 @@ job that starts the app from a clean checkout.
 - `src/CommissionCalculator.Web` — Razor Pages view of the engine's statements.
 - `tests/` — unit tests (xUnit v3) and Gherkin feature files (Reqnroll) mirroring the spec's
   acceptance scenarios.
-- `tools/` — CI helpers (coverage gate, test lister) and, later, the traceability generator.
+- `tools/` — CI helpers: coverage gate, test lister and the traceability generator.

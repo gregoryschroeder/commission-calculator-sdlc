@@ -98,6 +98,34 @@ public sealed class ScenarioValidatorTests
             && error.Message.Contains(rule.Subject, StringComparison.Ordinal));
     }
 
+    // FR-004 rejects a deal listed in both places only when the two entries differ. A loader reads
+    // each list separately, so the two entries are distinct objects holding equal values; comparing
+    // them must compare the values, splits and refunds included. (Adversarial pass, 2026-09-22.)
+    [Fact, Trait("Requirement", "FR-004")]
+    public void ADealListedInBothListsWithEqualValuesIsNotADifference()
+    {
+        var scenario = ValidScenario.Create();
+        var booked = scenario.BookingQuarter().Deals[0];
+        var rebuilt = ValidScenario.Deal(booked.DealId, booked.Amount, booked.CloseDate, booked.BookingDate,
+            [.. booked.Splits.Select(split => new SplitCredit(split.RepId, split.Percent))],
+            [.. booked.Refunds.Select(refund => new RefundInput(refund.Amount, refund.Date))]);
+
+        var errors = ScenarioValidator.Validate(scenario with { Deals = [.. scenario.Deals, rebuilt] });
+
+        Assert.DoesNotContain(errors, error => error.Message.Contains("differs between the two lists", StringComparison.Ordinal));
+    }
+
+    // The refund-total rule is about refunds; a deal with none must not be accused of breaking it,
+    // whatever its amount. (Adversarial pass, 2026-09-22.)
+    [Fact, Trait("Requirement", "FR-004")]
+    public void ADealWithNoRefundsIsNeverAccusedOfRefundsExceedingIt()
+    {
+        var errors = ScenarioValidator.Validate(ValidScenario.Create().WithOwnDeal(deal => deal with { Amount = -100.00m, Refunds = [] }));
+
+        Assert.Contains(errors, error => error.Message.Contains("amount must be greater than zero", StringComparison.Ordinal));
+        Assert.DoesNotContain(errors, error => error.Message.Contains("refunds total more than the deal amount", StringComparison.Ordinal));
+    }
+
     [Fact, Trait("Requirement", "FR-004")]
     public void APartnerListedWithAStartDateIsAccepted() =>
         Assert.DoesNotContain(ScenarioValidator.Validate(ValidScenario.Create()),

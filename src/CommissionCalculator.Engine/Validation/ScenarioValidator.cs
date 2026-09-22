@@ -95,7 +95,7 @@ internal static class ScenarioValidator
     {
         var bookingDeals = scenario.BookingQuarters.SelectMany(quarter => quarter.Deals).ToLookup(deal => deal.DealId);
         return scenario.Deals
-            .Where(deal => bookingDeals[deal.DealId].Any(other => other != deal))
+            .Where(deal => bookingDeals[deal.DealId].Any(other => !DealInput.HaveEqualValues(deal, other)))
             .Select(deal => new Failure($"Deal '{deal.DealId}' differs between the two lists."));
     }
 
@@ -220,7 +220,8 @@ internal static class ScenarioValidator
 
     private static IEnumerable<Failure> RefundTotalErrors(DealInput deal)
     {
-        if (deal.Refunds.Sum(refund => refund.Amount) > deal.Amount)
+        // A deal with no refunds cannot break a rule about refunds, whatever its amount is.
+        if (deal.Refunds.Count > 0 && deal.Refunds.Sum(refund => refund.Amount) > deal.Amount)
         {
             yield return new Failure($"Deal '{deal.DealId}': refunds total more than the deal amount.");
         }

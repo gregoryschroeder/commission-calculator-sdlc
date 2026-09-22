@@ -49,6 +49,40 @@ Feature: US6 - A refunded deal is clawed back
       | Payable                   | 0.00       |
       | ClosingRecoverableBalance | 13,600.00  |
 
+  # FR-004 rejects a deal listed in both places only when the entries differ. This is AS2 with the
+  # earlier-quarter deal also listed in the scenario's own deals, where the page shows it excluded
+  # (FR-008): the two entries agree, so the scenario stands and pays exactly as AS2 does.
+  # Found by the adversarial pass, 2026-09-22.
+  Scenario: US6 AS2 with the earlier-quarter deal listed in both lists, unchanged
+    Given the quarter 2026-04-01 to 2026-06-30
+    And the roster:
+      | rep  | name | quota      | start      |
+      | sage | Sage | 100,000.00 | 2025-06-01 |
+    And the deals:
+      | deal | amount    | close      | booking    | credit    | refunds                 |
+      | Q2-1 | 40,000.00 | 2026-05-01 | 2026-05-04 | sage 100% |                         |
+      | R-11 | 60,000.00 | 2026-01-09 | 2026-01-10 | sage 100% | 60,000.00 on 2026-04-15 |
+    And the booking quarter 2026-01-01 to 2026-03-31 with reps:
+      | rep  | quota      | start      |
+      | sage | 100,000.00 | 2025-06-01 |
+    And its deals:
+      | deal | amount    | close      | booking    | credit    | refunds                 |
+      | R-11 | 60,000.00 | 2026-01-09 | 2026-01-10 | sage 100% | 60,000.00 on 2026-04-15 |
+      | R-12 | 60,000.00 | 2026-02-09 | 2026-02-10 | sage 100% |                         |
+    When the scenario is calculated
+    Then the statement for "sage" includes, in order:
+      | item                                                                             | amount    | rule   |
+      | R-11 booked 2026-01-10 (closed 2026-01-09): excluded, booked outside the quarter | 0.00      | FR-008 |
+      | Commission before refunds                                                        | 2,000.00  | FR-006 |
+      | Clawback: R-11 refund $60,000.00 on 2026-04-15                                   | 3,600.00  | FR-016 |
+      | Earned commission                                                                | -1,600.00 | FR-015 |
+    And the statement for "sage" has:
+      | field                     | value      |
+      | EarnedCommission          | -1,600.00  |
+      | Recovered                 | 0.00       |
+      | Payable                   | 0.00       |
+      | ClosingRecoverableBalance | 13,600.00  |
+
   Scenario: US6 AS3 - a refund dated after the quarter does not affect it
     Given the quarter 2026-01-01 to 2026-03-31
     And the roster:
