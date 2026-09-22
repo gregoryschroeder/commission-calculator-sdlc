@@ -120,10 +120,10 @@ tests/
 ├── CommissionCalculator.Engine.Tests/    # xUnit v3 unit tests, [Trait("Requirement", ...)]
 ├── CommissionCalculator.Specs/           # Reqnroll: one .feature per user story + seeded scenarios
 ├── CommissionCalculator.Web.Tests/       # xUnit unit tests of single web classes (reader, catalog, formatters, stylesheet)
-├── CommissionCalculator.Tools.Tests/     # tests for the CI helper and traceability commands
-└── CommissionCalculator.Tools.Fixture/   # Web SDK fixture assembly for the trace command's reflection test
+└── CommissionCalculator.Tools.Tests/     # tests for the CI helper and traceability commands
 
 tools/CommissionCalculator.Tools/         # console app: coverage-gate, list-tests, trace (R8)
+tools/CommissionCalculator.Tools.Fixture/ # Web SDK Library, not in the solution: fixture for trace's reflection test
 .github/workflows/ci.yml
 ```
 

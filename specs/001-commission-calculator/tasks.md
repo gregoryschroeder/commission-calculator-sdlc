@@ -513,8 +513,11 @@ reader that every story uses.
   (`[Trait("Principle", "III")]`; fixture spec with FR-001..FR-003 and SC-001, fixture TRX, fixture
   assembly metadata, plus one case that runs the built tools executable **as a separate process**
   against a fixture DLL built from a committed fixture project,
-  `tests/CommissionCalculator.Tools.Fixture/` (Web SDK, one Razor Pages `PageModel` marked
-  `[Implements("FR-001")]`, referencing the Engine for `ImplementsAttribute`); Tools.Tests builds it
+  `tools/CommissionCalculator.Tools.Fixture/` (Web SDK with `<OutputType>Library</OutputType>` —
+  the Web SDK's default Exe fails with CS5001 — one Razor Pages `PageModel` marked
+  `[Implements("FR-001")]`, referencing the Engine for `ImplementsAttribute`; outside `tests/`, so
+  T001's test-package rule does not make it a test application, and not in
+  `CommissionCalculator.slnx`, so `dotnet test` never runs it); Tools.Tests builds it
   through a `ProjectReference` with `ReferenceOutputAssembly="false"` and loads it from the
   fixture's output path in the child process, so no ASP.NET framework reference reaches the
   tools process through the test. `trace` recognises the attribute by its full type name,
