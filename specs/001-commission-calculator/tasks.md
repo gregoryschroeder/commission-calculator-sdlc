@@ -467,9 +467,10 @@ reader that every story uses.
 **Goal**: draws per month (start month prorated), recovery, payable, carried balance.
 **Independent test**: `Features/US5_Draw.feature` passes.
 
-- [ ] T051 [P] [US5] Write `Features/US5_Draw.feature`: US5 AS1–AS6 exact, including AS6's total
+- [X] T051 [P] [US5] Write `Features/US5_Draw.feature`: US5 AS1–AS6 exact, including AS6's total
   draw of $9,548.39 (`@FR-014 @FR-015`). Run; record failing.
-- [ ] T052 [P] [US5] Write `DrawScheduleTests` (`FR-014`): full quarter = 3 × 4,000.00; start
+  **Result**: Recorded red 2026-09-22: US5 AS1–AS6 (5 scenarios) all failed — no draw or recovery lines existed. Green after T053.
+- [X] T052 [P] [US5] Write `DrawScheduleTests` (`FR-014`): full quarter = 3 × 4,000.00; start
   2026-02-15 → 0.00 / 2,000.00 / 4,000.00; start 2026-01-20 → 1,548.39; start on the 1st of the
   second month → 0.00 / 4,000.00 / 4,000.00. Write `DrawRecoveryTests` (`FR-015`): earned ≥
   recoverable total; earned < total; earned = 0; earned negative (recovered 0.00, payable 0.00,
@@ -479,8 +480,10 @@ reader that every story uses.
   is `earned − min(earned, total)` ≥ 0 when earned ≥ 0); `PayableIsNeverNegative` is therefore a
   property check, not a failure-path guard — recorded here per standing rule 2. Run; record
   failing.
-- [ ] T053 [US5] Implement `Calculation/DrawSchedule.cs` and `Calculation/DrawRecovery.cs` and
+  **Result**: Recorded red: 4 `DrawScheduleTests` and 11 `DrawRecoveryTests` cases failed with `NotImplementedException`. Guards: removing the negative-earned branch failed `NegativeEarningsAreAddedToTheBalanceAndRecoverNothing` (recovered became −1,600.00, as predicted); prorating every month, not only the start month, failed all 4 draw-schedule tests. `PayableIsNeverNegative` is a property check with no guard, as the task records.
+- [X] T053 [US5] Implement `Calculation/DrawSchedule.cs` and `Calculation/DrawRecovery.cs` and
   their statement lines until T051–T052 pass.
+  **Result**: Done; 172/172 green, engine coverage 98.16%, every test passes alone. The "Earned commission" line (FR-015) is added here; the "Clawbacks" line above it is Phase 8's.
 - [ ] T054 [US5] Checkpoint: PR "Phase 7: US5", CI green, maintainer approves squash-merge.
 
 ---
