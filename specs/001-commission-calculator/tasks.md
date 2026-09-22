@@ -396,8 +396,8 @@ reader that every story uses.
   Appendix A.11 errors. SC-003 check: the brief's rules map to FRs as rule 1 → FR-005, rule 2 →
   FR-006, rule 3 → FR-010, rule 4 → FR-012, rule 5 → FR-014/FR-015, rule 6 → FR-016, rule 7 →
   FR-008, rule 8 → FR-019. Each rule's check is chosen so that removing the scenario that
-  exercises it makes the check fail: rule 1 — at least one scenario whose reps have different
-  quotas (`proration` has $90,000.00 against others' $100,000.00); rule 2 — a line at each rate,
+  exercises it makes the check fail: rule 1 — the seeded reps do not all have the same quota
+  (`proration`'s reps have $90,000.00; every other seeded rep has $100,000.00); rule 2 — a line at each rate,
   5%, 8% and 12% (`tiers`); rule 3 — a "Prorated quota" line (FR-010); rule 4 — a share line
   (FR-012); rule 5 — a non-zero "Draw recovered" and a non-zero "Commission payable" (`draw`,
   Parker); rule 6 — a non-zero clawback line (FR-016); rule 7 — a line with section `Excluded`
@@ -405,7 +405,7 @@ reader that every story uses.
   could not fail); rule 8 — every seeded file loads under the strict reader (no currency, tax or
   term fields exist to set) and every rendered amount is in dollars, `$` or `−$`. Every breakdown
   line's FR exists in spec.md (SC-002). *Guard*: for each of rules 2–7, remove the one scenario
-  named and confirm that rule's check fails; for rule 1 replace `proration`'s quota with
+  named and confirm that rule's check fails; for rule 1 set both `proration` quotas to
   $100,000.00 and confirm it fails; for rule 8 add a `"currency": "EUR"` property to one seed and
   confirm it fails; record all. The feature
   lists the eleven expected files by name, so before T060a it fails on every one ("scenario file
