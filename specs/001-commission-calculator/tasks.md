@@ -297,7 +297,8 @@ reader that every story uses.
   (`ci-evidence/<job>.json`: job name, check, requirement IDs `SC-004` and — for the smoke job —
   `FR-020`, result, commit SHA and run URL). These are CI gates, not tests; the trace lists them in
   their own "Verified by CI job" section and never counts them as tests (maintainer decision D1,
-  2026-09-22). *Guard*: point the sidecar's request at a path
+  2026-09-22). Each job uploads its `ci-evidence/*.json` with `actions/upload-artifact@v7` so the
+  traceability job (T061) can download it. *Guard*: point the sidecar's request at a path
   that returns 404 and confirm the job fails; *Guard (no network)*: run the job once with the app
   container on the default bridge network instead of `--network none` and confirm the job fails
   because the external request succeeds — the positive control for the "no network" evidence;
