@@ -1,0 +1,213 @@
+{
+  "id": "refunds",
+  "name": "Refunds inside the quarter",
+  "description": "Appendix A: Refunds inside the quarter (carries US6 AS1, AS3, AS4, AS5 (Q1), AS6).",
+  "quarter": {
+    "start": "2026-01-01",
+    "end": "2026-03-31"
+  },
+  "roster": [
+    {
+      "repId": "sage",
+      "name": "Sage",
+      "quota": 100000.00,
+      "startDate": "2025-06-01",
+      "openingRecoverableBalance": 0.00
+    },
+    {
+      "repId": "tatum",
+      "name": "Tatum",
+      "quota": 100000.00,
+      "startDate": "2025-06-01",
+      "openingRecoverableBalance": 0.00
+    },
+    {
+      "repId": "uma",
+      "name": "Uma",
+      "quota": 100000.00,
+      "startDate": "2025-06-01",
+      "openingRecoverableBalance": 0.00
+    },
+    {
+      "repId": "val",
+      "name": "Val",
+      "quota": 100000.00,
+      "startDate": "2025-06-01",
+      "openingRecoverableBalance": 0.00
+    },
+    {
+      "repId": "wren",
+      "name": "Wren",
+      "quota": 100000.00,
+      "startDate": "2025-06-01",
+      "openingRecoverableBalance": 0.00
+    }
+  ],
+  "deals": [
+    {
+      "dealId": "R-1",
+      "amount": 60000.00,
+      "closeDate": "2026-01-09",
+      "bookingDate": "2026-01-10",
+      "splits": [
+        {
+          "repId": "sage",
+          "percent": 100.0
+        }
+      ],
+      "refunds": [
+        {
+          "amount": 60000.00,
+          "date": "2026-02-15"
+        }
+      ]
+    },
+    {
+      "dealId": "R-2",
+      "amount": 60000.00,
+      "closeDate": "2026-02-09",
+      "bookingDate": "2026-02-10",
+      "splits": [
+        {
+          "repId": "sage",
+          "percent": 100.0
+        }
+      ],
+      "refunds": []
+    },
+    {
+      "dealId": "R-3",
+      "amount": 60000.00,
+      "closeDate": "2026-01-09",
+      "bookingDate": "2026-01-10",
+      "splits": [
+        {
+          "repId": "tatum",
+          "percent": 100.0
+        }
+      ],
+      "refunds": [
+        {
+          "amount": 20000.00,
+          "date": "2026-04-20"
+        }
+      ]
+    },
+    {
+      "dealId": "R-4",
+      "amount": 60000.00,
+      "closeDate": "2026-02-09",
+      "bookingDate": "2026-02-10",
+      "splits": [
+        {
+          "repId": "tatum",
+          "percent": 100.0
+        }
+      ],
+      "refunds": []
+    },
+    {
+      "dealId": "R-5",
+      "amount": 60000.00,
+      "closeDate": "2026-01-09",
+      "bookingDate": "2026-01-10",
+      "splits": [
+        {
+          "repId": "uma",
+          "percent": 100.0
+        }
+      ],
+      "refunds": [
+        {
+          "amount": 30000.00,
+          "date": "2026-03-01"
+        }
+      ]
+    },
+    {
+      "dealId": "R-6",
+      "amount": 60000.00,
+      "closeDate": "2026-02-09",
+      "bookingDate": "2026-02-10",
+      "splits": [
+        {
+          "repId": "uma",
+          "percent": 100.0
+        }
+      ],
+      "refunds": []
+    },
+    {
+      "dealId": "R-7",
+      "amount": 60000.00,
+      "closeDate": "2026-01-09",
+      "bookingDate": "2026-01-10",
+      "splits": [
+        {
+          "repId": "val",
+          "percent": 100.0
+        }
+      ],
+      "refunds": [
+        {
+          "amount": 20000.00,
+          "date": "2026-02-20"
+        },
+        {
+          "amount": 20000.00,
+          "date": "2026-05-05"
+        }
+      ]
+    },
+    {
+      "dealId": "R-8",
+      "amount": 60000.00,
+      "closeDate": "2026-02-09",
+      "bookingDate": "2026-02-10",
+      "splits": [
+        {
+          "repId": "val",
+          "percent": 100.0
+        }
+      ],
+      "refunds": []
+    },
+    {
+      "dealId": "R-9",
+      "amount": 60000.00,
+      "closeDate": "2026-01-09",
+      "bookingDate": "2026-01-10",
+      "splits": [
+        {
+          "repId": "wren",
+          "percent": 100.0
+        }
+      ],
+      "refunds": [
+        {
+          "amount": 60000.00,
+          "date": "2026-02-20"
+        }
+      ]
+    },
+    {
+      "dealId": "R-10",
+      "amount": 60000.00,
+      "closeDate": "2026-01-12",
+      "bookingDate": "2026-01-13",
+      "splits": [
+        {
+          "repId": "wren",
+          "percent": 100.0
+        }
+      ],
+      "refunds": [
+        {
+          "amount": 60000.00,
+          "date": "2026-03-10"
+        }
+      ]
+    }
+  ],
+  "bookingQuarters": []
+}

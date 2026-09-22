@@ -581,7 +581,7 @@ reader that every story uses.
   seed files from its output. *Guard*: on a throwaway branch add `<Content Update="Scenarios/*.json"
   CopyToOutputDirectory="Never" CopyToPublishDirectory="Never" />` and confirm both assertions fail
   (research R17 observed that this removes the files from output); record.
-- [ ] T061 Traceability generator, test first: add `TraceabilityTests` to Tools.Tests
+- [X] T061 Traceability generator, test first: add `TraceabilityTests` to Tools.Tests
   (`[Trait("Principle", "III")]`; fixture spec with FR-001..FR-003 and SC-001, fixture TRX, fixture
   assembly metadata, plus one case that runs the built tools executable **as a separate process**
   against a fixture DLL built from a committed fixture project,
@@ -622,12 +622,41 @@ reader that every story uses.
   `dotnet test` produce), runs `trace --assemblies
   <engine.dll> <web.dll> --results <files>` over them and uploads the result. The build/test job
   (T007) gains an upload of that build output.
-- [ ] T062 Add `[Implements]` to every engine and web member that implements an FR; run `trace`
+
+  **Result**: Done. `TraceabilityTests` (11 cases, `[Trait("Principle", "III")]`) written first and run
+  red 2026-09-22 (11 failed / 6 passed: every new case failed on `NotImplementedException`, and the
+  child-process case on the tools usage message, `trace` not yet being a command). Fixture project
+  `tools/CommissionCalculator.Tools.Fixture/` (Web SDK, `<OutputType>Library</OutputType>`, one
+  `[Implements("FR-001")]` Razor Pages model), referenced with `ReferenceOutputAssembly="false"`;
+  the in-process member test uses an `ImplementsAttribute` declared in the test assembly under the
+  engine's namespace, so full-type-name matching is what is proved. Implemented `Traceability` and
+  `Trace`; 17/17 Tools.Tests green. *Guards*: gap detection disabled (`&& DateTime.Now.Year < 0`,
+  because `if (false)` breaks the build under warnings-as-errors) — the five gap cases failed;
+  `FrameworkReference Include="Microsoft.AspNetCore.App"` removed from the tools project — the
+  child-process case failed with `Unhandled exception. System.Reflection.ReflectionTypeLoadException`
+  in the captured output. Both restored (`grep -c` 0 and 1 respectively) and green again. CI job
+  `traceability` added (needs build-test, smoke, offline-smoke; `actions/download-artifact@v8`;
+  `--strict`), and build-test now uploads the Debug build output.
+- [X] T062 Add `[Implements]` to every engine and web member that implements an FR; run `trace`
   with the same assemblies and result files the CI job uses; the report's "Unexplained" gaps are
   empty, and its "Explained" gaps are exactly the explained-gaps table of T061, with SC-004's CI
   record passing and the manual-evidence items carrying the PR links recorded in T033/T034 (the
   T064 re-check links are added to the report when T065's PR is opened).
-- [ ] T063 Re-verify every failure-path guard added in T007 (warnings, coverage), T008, T009,
+
+  **Result**: Done 2026-09-22. The first local trace reported three unexplained gaps: FR-011 (no test,
+  no member), FR-013 (no member), FR-020 (no member). Fixed at the source, not in the report:
+  `[Implements("FR-011")]` on `ScenarioValidator.StartDateFailure`, `[Implements("FR-013")]` on
+  `SplitSumFailure`, `[Implements("FR-020")]` on the web `Program` composition root; and the
+  validator rule theory, whose cases cover FR-011's start-date rules as well as FR-004's, now
+  carries both `Requirement` traits. Second run: **0 unexplained gaps**, `--strict` exit 0, and the
+  Explained table is exactly T061's six entries (FR-019 scope; SC-001..SC-003 evidence-only;
+  SC-004 CI evidence, record passing; SC-005 manual evidence with the T033/T034 PR links) plus the
+  SC-005 note on FR-021's screen-reader clause. 232/232 tests green. The report is generated, so it
+  must not churn: a further test (`TestsAreListedInOrderAndRepeatedNamesCarryTheirCount`, written red
+  first) fixed the listing in name order with a count for a name several cases share, and two
+  successive runs now produce byte-identical output. The committed report is
+  regenerated from the CI artifacts at T065, so its CI-evidence rows carry the real run URL.
+- [X] T063 Re-verify every failure-path guard added in T007 (warnings, coverage), T008, T009,
   T010, T018, T020, T022 (error capture, unknown property, required field), T023 (first-failure, missing directory,
   duplicate id), T030 (unknown id, skip-link
   target, second `h1`, section labelling, attainment format, money format), T031 (all four),
@@ -635,10 +664,71 @@ reader that every story uses.
   T047 (largest remainder, sum check, sum-100 accepted, own-list-only), T048, T052, T055 (AS3), T056 (incl. partner accepted, detectable completeness,
   overlap, date range, start-date mismatch, differing duplicate, single-rep no re-split), T061 (framework reference), T057, T060 (every rule check, dollar check), T060b, T061 — each still fails with its guarded
   behaviour removed; record each result here.
-- [ ] T064 Quickstart validation (standing rule 3): step 1 from a fresh clone (evidence:
+
+  **Result**: Done 2026-09-22; every guard re-run against the final code, each still failing with its
+  guarded behaviour removed. Source-level guards (guard runner restores the file and touches it, so
+  the next build recompiles; `&& DateTime.Now.Year < 0` stands in for `if (false)`, which
+  warnings-as-errors rejects):
+  - T018 (20 rules): every rule's own case failed when its check was disabled — empty roster,
+    quarter shape, quota > 0 and whole cents, opening balance ≥ 0 and whole cents, deal amount > 0
+    and whole cents, refund amount > 0 and whole cents, split range, same rep twice on a deal,
+    duplicate roster repId, duplicate dealId, rep not on the roster; and dropping
+    `BookingQuarters.SelectMany(BookingQuarterErrors)` failed 18 booking-quarter cases (own-data-only).
+  - T020 skip validation → `AnInvalidScenarioIsRejectedWithNoStatements`.
+  - T022 error capture (4 cases), unknown property, required field. T023 missing directory,
+    duplicate id, stop at the first failure — one case each.
+  - T030 skip-link target, section labelling, second `h1`, unknown id → 200, attainment format,
+    money format. T031 (a) light grey text, (b) 16px controls, (c) sticky rule, (d) fixed caption height.
+  - T037 exclude every deal → 39 failures (AS3's red evidence). T038 close-date crediting (features
+    and unit), exclusive bounds, refund-date check, refund-total check, refunds on the own list only.
+  - T042 prorate unconditionally → 25 failures (AS4). T043 start-after-quarter-end, zero prorated
+    quota, booked-before-start, start-date rules on own data only.
+  - T047 independent rounding instead of largest remainder (7), split-sum check removed (4),
+    sum check rejecting every deal (7, incl. `SplitPercentagesSummingToExactlyOneHundredAreAccepted`),
+    sum check on the scenario's own list only (5). T048 alert list not rendered.
+  - T052 negative-earned branch, start-month proration applied to every month (4).
+  - T055/T056 (a) refunds sized against the untouched quarter, (b) refund-date filter, (c) clawbacks
+    floored at zero, re-split line emitted for every refund, every booking-quarter partner rejected (5).
+  - T057 negatives formatted with `Math.Abs` alone → the money-format unit test and the page test
+    for a clawback larger than the quarter's commission.
+  Command-level guards: T007 warnings — an unused variable in Engine → `error CS0219`, build exit 1;
+  T007 coverage — `tools/ci/coverage-gate.sh 101` → "Engine line coverage: 98.63% (floor 101%) — FAIL",
+  exit 1 (the real floor of 80 passes). T008 isolation — an order-dependent probe pair passed in the
+  suite ("Test run summary: Passed!", 19/19) while the reader failed alone: `alone FAIL
+  CommissionCalculator.Tools.Tests.Probe.AaaReaderProbe`. T009 skip gate — `[Fact(Skip="probe")]`
+  with `--fail-skips on` → "Test run summary: Failed!", failed 1. T010/T060b smoke — the seeds kept
+  out of the build output gave 404 and exit 1. T035 no-network — `--network none` run passes
+  ("external request failed, as it must with no network", exit 0) and the positive control on
+  `bridge` fails ("an external request succeeded, so the app was not running without a network",
+  exit 1). T060 rule checks and T061 (gap detection disabled; ASP.NET framework reference removed →
+  `ReflectionTypeLoadException` in the child process) were verified earlier in this phase.
+  Afterwards: working tree clean apart from the quickstart edit, build green with `-warnaserror`,
+  232/232 tests passing, 0 skipped.
+- [X] T064 Quickstart validation (standing rule 3): step 1 from a fresh clone (evidence:
   `git status --ignored` shows no build output before running); re-run T033's keyboard check on the
   final UI; the maintainer re-runs T034's VoiceOver check. Record results in the PR.
+
+  **Result**: Done 2026-09-22 (the maintainer's VoiceOver re-check is the open item, taken at the
+  T065 gate). Step 1 from a fresh clone of this branch: `git status --ignored --short` printed
+  nothing before running (no `bin/`, no `obj/`; it lists them afterwards, which is the positive
+  control that the check can see them), then `dotnet run --project src/CommissionCalculator.Web`
+  alone served `GET /` → 200 and `GET /?scenario=tiers` → 200 with four rep tables and Avery's
+  figures, the picker listing all 11 shipped scenarios. Keyboard re-check on that same final UI,
+  key presses only: Tab reaches the skip link (`href="#main"`, and `#main` is the `main` landmark),
+  then the labelled `Scenario` select, then the `Show` submit button, each showing the 3px
+  `rgb(11, 87, 164)` focus outline; Enter on `Show` submitted the GET form and the URL became
+  `/?scenario=tiers`. Unchanged from T033: pressing Down while the select held focus left
+  `value`/`selectedIndex` untouched (10, "tiers") — the in-app browser's synthesized keys do not
+  drive the native select widget; the maintainer confirmed that behaviour natively at the Phase 7
+  gate. Reflow at 320px: `clientWidth` 320, widest right edge 304px, no horizontal scroll.
 - [ ] T065 Checkpoint: PR "Phase 9: Polish", CI green, maintainer approves squash-merge.
+
+  **Status**: PR #12 open, CI green on run 35776592291 (build-test, smoke, offline-smoke,
+  traceability). Leak check before the push: 0 non-installer hits over 15 library phrases, 3
+  expected hits in `.specify/templates/overrides/` (installer output). The CI-generated report and
+  the committed one are byte-identical apart from the CI-evidence run URL, which necessarily names
+  the run before the commit. Waiting on the maintainer: the VoiceOver re-check (T064) and approval
+  to squash-merge.
 
 ---
 

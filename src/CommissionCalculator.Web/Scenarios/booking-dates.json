@@ -1,0 +1,73 @@
+{
+  "id": "booking-dates",
+  "name": "Close date vs booking date",
+  "description": "Appendix A: Close date vs booking date (carries US2 AS1\u2013AS4).",
+  "quarter": {
+    "start": "2026-01-01",
+    "end": "2026-03-31"
+  },
+  "roster": [
+    {
+      "repId": "emery",
+      "name": "Emery",
+      "quota": 100000.00,
+      "startDate": "2025-01-01",
+      "openingRecoverableBalance": 0.00
+    }
+  ],
+  "deals": [
+    {
+      "dealId": "B-1",
+      "amount": 20000.00,
+      "closeDate": "2026-03-30",
+      "bookingDate": "2026-04-02",
+      "splits": [
+        {
+          "repId": "emery",
+          "percent": 100.0
+        }
+      ],
+      "refunds": []
+    },
+    {
+      "dealId": "B-2",
+      "amount": 10000.00,
+      "closeDate": "2025-12-29",
+      "bookingDate": "2026-01-05",
+      "splits": [
+        {
+          "repId": "emery",
+          "percent": 100.0
+        }
+      ],
+      "refunds": []
+    },
+    {
+      "dealId": "B-3",
+      "amount": 30000.00,
+      "closeDate": "2026-02-03",
+      "bookingDate": "2026-02-04",
+      "splits": [
+        {
+          "repId": "emery",
+          "percent": 100.0
+        }
+      ],
+      "refunds": []
+    },
+    {
+      "dealId": "B-4",
+      "amount": 15000.00,
+      "closeDate": "2025-12-10",
+      "bookingDate": "2025-12-15",
+      "splits": [
+        {
+          "repId": "emery",
+          "percent": 100.0
+        }
+      ],
+      "refunds": []
+    }
+  ],
+  "bookingQuarters": []
+}

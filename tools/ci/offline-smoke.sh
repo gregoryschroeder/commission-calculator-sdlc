@@ -6,6 +6,7 @@
 set -euo pipefail
 path="${1:-/}"
 network="${2:-none}"
+expect="${3:-}"
 app="offline-smoke-app-$$"
 publish="$PWD/out/publish"
 
@@ -25,7 +26,11 @@ for _ in $(seq 1 30); do
   sleep 1
 done
 [ "$status" = "200" ] || { echo "offline smoke: GET $path -> $status, expected 200" >&2; docker logs "$app" >&2; exit 1; }
-echo "offline smoke: GET $path -> 200"
+if [ -n "$expect" ] && ! sidecar -s "http://127.0.0.1:8080$path" | tr -d '\n' | grep -q "<table.*$expect"; then
+  echo "offline smoke: GET $path returned 200 but no table containing '$expect' (are the seed files in the publish output?)" >&2
+  exit 1
+fi
+echo "offline smoke: GET $path -> 200${expect:+ with a table containing '$expect'}"
 
 if sidecar -s -m 5 -o /dev/null https://example.com/; then
   echo "offline smoke: an external request succeeded, so the app was not running without a network" >&2

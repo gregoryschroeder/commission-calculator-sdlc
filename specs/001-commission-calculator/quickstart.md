@@ -21,7 +21,7 @@ dotnet test --fail-skips on --report-trx --coverage --coverage-output-format cob
 dotnet run --project tools/CommissionCalculator.Tools -- trace \
   --assemblies src/CommissionCalculator.Engine/bin/Debug/net10.0/CommissionCalculator.Engine.dll \
                src/CommissionCalculator.Web/bin/Debug/net10.0/CommissionCalculator.Web.dll \
-  --results $(find . \( -name '*.trx' -path '*TestResults*' \) -o -path '*ci-evidence/*.json')
+  --results TestResults/*.trx
 ```
 
 ## Validation steps (each falsifiable)

@@ -20,8 +20,13 @@ switch (args)
 
         return 0;
 
+    case ["trace", .. var options]:
+        return Trace.Run(options);
+
     default:
         Console.Error.WriteLine("usage: coverage-gate <floor-percent> <engine.dll> <cobertura.xml>...");
         Console.Error.WriteLine("       list-tests <results.trx>");
+        Console.Error.WriteLine("       trace [--spec <spec.md>] --assemblies <dll>... --results <trx>... "
+            + "[--evidence <json>...] [--out <traceability.md>] [--strict]");
         return 2;
 }

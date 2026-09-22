@@ -12,4 +12,7 @@ app.UseStaticFiles();
 app.MapRazorPages();
 app.Run();
 
+// The composition root: Razor Pages, options bound from configuration and a catalogue reading
+// local files — no external service, no authentication and no database (FR-020).
+[CommissionCalculator.Engine.Implements("FR-020")]
 public partial class Program;

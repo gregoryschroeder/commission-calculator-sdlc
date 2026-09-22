@@ -21,8 +21,10 @@ internal static class ScenarioValidator
     // start-date rules are FR-011's, the split-sum rule is FR-013's, the rest are FR-004's.
     private sealed record Failure(string Message, string Requirement = Requirement4);
 
+    [Implements("FR-011")]
     private static Failure StartDateFailure(string message) => new(message, "FR-011");
 
+    [Implements("FR-013")]
     private static Failure SplitSumFailure(string message) => new(message, "FR-013");
 
     private static IEnumerable<Failure> StartDateErrors(string repId, DateOnly startDate, decimal quota, QuarterPeriod quarter)

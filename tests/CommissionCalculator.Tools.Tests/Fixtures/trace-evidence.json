@@ -1,0 +1,8 @@
+{
+  "job": "smoke",
+  "check": "clean checkout starts with one command and serves /",
+  "requirements": ["SC-001"],
+  "result": "success",
+  "commit": "0123456789abcdef",
+  "runUrl": "https://github.com/owner/repo/actions/runs/1"
+}

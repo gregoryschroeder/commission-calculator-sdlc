@@ -1,0 +1,74 @@
+{
+  "id": "draw",
+  "name": "Draw recovery",
+  "description": "Appendix A: Draw recovery (carries US5 AS1\u2013AS3).",
+  "quarter": {
+    "start": "2026-01-01",
+    "end": "2026-03-31"
+  },
+  "roster": [
+    {
+      "repId": "parker",
+      "name": "Parker",
+      "quota": 100000.00,
+      "startDate": "2025-06-01",
+      "openingRecoverableBalance": 0.00
+    },
+    {
+      "repId": "quinn",
+      "name": "Quinn",
+      "quota": 100000.00,
+      "startDate": "2025-06-01",
+      "openingRecoverableBalance": 0.00
+    },
+    {
+      "repId": "reese",
+      "name": "Reese",
+      "quota": 100000.00,
+      "startDate": "2025-06-01",
+      "openingRecoverableBalance": 8000.00
+    }
+  ],
+  "deals": [
+    {
+      "dealId": "W-1",
+      "amount": 200000.00,
+      "closeDate": "2026-02-20",
+      "bookingDate": "2026-02-23",
+      "splits": [
+        {
+          "repId": "parker",
+          "percent": 100.0
+        }
+      ],
+      "refunds": []
+    },
+    {
+      "dealId": "W-2",
+      "amount": 80000.00,
+      "closeDate": "2026-03-11",
+      "bookingDate": "2026-03-12",
+      "splits": [
+        {
+          "repId": "quinn",
+          "percent": 100.0
+        }
+      ],
+      "refunds": []
+    },
+    {
+      "dealId": "W-3",
+      "amount": 200000.00,
+      "closeDate": "2026-01-26",
+      "bookingDate": "2026-01-27",
+      "splits": [
+        {
+          "repId": "reese",
+          "percent": 100.0
+        }
+      ],
+      "refunds": []
+    }
+  ],
+  "bookingQuarters": []
+}

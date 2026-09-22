@@ -1,0 +1,78 @@
+{
+  "id": "invalid",
+  "name": "Invalid data (rejected)",
+  "description": "Appendix A.11: a scenario that must be rejected with four errors.",
+  "quarter": {
+    "start": "2026-01-01",
+    "end": "2026-03-31"
+  },
+  "roster": [
+    {
+      "repId": "mara",
+      "name": "Mara",
+      "quota": 100000.00,
+      "startDate": "2025-06-01",
+      "openingRecoverableBalance": 0.00
+    },
+    {
+      "repId": "nico",
+      "name": "Nico",
+      "quota": 100000.00,
+      "startDate": "2026-02-01",
+      "openingRecoverableBalance": 0.00
+    },
+    {
+      "repId": "ollie",
+      "name": "Ollie",
+      "quota": 100000.00,
+      "startDate": "2026-04-10",
+      "openingRecoverableBalance": 0.00
+    }
+  ],
+  "deals": [
+    {
+      "dealId": "V-1",
+      "amount": 50000.00,
+      "closeDate": "2026-02-01",
+      "bookingDate": "2026-02-02",
+      "splits": [
+        {
+          "repId": "mara",
+          "percent": 60
+        },
+        {
+          "repId": "nico",
+          "percent": 30
+        }
+      ],
+      "refunds": []
+    },
+    {
+      "dealId": "V-2",
+      "amount": 10000.00,
+      "closeDate": "2026-01-14",
+      "bookingDate": "2026-01-15",
+      "splits": [
+        {
+          "repId": "nico",
+          "percent": 100
+        }
+      ],
+      "refunds": []
+    },
+    {
+      "dealId": "V-3",
+      "amount": 10.005,
+      "closeDate": "2026-03-01",
+      "bookingDate": "2026-03-02",
+      "splits": [
+        {
+          "repId": "mara",
+          "percent": 100
+        }
+      ],
+      "refunds": []
+    }
+  ],
+  "bookingQuarters": []
+}

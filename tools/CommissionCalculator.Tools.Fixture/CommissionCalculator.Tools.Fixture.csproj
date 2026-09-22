@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <!-- A library, because the Web SDK's default Exe has no entry point here (CS5001), and kept
+         out of CommissionCalculator.slnx so `dotnet test` never treats it as a test project. -->
+    <OutputType>Library</OutputType>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\CommissionCalculator.Engine\CommissionCalculator.Engine.csproj" />
+  </ItemGroup>
+</Project>
