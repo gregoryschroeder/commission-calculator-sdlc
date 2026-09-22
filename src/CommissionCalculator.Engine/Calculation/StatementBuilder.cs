@@ -11,11 +11,18 @@ internal static class StatementBuilder
     {
         var credits = QuarterCredit.For(rep.RepId, quarter, deals);
         var creditedBookings = credits.Sum(credit => credit.Share);
-        var proratedQuota = rep.Quota;
+        var prorated = QuotaProration.For(rep.Quota, rep.StartDate, quarter);
+        var proratedQuota = prorated.Amount;
         var tiers = TierSchedule.Lines(creditedBookings, proratedQuota);
         var commissionBeforeRefunds = tiers.Sum(tier => tier.Amount);
 
         List<BreakdownLine> lines = [QuotaLine(rep)];
+        if (prorated.IsProrated)
+        {
+            lines.Add(new BreakdownLine(LineSection.Quota,
+                $"Prorated quota ({prorated.DaysEmployed} of {prorated.DaysInQuarter} days)", proratedQuota, "FR-010"));
+        }
+
         lines.AddRange(credits.Select(CreditLineFor));
         lines.Add(new BreakdownLine(LineSection.Subtotal, "Credited bookings", creditedBookings, "FR-008"));
         lines.AddRange(tiers.Select(TierLineFor));

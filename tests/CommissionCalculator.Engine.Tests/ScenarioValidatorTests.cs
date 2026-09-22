@@ -48,6 +48,12 @@ public sealed class ScenarioValidatorTests
         new("own refund dated before booking", s => s.WithOwnDeal(d => d with { Refunds = [new(1_000.00m, new(2026, 5, 1))] }), "is dated before its booking date", "Q2-1"),
         new("booking-quarter refund dated before booking", s => s.WithBookingDeal(1, d => d with { Refunds = [new(1_000.00m, new(2026, 2, 1))] }), "is dated before its booking date", "R-12"),
         new("own refunds total more than the deal", s => s.WithOwnDeal(d => d with { Refunds = [new(30_000.00m, May10), new(20_000.00m, May10)] }), "refunds total more than the deal amount", "Q2-1"),
+        new("prorated quota rounds to zero", s => s with { Roster = [s.Roster[0] with { Quota = 0.01m, StartDate = new(2026, 6, 30) }, .. s.Roster.Skip(1)] }, "prorated quota rounds to $0.00", "sage"),
+        new("booking-quarter prorated quota rounds to zero", s => s.WithBookingQuarter(s.BookingQuarter() with { Reps = [s.BookingQuarter().Reps[0] with { Quota = 0.01m, StartDate = new(2026, 3, 31) }, .. s.BookingQuarter().Reps.Skip(1)] }), "prorated quota rounds to $0.00", "sage"),
+        new("rep starts after the quarter ends", s => s with { Roster = [s.Roster[0] with { StartDate = new(2026, 7, 1) }, .. s.Roster.Skip(1)] }, "starts after the quarter ends", "sage"),
+        new("booking-quarter rep starts after that quarter ends", s => s.WithBookingQuarter(s.BookingQuarter() with { Reps = [s.BookingQuarter().Reps[0] with { StartDate = new(2026, 4, 1) }, .. s.BookingQuarter().Reps.Skip(1)] }), "starts after the quarter ends", "sage"),
+        new("own deal booked before its rep's start date", s => s with { Roster = [s.Roster[0] with { StartDate = new(2026, 5, 10) }, .. s.Roster.Skip(1)] }, "is booked before the start date of rep", "Q2-1"),
+        new("booking-quarter deal booked before a partner's start date", s => s.WithBookingQuarter(s.BookingQuarter() with { Partners = [new("yves", new(2026, 3, 1))] }), "is booked before the start date of rep", "D2"),
         new("booking-quarter refunds total more than the deal", s => s.WithBookingDeal(5, d => d with { Refunds = [new(25_000.00m, new(2026, 3, 1)), new(20_000.00m, new(2026, 3, 2))] }), "refunds total more than the deal amount", "D2"),
     ];
 
