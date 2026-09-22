@@ -477,9 +477,11 @@ reader that every story uses.
   empty, and its "Explained" gaps are exactly the explained-gaps table of T061, with SC-004's CI
   record passing and the manual-evidence items carrying the PR links recorded in
   T033/T034/T064.
-- [ ] T063 Re-verify every failure-path guard added in T007, T008, T009, T010, T018, T020, T022, T023,
-  T031 (all four), T037 (AS3 exclude-all), T038 (close date, bounds),
-  T030 (unknown id, skip-link target, section labelling, attainment format, money format), T060, T060b, T031, T035 (404 and no-network), T023 (missing directory), T038, T043, T047, T048, T052, T056, T057, T061 still fails with its guarded
+- [ ] T063 Re-verify every failure-path guard added in T007 (warnings, coverage), T008, T009,
+  T010, T018, T020, T022, T023 (first-failure, missing directory), T030 (unknown id, skip-link
+  target, second `h1`, section labelling, attainment format, money format), T031 (all four),
+  T035 (404, no-network), T037 (AS3 exclude-all), T038 (close date, bounds, refund date), T043,
+  T047, T048, T052, T056, T057, T060 (every rule check), T060b, T061 — each still fails with its guarded
   behaviour removed; record each result here.
 - [ ] T064 Quickstart validation (standing rule 3): step 1 from a fresh clone (evidence:
   `git status --ignored` shows no build output before running); re-run T033's keyboard check on the
