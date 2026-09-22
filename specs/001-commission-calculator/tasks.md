@@ -276,9 +276,16 @@ reader that every story uses.
 **Independent test**: `Features/US2_BookingDate.feature` passes.
 
 - [ ] T037 [P] [US2] Write `Features/US2_BookingDate.feature`: US2 AS1–AS4 with exact dates and
-  amounts (`@FR-008`), including the excluded-deal line citing FR-008. Run; record failing.
-- [ ] T038 [P] [US2] Write `QuarterCreditTests` (`FR-008`): booked on the first and last day counts;
-  booked the day before/after is excluded; close date never changes the result. Add
+  amounts (`@FR-008`), including the excluded-deal line citing FR-008. Run; record failing —
+  expected red: AS1 and AS3 (Phase 3's T029 credits every deal of the rep, so the excluded deals
+  are still counted). AS2 and AS4 (deals booked inside the quarter) are expected **green** at
+  write time, because Phase 3 already credits them; their red evidence is T038's guard, where
+  close-date crediting makes AS2 (B-2) fail. Record which were red and which green.
+- [ ] T038 [P] [US2] Write `QuarterCreditTests` (`FR-008`): booked the day before/after the quarter
+  is excluded (expected red: Phase 3 credits every deal); booked on the first and last day counts,
+  and close date never changes the result (expected green at write time — Phase 3 already credits
+  them; red evidence is the guards below plus an inclusive-bounds guard: make the bounds exclusive
+  and confirm the first/last-day tests fail). Add
   `ScenarioValidatorTests` (`FR-004`): refund dated before booking date is rejected. *Guard*:
   switch crediting to close date and confirm AS1 (B-1) and AS2 (B-2) fail; remove the refund-date
   check and confirm its test fails; record. Run; record failing.
@@ -431,33 +438,34 @@ reader that every story uses.
 - [ ] T061 Traceability generator, test first: add `TraceabilityTests` to Tools.Tests
   (`[Trait("Principle", "III")]`; fixture spec with FR-001..FR-003 and SC-001, fixture TRX, fixture
   assembly metadata) — an ID with no test and an ID with no member both appear under "Gaps"; an ID
-  declared in the scope-only list appears under "Satisfied by scope" with its reason and not under
-  Gaps; an SC in the evidence-only list with tests and no member is not a gap, and with no tests it
-  is; an ID in the manual-evidence list appears under "Manual evidence" with its task reference and
-  not under Gaps; tests carrying a `Principle` trait appear under "Tooling tests" and not against any FR; a
+  declared in the explained-gaps table (below) still appears under "Gaps" — Principle III requires
+  every FR/SC lacking a test or a member to be listed as a gap — but in an "Explained" subsection
+  with its reason and category (scope, evidence-only, CI evidence, manual evidence), while any gap
+  without an entry appears under "Unexplained"; tests carrying a `Principle` trait appear under "Tooling tests" and not against any FR; a
   CI-evidence record (`ci-evidence/*.json`) appears under "Verified by CI job" with its job, result
-  and run URL, is never counted as a test, and a failed record is listed as a gap.
+  and run URL, is never counted as a test, and a failed record makes its gap Unexplained.
   *Guard*: disable gap detection and confirm the gaps test fails; record. Run; record failing. Then add the
   `trace` command to `tools/CommissionCalculator.Tools` (FR/SC IDs from spec.md; test → IDs from
   TRX categories/traits; member → IDs from `[Implements]` via reflection over the built engine and
-  web assemblies; scope-only list: FR-019 — "USD only; tax, currency conversion and
-  multi-year are out of scope, so no member implements them"; evidence-only list: SC-001 — seed
-  files and Appendix A, SC-003 — the seeded scenarios, each verified by tests but implemented by no
-  single member, and SC-002 — every line cites an FR, verified by T030 and T060; CI-evidence list:
-  SC-004 — verified by the smoke and offline-smoke jobs (T010, T035, T060b); manual-evidence list:
-  SC-005 and FR-021's
-  screen-reader clause — T033/T034, not visible to the trace) writing
+  web assemblies; explained-gaps table — scope: FR-019, "USD only; tax, currency conversion and
+  multi-year are out of scope, so no member implements them"; evidence-only (tests, no single
+  member): SC-001 — seed files and Appendix A, SC-002 — every line cites an FR (T030, T060),
+  SC-003 — the seeded scenarios (T060); CI evidence (no test): SC-004 — the smoke step and
+  offline-smoke job (T010, T035, T060b); manual evidence (no test the trace can see): SC-005 and
+  FR-021's screen-reader clause — T033/T034) writing
   `specs/001-commission-calculator/traceability.md`. Add a final CI job, `traceability`, that
-  depends on the build/test, smoke and offline-smoke jobs, downloads their artifacts with
-  `actions/download-artifact@v8` (suite TRX files, `ci-evidence/*.json`, and the build/test job's
-  uploaded Release build output of the engine and web assemblies), runs `trace --assemblies
+  depends on the build/test job (which contains the smoke step, T010) and the offline-smoke job
+  (T035), downloads their artifacts with `actions/download-artifact@v8` (suite TRX files,
+  `ci-evidence/*.json`, and the build/test job's uploaded Debug build output
+  `src/CommissionCalculator.{Engine,Web}/bin/Debug/net10.0/`, the configuration `dotnet build` and
+  `dotnet test` produce), runs `trace --assemblies
   <engine.dll> <web.dll> --results <files>` over them and uploads the result. The build/test job
   (T007) gains an upload of that build output.
 - [ ] T062 Add `[Implements]` to every engine and web member that implements an FR; run `trace`
-  with the same assemblies and result files the CI job uses; every FR has at least one member and one test except the
-  scope-only FR-019; every SC has at least one test except SC-004 (a passing CI-evidence record)
-  and SC-005 (manual evidence); the
-  manual-evidence items are listed with the PR links recorded in T033/T034/T064.
+  with the same assemblies and result files the CI job uses; the report's "Unexplained" gaps are
+  empty, and its "Explained" gaps are exactly the explained-gaps table of T061, with SC-004's CI
+  record passing and the manual-evidence items carrying the PR links recorded in
+  T033/T034/T064.
 - [ ] T063 Re-verify every failure-path guard added in T007, T008, T009, T010, T018, T020, T022, T023,
   T030 (unknown id, skip-link target, section labelling, attainment format, money format), T060, T060b, T031, T035 (404 and no-network), T023 (missing directory), T038, T043, T047, T048, T052, T056, T057, T061 still fails with its guarded
   behaviour removed; record each result here.

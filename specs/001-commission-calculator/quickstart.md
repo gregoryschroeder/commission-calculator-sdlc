@@ -18,7 +18,10 @@ dotnet run --project src/CommissionCalculator.Web
 ```bash
 dotnet build -warnaserror
 dotnet test --fail-skips on --report-trx --coverage --coverage-output-format cobertura
-dotnet run --project tools/CommissionCalculator.Tools -- trace $(find . \( -name '*.trx' -path '*TestResults*' \) -o -path '*ci-evidence/*.json')
+dotnet run --project tools/CommissionCalculator.Tools -- trace \
+  --assemblies src/CommissionCalculator.Engine/bin/Debug/net10.0/CommissionCalculator.Engine.dll \
+               src/CommissionCalculator.Web/bin/Debug/net10.0/CommissionCalculator.Web.dll \
+  --results $(find . \( -name '*.trx' -path '*TestResults*' \) -o -path '*ci-evidence/*.json')
 ```
 
 ## Validation steps (each falsifiable)
@@ -36,7 +39,7 @@ dotnet run --project tools/CommissionCalculator.Tools -- trace $(find . \( -name
 3. **Every seeded amount matches the spec (SC-001).** Run the test command; expect the
    `SeededScenarios.feature` scenarios to pass and zero skipped (the run fails on any skip).
 4. **Every line cites an FR (FR-003, SC-002).** Web tests assert every breakdown row's Rule cell is
-   an FR ID present in spec.md; the traceability report lists no FR without a test.
+   an FR ID present in spec.md; the traceability report's "Unexplained" gaps are empty.
 5. **Rejected scenario (FR-004).** Select "Invalid data (rejected)"; expect an alert listing each
    error with its FR, and no rep tables (asserted by T048).
 6. **Keyboard only (SC-005, FR-021).** Condition: no pointer input — evidence: the check is driven
