@@ -46,6 +46,19 @@ else if (Model.NotFoundId is not null)
     <p class="description">@Model.Selected.Description</p>
 }
 
+@if (Model.Result is RejectedScenario rejected)
+{
+    <section class="rejected" role="alert" aria-labelledby="rejected-heading">
+        <h2 id="rejected-heading">This scenario was rejected</h2>
+        <ul>
+            @foreach (var error in rejected.Errors)
+            {
+                <li><span class="requirement">@error.RequirementId</span>: @error.Message</li>
+            }
+        </ul>
+    </section>
+}
+
 @if (Model.Result is CalculatedScenario calculated)
 {
     @foreach (var statement in calculated.Statements)
