@@ -9,3 +9,4 @@ ci-evidence/
 .idea/
 .DS_Store
 *.feature.cs
+out/

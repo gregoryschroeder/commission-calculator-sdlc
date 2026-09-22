@@ -34,4 +34,32 @@ jobs:
       - name: Evidence of a clean tree (no bin/ or obj/)
         run: git status --ignored --short
       - name: Start with one command and serve the page
+        id: smoke
         run: tools/ci/smoke.sh /
+      - name: Record CI evidence (SC-004, FR-020)
+        if: always()
+        run: tools/ci/evidence.sh smoke "clean checkout starts with one command and serves /" "SC-004,FR-020" "${{ steps.smoke.outcome }}"
+      - name: Upload CI evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: ci-evidence-smoke
+          path: ci-evidence/
+
+  offline-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+      - name: Serve the published app with no network
+        id: offline
+        run: tools/ci/offline-smoke.sh /
+      - name: Record CI evidence (SC-004)
+        if: always()
+        run: tools/ci/evidence.sh offline-smoke "published app serves / with no network" "SC-004" "${{ steps.offline.outcome }}"
+      - name: Upload CI evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: ci-evidence-offline-smoke
+          path: ci-evidence/

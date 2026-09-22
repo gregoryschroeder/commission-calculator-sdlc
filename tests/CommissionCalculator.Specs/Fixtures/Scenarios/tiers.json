@@ -1,0 +1,107 @@
+{
+  "id": "tiers",
+  "name": "Tiered rates",
+  "description": "Appendix A: Tiered rates (carries US1 AS1\u2013AS4).",
+  "quarter": {
+    "start": "2026-01-01",
+    "end": "2026-03-31"
+  },
+  "roster": [
+    {
+      "repId": "avery",
+      "name": "Avery",
+      "quota": 100000.00,
+      "startDate": "2025-06-01",
+      "openingRecoverableBalance": 0.00
+    },
+    {
+      "repId": "blake",
+      "name": "Blake",
+      "quota": 100000.00,
+      "startDate": "2025-06-01",
+      "openingRecoverableBalance": 0.00
+    },
+    {
+      "repId": "casey",
+      "name": "Casey",
+      "quota": 100000.00,
+      "startDate": "2025-06-01",
+      "openingRecoverableBalance": 0.00
+    },
+    {
+      "repId": "devon",
+      "name": "Devon",
+      "quota": 100000.00,
+      "startDate": "2025-06-01",
+      "openingRecoverableBalance": 0.00
+    }
+  ],
+  "deals": [
+    {
+      "dealId": "T-1",
+      "amount": 80000.00,
+      "closeDate": "2026-02-10",
+      "bookingDate": "2026-02-12",
+      "splits": [
+        {
+          "repId": "avery",
+          "percent": 100.0
+        }
+      ],
+      "refunds": []
+    },
+    {
+      "dealId": "T-2",
+      "amount": 100000.00,
+      "closeDate": "2026-01-20",
+      "bookingDate": "2026-01-22",
+      "splits": [
+        {
+          "repId": "blake",
+          "percent": 100.0
+        }
+      ],
+      "refunds": []
+    },
+    {
+      "dealId": "T-3",
+      "amount": 60000.00,
+      "closeDate": "2026-03-02",
+      "bookingDate": "2026-03-04",
+      "splits": [
+        {
+          "repId": "blake",
+          "percent": 100.0
+        }
+      ],
+      "refunds": []
+    },
+    {
+      "dealId": "T-4",
+      "amount": 150000.00,
+      "closeDate": "2026-02-26",
+      "bookingDate": "2026-03-02",
+      "splits": [
+        {
+          "repId": "casey",
+          "percent": 100.0
+        }
+      ],
+      "refunds": []
+    },
+    {
+      "dealId": "T-5",
+      "amount": 10.10,
+      "closeDate": "2026-01-15",
+      "bookingDate": "2026-01-16",
+      "splits": [
+        {
+          "repId": "devon",
+          "percent": 100.0
+        }
+      ],
+      "refunds": []
+    }
+  ],
+  "bookingQuarters": []
+}

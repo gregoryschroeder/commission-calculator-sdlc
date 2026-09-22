@@ -193,8 +193,9 @@ correctness.
   shares its network namespace (see the request-method spike below), so the
   "no network service at run time" claim is shown under the condition, not reasoned.
 - **Established**: registry — `mcr.microsoft.com/v2/dotnet/aspnet/tags/list`, 2026-09-21, lists
-  `10.0.12`, `10.0` and `10.0-noble`. **Assumed until the first run of that job**: Docker is
-  available on `ubuntu-latest` runners.
+  `10.0.12`, `10.0` and `10.0-noble`. **Confirmed by the job's first run (2026-09-22, run
+  35762826388, PR #5)**: Docker is available on `ubuntu-latest`; the log shows `NetworkMode: none`,
+  `GET / -> 200`, and the external request failing.
 - **Request method — spiked locally (Docker 29.8.0, 2026-09-21)**: the `aspnet:10.0.12` image has no
   `curl` or `wget`, so the request cannot come from inside the app container. A published
   `dotnet new webapp` ran with `--network none` (`docker inspect` → `NetworkMode=none`); a

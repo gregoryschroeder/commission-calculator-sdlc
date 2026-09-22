@@ -243,7 +243,7 @@ reader that every story uses.
 **Independent test**: `Features/US1_TieredCommission.feature` passes; the page renders the
 `tiers` scenario.
 
-- [ ] T027 [P] [US1] In `tests/CommissionCalculator.Specs/`, add step definitions that build
+- [X] T027 [P] [US1] In `tests/CommissionCalculator.Specs/`, add step definitions that build
   `ScenarioInput` from Gherkin tables and assert, to the cent, both
   statement lines (description, amount, FR) — each description copied **exactly** from the
   Appendix A scenario that carries the example (e.g. "T-1 booked 2026-02-12 (closed 2026-02-10)",
@@ -257,14 +257,17 @@ reader that every story uses.
   `Payable`, `ClosingRecoverableBalance`). Write `Features/US1_TieredCommission.feature` with US1 AS1–AS4
   exact, including AS1's attainment of 80% (`@FR-006 @FR-007 @FR-009 @FR-018`). Run; record
   failing.
-- [ ] T028 [P] [US1] Write `TierScheduleTests` (`FR-006`, `FR-007`): credit 80,000/100,000 → one 5%
+  **Result**: Recorded red 2026-09-22: US1 AS1–AS4 all failed on the line check ("Actual lines" held only the quota line). Green after T029.
+- [X] T028 [P] [US1] Write `TierScheduleTests` (`FR-006`, `FR-007`): credit 80,000/100,000 → one 5%
   line 4,000.00; 160,000 → 5,000.00 / 4,000.00 / 1,200.00; exactly 150,000 → no 12% line;
   exactly 100,000 → no 8% line; 10.10 → 0.51; 150% edge from a rounded quota of 50,549.45 is
   75,824.18. Run; record failing.
-- [ ] T029 [US1] Implement `Calculation/TierSchedule.cs` and crediting of single-rep deals in
+  **Result**: Recorded red: 7/7 `TierScheduleTests` failed with `NotImplementedException`. Expected values cross-checked with an independent decimal calculation (edge 75,824.18; lines 2,527.47 / 2,021.98 / 501.10).
+- [X] T029 [US1] Implement `Calculation/TierSchedule.cs` and crediting of single-rep deals in
   `Calculation/QuarterCredit.cs` wired into `StatementBuilder` (credit lines FR-008, tier lines
   FR-006, "Commission before refunds", attainment FR-009) until T027–T028 pass.
-- [ ] T030 [P] [US1] Write `Features/UI_Page.feature` in Specs, driven through the web host
+  **Result**: Done; engine 54/54 green. Phase 3 credits every deal of the rep (booking-date filtering is Phase 4); `EarnedCommission` equals commission before refunds until clawbacks exist (Phase 8).
+- [X] T030 [P] [US1] Write `Features/UI_Page.feature` in Specs, driven through the web host
   (`@FR-001 @FR-002 @FR-003 @FR-021 @SC-002`): picker form structure per contracts/ui.md; exactly one
   `h1`; a skip link whose `href` targets the `<main>` element's id; on `?scenario=tiers` exactly four rep
   `section`s (one per A.1 rep) exist — so the check is red until T032 renders them — and each
@@ -295,7 +298,8 @@ reader that every story uses.
   (`FR-021`, `FR-018`): 1234.5 → "$1,234.50", 0 → "$0.00", −1600 → "−$1,600.00" (minus sign in
   the text). *Guard*: format with `Math.Abs` and confirm the negative case fails; record. (T032's
   formatting is written against these, not against T057, which arrives in Phase 8.)
-- [ ] T031 [P] [US1] Write `StylesheetAccessibilityTests` in Web.Tests (`FR-021`), reading
+  **Result**: Recorded 2026-09-22: 13 of 16 host scenarios red on real assertions (e.g. picker "collection was empty", sections "Values differ"); the `h1` and skip-link scenarios green at write time, as declared. Format tests: 6/6 red (stubs). Guards: removing the main id failed the skip-link scenario; removing `aria-labelledby` failed the sections scenario; a second `h1` failed the h1 scenario; returning 200 for an unknown id failed the 404 scenario; banker's rounding failed the 12.35% case; dropping the minus sign failed the −$1,600.00 case.
+- [X] T031 [P] [US1] Write `StylesheetAccessibilityTests` in Web.Tests (`FR-021`), reading
   `wwwroot/css/site.css`: 1.4.3 text contrast — body, table and link text on their backgrounds
   ≥ 4.5:1; 1.4.11 non-text contrast — focus indicator and `select`/`button` borders ≥ 3:1 against
   adjacent colours; 2.5.8 target size — `select`, `button` and the skip link have a minimum height
@@ -307,10 +311,12 @@ reader that every story uses.
   red (Phase 1's stylesheet defines no colour tokens or target sizes); the 2.4.11 and 1.4.12
   absence checks are expected **green** at write time, with guards (c) and (d) as their red
   evidence. Record which were red and which green.
-- [ ] T032 [US1] Implement the page (picker, the empty state "No scenarios are installed",
+  **Result**: Recorded: contrast (2 tests) and target-size (3 cases) red — no tokens or sizes existed; the two absence checks green at write time, as declared. Guards (a)–(d) each failed their test: light-grey text → contrast; 16px min-height → button and select target size; sticky rule → focus-not-obscured; fixed caption height → text spacing.
+- [X] T032 [US1] Implement the page (picker, the empty state "No scenarios are installed",
   statements, summary `dl`, breakdown tables, `$#,##0.00` with a minus sign, `site.css` colour
   tokens and visible focus styles) until T030–T031 pass.
-- [ ] T033 [US1] Keyboard-only check (FR-021, SC-005; standing rule 3): run the app with its
+  **Result**: Done; Web 22/22 and Specs 19/19 green. A reflow defect found in T033 (summary amounts clipped at 320px) was fixed here: the summary's label column now shrinks and wraps.
+- [X] T033 [US1] Keyboard-only check (FR-021, SC-005; standing rule 3): run the app with its
   scenario directory pointed at a folder holding the Appendix A.1 and A.2 inputs, and drive it with
   key presses only through the in-app browser (evidence: the action log contains no pointer
   events); Tab to the picker, change scenario with arrow keys, submit with Enter, Tab through each
@@ -318,12 +324,13 @@ reader that every story uses.
   reflow; evidence: the viewport width reported by the browser just before the screenshot) and
   confirm no horizontal page scroll other than inside the breakdown tables. Record the log excerpt
   and screenshot in the PR.
+  **Result**: Done 2026-09-22 in the in-app browser, key presses only (no pointer actions in the log). Verified: Tab reaches the skip link, then the scenario select, then Show, each with a visible focus outline; Enter on Show submits. **Not verified**: changing the select's value by keyboard. ArrowDown, Down, typing "T" and Alt+ArrowDown all left the value unchanged while the select held focus, which points to the embedded browser's synthesized keys not driving the native select widget; this is handed to the maintainer with T034. Reflow (1.4.10) at a 320px viewport (`clientWidth` 320): first run found the summary amounts clipped at the right edge; after the T032 fix, no summary element extends past 320px (widest right edge 304px) and the page does not scroll horizontally.
 - [ ] T034 [US1] Screen-reader check (FR-021; standing rule 3) — **maintainer step**: with
   VoiceOver on (evidence: VoiceOver caption panel visible in a screenshot), navigate by headings
   and tables on `?scenario=tiers` (app run as in T033); confirm each rep's `h2`, the table caption and column headers are
   announced. The agent does not change system accessibility settings; the maintainer records the
   result on the PR.
-- [ ] T035 [US1] Add a second CI job, **offline smoke**: `dotnet publish` the web app, run it in
+- [X] T035 [US1] Add a second CI job, **offline smoke**: `dotnet publish` the web app, run it in
   `mcr.microsoft.com/dotnet/aspnet:10.0.12` with `docker run --network none`, and request `/` (HTTP
   200 with the picker; the seed-table assertion joins it in T060b) from a `curlimages/curl:8.22.0` container started with `--network container:<app>`
   (the runtime image has no HTTP client; research R16); as a negative control the same sidecar's
@@ -338,11 +345,14 @@ reader that every story uses.
   container on the default bridge network instead of `--network none` and confirm the job fails
   because the external request succeeds — the positive control for the "no network" evidence;
   record both.
-- [ ] T036 [US1] Checkpoint: PR "Phase 3: US1", CI green, maintainer approves squash-merge. Record
+  **Result**: Done; offline-smoke job and CI-evidence records added. Local run 2026-09-22 (Docker 29.8.0): `NetworkMode: none`, GET / → 200, external request failed as required. Guards: GET /does-not-exist → "404, expected 200", exit 1; `bridge` network → "an external request succeeded", exit 1.
+- [X] T036 [US1] Checkpoint: PR "Phase 3: US1", CI green, maintainer approves squash-merge. Record
   the offline job's first run in research R16 (Docker on the runner) and confirm the plan's
   Provenance gate; propose to the maintainer a PATCH amendment adding Docker (a CI-only dependency
   of the offline-smoke job) to constitution C7 and its pairwise note.
 
+  **Result**: CI green on PR #5 (run 35762826388: build-test, smoke, offline-smoke). R16 confirmed and the
+  plan's Provenance gate updated; the Docker PATCH amendment is proposed to the maintainer at this gate.
 ---
 
 ## Phase 4: User Story 2 — booking date decides the quarter (P1) — PR 4

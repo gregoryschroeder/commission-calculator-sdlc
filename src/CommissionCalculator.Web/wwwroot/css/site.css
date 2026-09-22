@@ -1,15 +1,95 @@
+/* Colour tokens. Checked by StylesheetAccessibilityTests against WCAG 2.2 AA:
+   text and links >= 4.5:1, focus indicator and control borders >= 3:1, on the background. */
+:root {
+    --color-text: #1a1a1a;
+    --color-background: #ffffff;
+    --color-link: #0b57a4;
+    --color-focus: #0b57a4;
+    --color-border: #595959;
+}
+
 body {
+    color: var(--color-text);
+    background: var(--color-background);
     font-family: system-ui, sans-serif;
+    line-height: 1.5;
     margin: 0 auto;
     max-width: 72rem;
     padding: 1rem;
 }
 
+a {
+    color: var(--color-link);
+}
+
+:focus-visible {
+    outline: 3px solid var(--color-focus);
+    outline-offset: 2px;
+}
+
 .skip-link {
     position: absolute;
     left: -10000px;
+    min-height: 24px;
+    min-width: 24px;
 }
 
 .skip-link:focus {
     position: static;
+}
+
+select,
+button {
+    min-height: 24px;
+    min-width: 24px;
+    font: inherit;
+    color: var(--color-text);
+    background: var(--color-background);
+    border: 1px solid var(--color-border);
+    padding: 0.25rem 0.5rem;
+}
+
+.picker {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.table-scroll {
+    overflow-x: auto;
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+caption {
+    text-align: left;
+    font-weight: bold;
+    padding: 0.5rem 0;
+}
+
+th,
+td {
+    border-bottom: 1px solid var(--color-border);
+    padding: 0.25rem 0.5rem;
+    text-align: left;
+}
+
+td.amount {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.summary {
+    display: grid;
+    /* The label column shrinks and wraps so amounts stay inside a 320px viewport (WCAG 1.4.10). */
+    grid-template-columns: minmax(0, auto) max-content;
+    gap: 0.25rem 1rem;
+}
+
+.summary dd {
+    margin: 0;
 }

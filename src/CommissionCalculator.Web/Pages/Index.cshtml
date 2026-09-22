@@ -1,5 +1,84 @@
 @page
+@model IndexModel
+@using CommissionCalculator.Engine
+@using CommissionCalculator.Web.Presentation
 @{
-    ViewData["Title"] = "Commission Calculator";
+    ViewData["Title"] = Model.Selected is null
+        ? "Commission Calculator"
+        : $"{Model.Selected.Scenario.Name} — Commission Calculator";
 }
-<p>Quarterly sales commission statements.</p>
+
+<form method="get" class="picker">
+    <label for="scenario">Scenario</label>
+    <select id="scenario" name="scenario">
+        @foreach (var file in Model.Scenarios)
+        {
+            <option value="@file.Scenario.Id" selected="@(file == Model.Selected)">@file.Scenario.Name</option>
+        }
+    </select>
+    <button type="submit">Show</button>
+</form>
+
+@if (Model.LoadErrors.Count > 0)
+{
+    <section class="load-errors" aria-labelledby="load-errors-heading">
+        <h2 id="load-errors-heading">Scenarios that failed to load</h2>
+        <ul>
+            @foreach (var error in Model.LoadErrors)
+            {
+                <li><strong>@error.FileName</strong>: @error.Message</li>
+            }
+        </ul>
+    </section>
+}
+
+@if (Model.Scenarios.Count == 0)
+{
+    <p>No scenarios are installed.</p>
+}
+else if (Model.NotFoundId is not null)
+{
+    <p>Scenario “@Model.NotFoundId” was not found.</p>
+}
+
+@if (Model.Selected is not null)
+{
+    <p class="description">@Model.Selected.Description</p>
+}
+
+@if (Model.Result is CalculatedScenario calculated)
+{
+    @foreach (var statement in calculated.Statements)
+    {
+        var headingId = $"rep-{statement.RepId}";
+        <section class="rep" aria-labelledby="@headingId">
+            <h2 id="@headingId">@statement.Name</h2>
+            <dl class="summary">
+                <dt>Quota</dt><dd>@Format.Money(statement.Quota)</dd>
+                <dt>Prorated quota</dt><dd>@Format.Money(statement.ProratedQuota)</dd>
+                <dt>Credited bookings</dt><dd>@Format.Money(statement.CreditedBookings)</dd>
+                <dt>Attainment</dt><dd>@Format.Attainment(statement.Attainment)</dd>
+                <dt>Earned commission</dt><dd>@Format.Money(statement.EarnedCommission)</dd>
+                <dt>Clawbacks</dt><dd>@Format.Money(statement.Clawbacks)</dd>
+                <dt>Draws paid</dt><dd>@Format.Money(statement.DrawPaid)</dd>
+                <dt>Draw recovered</dt><dd>@Format.Money(statement.Recovered)</dd>
+                <dt>Commission payable</dt><dd>@Format.Money(statement.Payable)</dd>
+                <dt>Closing recoverable balance</dt><dd>@Format.Money(statement.ClosingRecoverableBalance)</dd>
+            </dl>
+            <div class="table-scroll">
+                <table>
+                    <caption>Breakdown for @statement.Name</caption>
+                    <thead>
+                        <tr><th scope="col">Item</th><th scope="col">Amount</th><th scope="col">Rule</th></tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var line in statement.Lines)
+                        {
+                            <tr><td>@line.Description</td><td class="amount">@Format.Money(line.Amount)</td><td>@line.RequirementId</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    }
+}
